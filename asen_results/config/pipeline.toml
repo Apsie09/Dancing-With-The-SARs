@@ -1,0 +1,106 @@
+# TerraGuard data pipeline configuration (stages 1-3).
+# Every value here can be changed without touching code; outputs record the config used.
+
+[paths]
+raw_dir = "data/raw"
+processed_dir = "data/processed"
+reports_dir = "data/reports"
+
+[incidents]
+feature_service = "https://services1.arcgis.com/qAo1OsXi67t7XgmS/ArcGIS/rest/services/Water_Main_Breaks/FeatureServer/0"
+page_size = 2000
+# Generous Kitchener envelope (lon/lat). Points outside are treated as invalid locations.
+valid_bbox = [-80.70, 43.30, -80.20, 43.60]
+# Dates before this are treated as suspect (1985-01-01 placeholders, sparse pre-1997 records).
+suspect_date_before = "1997-01-01"
+# Records sharing ASSETID + calendar date within this distance are grouped as possible duplicates.
+duplicate_distance_m = 25.0
+local_timezone = "America/Toronto"
+
+[nisar]
+# Study area for the CMR search (lon/lat): min_lon, min_lat, max_lon, max_lat.
+# Covers the full incident extent (-80.573..-80.295, 43.379..43.539) plus a margin.
+aoi_bbox = [-80.60, 43.36, -80.27, 43.56]
+# Collections, in increasing maturity. Beta is included for discovery but down-weighted in matching.
+collections = ["NISAR_L2_GCOV_BETA_V1", "NISAR_L2_GCOV_PROVISIONAL_V1", "NISAR_L2_GCOV_V1"]
+temporal_start = "2025-07-01"
+temporal_end = "2027-12-31"
+# Incidents closer than this to a footprint polygon edge are flagged (the polygon is a coarse 4-corner outline).
+edge_buffer_m = 2000.0
+
+[matching]
+# Signed time offset: delta_days = acquisition_time - incident_date. All bounds in days, inclusive.
+# The incident date is a reporting date, not proof that a leak was active at acquisition time.
+# Defaults: leaks can surface days-to-weeks before a report; most repairs finish within ~1-2 days.
+pre_event = [-120.0, -21.0]
+potential_event_window = [-14.0, 3.0]
+post_event = [10.0, 120.0]
+# Offsets falling between the windows above are labelled `timing_uncertain`.
+# Offsets outside [pre_event.min, post_event.max] are not matched at all.
+# Only consider acquisitions from these collections (beta can be dropped here).
+use_collections = ["NISAR_L2_GCOV_BETA_V1", "NISAR_L2_GCOV_PROVISIONAL_V1", "NISAR_L2_GCOV_V1"]
+
+[sar]
+# Used for size estimates now and for patch extraction in Stage 4.
+patch_size_px = 64          # square patch around each incident (64 px x 10 m = 640 m)
+channels = ["HHHH", "HVHV"] # GCOV diagonal covariance terms (gamma0 power, float32)
+bytes_per_px = 4
+quality_layers = ["mask", "numberOfLooks", "inputDataExceptionMask"]
+out_dir = "data/sar"
+# Streaming: HTTP range block size and parallel worker processes (one granule per worker).
+block_size_mb = 4
+workers = 4
+# Selection for a trial run: top-N incidents (pre + event-window + post in one comparison group),
+# keeping all event-window passes and the nearest pre/post passes in that group.
+default_incidents = 5
+max_pre_per_incident = 2
+max_post_per_incident = 2
+# Speckle filter applied to the dB analysis layer only (raw gamma0 is kept untouched).
+speckle_filter = "lee"      # "lee" | "boxcar" | "none"
+filter_size = 5
+
+[features]
+# Geometry around the incident (patch centre), in 10 m pixels.
+center_radius_px = 3        # ~70 m disk: the break site
+ring_inner_px = 10          # background ring 100-300 m: same neighbourhood, away from the site
+ring_outer_px = 30
+texture_radius_px = 10      # 210 m window for gray-level texture
+# Patch usability.
+min_valid_frac = 0.9
+min_center_valid_frac = 0.8
+# Gray-level quantisation for texture.
+glcm_levels = 32
+glcm_db_range = [-30.0, 10.0]
+# Weather (Open-Meteo ERA5 archive, no key). Single point: Kitchener centre.
+weather_lat = 43.45
+weather_lon = -80.49
+
+[controls]
+# Control sites: points ON the water-main network, matched to each incident, labelled `unknown`
+# (no recorded break nearby != verified no leak).
+per_incident = 5
+min_distance_m = 500        # from the matched incident (outside its patch core)
+max_distance_m = 3000       # same neighbourhood / land use
+min_spacing_m = 300         # between controls of one incident
+exclusion_m = 300           # no recorded break within this distance ...
+exclusion_window_days = 365 # ... within +/- this many days of the NISAR period
+sample_step_m = 50          # candidate spacing along mains
+seed = 42
+
+[dataset]
+spatial_block_m = 2000      # split grouping: 2 km blocks
+n_folds = 5
+time_holdout_from = "2026-08-01"  # acquisitions on/after this date form a temporal hold-out
+seed = 42
+
+[risk]
+# Segment x month break-risk model. Target: >=1 recorded break (primary, not cancelled) on the segment in the month.
+history_from = "2005-01-01"       # baseline training period start (older years: network snapshot mismatch)
+eval_from = "2025-12-01"          # evaluation months (NISAR features available in the prior window)
+eval_to = "2026-10-31"
+feature_window_days = 30          # NISAR + weather features from the window BEFORE the month (forecast, no leakage)
+link_max_distance_m = 30          # break -> segment by asset id, else nearest segment within this distance
+neighbour_radius_m = 200
+negative_sample_frac = 0.03       # history negatives subsampled (weighted back) for the baseline
+n_boot = 200
+seed = 42

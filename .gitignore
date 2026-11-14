@@ -1,0 +1,9 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+# pixi
+.pixi/
+# asen_results pipeline outputs (4+ GB, regenerate with `pixi run ...` inside asen_results/)
+/asen_results/data/
+__pycache__/
+.pytest_cache/

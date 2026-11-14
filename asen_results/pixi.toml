@@ -1,0 +1,58 @@
+[workspace]
+authors = ["Apsie09 <asenppopov639@gmail.com>"]
+channels = ['conda-forge']
+name = "terraguard"
+platforms = ['linux-64']
+version = "0.1.0"
+
+[activation.env]
+PYTHONPATH = "$PIXI_PROJECT_ROOT/src"
+
+[tasks]
+incidents = { cmd = "python -m terraguard incidents", description = "Stage 1: fetch + clean Kitchener water-main breaks" }
+catalog = { cmd = "python -m terraguard catalog", description = "Stage 2: NISAR GCOV catalogue over the AOI (no login)" }
+match = { cmd = "python -m terraguard match", description = "Stage 3: incident x acquisition spatiotemporal matching" }
+report = { cmd = "python -m terraguard report", description = "Summary stats + feasibility report from current outputs" }
+probe = { cmd = "python -m terraguard probe", description = "Stream one GCOV granule: layout, pixel size, bytes per crop (needs ~/.netrc)" }
+sar = { cmd = "python -m terraguard sar", description = "Stage 4: stream city crops + extract patches (args: --incidents N, --all, --workers W, --dry-run)" }
+features = { cmd = "python -m terraguard features", description = "Stage 5: radar/infrastructure/environment features -> radar_features.parquet" }
+signal = { cmd = "python -m terraguard signal", description = "Exploratory localized-change signal check by subset -> data/reports/signal_check.md" }
+mains = { cmd = "python -m terraguard mains", description = "Fetch the Kitchener water-main network" }
+controls = { cmd = "python -m terraguard controls", description = "Stage 6a: control sites on mains -> control patches + features" }
+dataset = { cmd = "python -m terraguard dataset", description = "Stage 6b: labels, DiD features, splits -> ml_dataset.parquet" }
+signal-controls = { cmd = "python -m terraguard signal-controls", description = "Incident sites vs matched controls: AUC + difference-in-differences" }
+aux = { cmd = "python -m terraguard aux", description = "Stage 7a: stream GUNW (ground movement) + SME2 (soil moisture) city crops (args: --workers, --dry-run)" }
+segments = { cmd = "python -m terraguard segments", description = "Stage 7b: sample GCOV/GUNW/SME2 along every water-main segment" }
+risk = { cmd = "python -m terraguard risk", description = "Stage 7c: segment x month break-risk models, baseline vs + NISAR" }
+pipeline = { cmd = "python -m terraguard all", description = "Run stages 1-3 and the report, in order" }
+
+[dependencies]
+python = "3.12.*"
+pandas = ">=3.1.1,<4"
+geopandas = ">=1.2.0,<2"
+pyarrow = ">=26.0.1,<27"
+shapely = ">=2.2.0,<3"
+pyproj = ">=3.8.0,<4"
+requests = ">=2.34.2,<3"
+earthaccess = ">=0.19.0,<0.20"
+h5py = ">=3.16.0,<4"
+xarray = ">=2026.9.0,<2027"
+rioxarray = ">=0.23.0,<0.24"
+rasterio = ">=1.5.2,<2"
+numpy = ">=2.5.4,<3"
+scipy = ">=1.18.1,<2"
+matplotlib = ">=3.11.2,<4"
+folium = ">=0.20.0,<0.21"
+rich = ">=15.0.0,<16"
+scikit-image = ">=0.26.0,<0.27"
+tabulate = ">=0.10.0,<0.11"
+scikit-learn = ">=1.9.1,<2"
+
+[feature.dev.dependencies]
+pytest = "*"
+
+[environments]
+dev = ["dev"]
+
+[feature.dev.tasks]
+test = "pytest -q tests"
