@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "water_pipelines",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{"type":"Feature","properties":{"osm_id":1106343159,"substance":"water","location":"underground","name":null,"operator":null},"geometry":{"type":"LineString","coordinates":[[23.6179396,42.6501654],[23.6170955,42.6491782],[23.615558,42.6473079],[23.6150799,42.6467004],[23.6124269,42.6434194],[23.6083695,42.6385214],[23.6046891,42.6339866],[23.6028165,42.6316712],[23.6010999,42.6295184],[23.5990061,42.6268393],[23.5973151,42.6248602],[23.5971595,42.6246959]]}}
+]
+}

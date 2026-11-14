@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TerraGuard — multi-case validation</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root {
+    --ink: #10201a;
+    --muted: #5b6b64;
+    --line: #d9e2dd;
+    --paper: #f5f8f6;
+    --card: #ffffff;
+    --green: #0b5d45;
+    --green-2: #0f7a5a;
+    --amber: #c87816;
+    --red: #a83232;
+    --blue: #1d5f8a;
+    --shadow: 0 8px 30px rgba(16, 32, 26, 0.10);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    display: flex;
+    flex-direction: column;
+  }
+  header {
+    background: linear-gradient(110deg, #082f24 0%, #0b5d45 55%, #0f7a5a 100%);
+    color: #fff;
+    padding: 18px 26px 0;
+    box-shadow: 0 2px 18px rgba(0,0,0,0.18);
+    z-index: 20;
+  }
+  .topline { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+  .brand { display: flex; flex-direction: column; gap: 3px; }
+  .brand h1 { margin: 0; font-size: 23px; letter-spacing: 0.2px; font-weight: 750; }
+  .brand .sub { color: #cfe7dc; font-size: 12.5px; max-width: 900px; line-height: 1.45; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.22);
+    color: #e9f7ef; font-size: 11px; padding: 6px 10px; border-radius: 999px; white-space: nowrap;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #7ee0b0; box-shadow: 0 0 0 3px rgba(126,224,176,0.18); }
+  nav.tabs { display: flex; gap: 4px; margin-top: 16px; overflow-x: auto; scrollbar-width: none; }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs button {
+    appearance: none; border: 0; background: transparent; color: #cfe7dc;
+    padding: 10px 15px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
+    border-bottom: 3px solid transparent; white-space: nowrap; font-family: inherit;
+  }
+  nav.tabs button:hover { color: #fff; background: rgba(255,255,255,0.05); border-radius: 7px 7px 0 0; }
+  nav.tabs button.active { color: #fff; border-bottom-color: #7ee0b0; }
+  main { flex: 1; min-height: 0; position: relative; }
+  .tabpane { display: none; height: 100%; }
+  .tabpane.active { display: flex; flex-direction: column; }
+
+  /* ---------- overview ---------- */
+  .overview-scroll { overflow: auto; padding: 20px 22px 30px; }
+  .overview-grid { display: grid; grid-template-columns: minmax(360px, 1.05fr) minmax(340px, 0.95fr); gap: 18px; max-width: 1500px; margin: 0 auto; }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 13px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .card h2 { margin: 0; padding: 15px 18px 4px; font-size: 15px; }
+  .card .hint { padding: 0 18px 12px; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+  #world-map { height: 365px; width: 100%; background: #dfe8e3; }
+  .metric-card { padding: 16px 18px 18px; }
+  .metric-card h2 { padding: 0 0 4px; }
+  .metric-card .hint { padding: 0 0 10px; }
+  .case-list { display: flex; flex-direction: column; gap: 9px; }
+  .case-item {
+    display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; align-items: center;
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; cursor: pointer;
+    transition: border-color .15s, transform .15s, background .15s;
+  }
+  .case-item:hover { border-color: #9ac7b5; background: #f7fbf9; transform: translateY(-1px); }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; }
+  .case-item .name { font-size: 12.5px; font-weight: 650; }
+  .case-item .desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .case-item .go { font-size: 11px; color: var(--green); font-weight: 650; }
+
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  .compare-table th, .compare-table td { padding: 8px 9px; border-bottom: 1px solid var(--line); text-align: right; }
+  .compare-table th:first-child, .compare-table td:first-child { text-align: left; }
+  .compare-table th { color: var(--muted); font-weight: 600; background: #f7faf8; }
+  .compare-table tr:last-child td { border-bottom: 0; }
+  .pill { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 10px; border: 1px solid; }
+  .pill.none { color: #6b6b6b; border-color: #d0d0d0; background: #f5f5f5; }
+  .pill.weak { color: #8a5a0d; border-color: #e5c28c; background: #fff6e5; }
+  .pill.skill { color: #0b5d45; border-color: #9ac7b5; background: #eef8f3; }
+
+  .bars { padding: 4px 18px 18px; }
+  .bar-group { margin-top: 13px; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .bar-track { position: relative; height: 13px; background: #eef2ef; border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .bar-fill.vv { background: #0f7a5a; }
+  .bar-fill.ndmi { background: #6fa8c9; }
+  .bar-fill.auc { background: #c87816; }
+  .baseline { position: absolute; top: -2px; bottom: -2px; width: 2px; background: #a83232; opacity: 0.9; }
+  .bars .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 10.5px; color: var(--muted); }
+  .legend i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 4px; }
+  .note { margin: 14px 0 0; padding: 11px 13px; background: #fff9ed; border: 1px solid #ead6ad; border-radius: 9px; color: #5e4a26; font-size: 11.5px; line-height: 1.55; }
+
+  /* ---------- case panes ---------- */
+  .casebar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 11px 16px; background: #fff; border-bottom: 1px solid var(--line);
+    box-shadow: 0 2px 10px rgba(16,32,26,0.04); z-index: 10;
+  }
+  .casebar .title { font-weight: 700; font-size: 14px; margin-right: 4px; }
+  .stat {
+    display: flex; flex-direction: column; gap: 1px; padding: 5px 10px; border-left: 2px solid var(--line);
+    min-width: 78px;
+  }
+  .stat b { font-size: 14px; line-height: 1.1; }
+  .stat span { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .casebar .spacer { flex: 1; }
+  .hintline { font-size: 10px; color: var(--muted); max-width: 330px; line-height: 1.35; }
+  .linkbtn {
+    display: inline-block; text-decoration: none; font-size: 11px; font-weight: 600;
+    color: var(--green); border: 1px solid #b8d7c9; background: #f4fbf7;
+    padding: 6px 9px; border-radius: 7px; white-space: nowrap;
+  }
+  .linkbtn:hover { background: #e7f6ef; }
+  .mapwrap { position: relative; flex: 1; min-height: 0; background: #e7eeea; }
+  .mapwrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .loading {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: #eef4f1; color: var(--muted); font-size: 12px; gap: 10px; z-index: 2;
+  }
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid #b9cec5; border-top-color: var(--green);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- method ---------- */
+  .method-scroll { overflow: auto; padding: 22px; }
+  .method { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+  .method h2 { margin: 0 0 8px; font-size: 16px; }
+  .method p, .method li { font-size: 12.5px; line-height: 1.6; color: #34443d; }
+  .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 9px; align-items: stretch; }
+  .flow .step { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 11px; position: relative; }
+  .flow .step:not(:last-child)::after { content: "›"; position: absolute; right: -9px; top: 50%; transform: translateY(-50%); color: #8aa99b; font-size: 22px; }
+  .flow b { display: block; font-size: 11.5px; margin-bottom: 3px; }
+  .flow span { font-size: 10.5px; color: var(--muted); line-height: 1.4; display: block; }
+  .method .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .method ul { margin: 6px 0 0 18px; padding: 0; }
+  .method code { background: #eef3f0; padding: 1px 5px; border-radius: 4px; font-size: 11px; }
+  footer {
+    padding: 10px 18px; border-top: 1px solid var(--line); background: #fff;
+    color: var(--muted); font-size: 10.5px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: space-between;
+  }
+  footer a { color: var(--green); text-decoration: none; }
+  @media (max-width: 980px) {
+    .overview-grid { grid-template-columns: 1fr; }
+    .method .cols { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: 1fr 1fr; }
+    .flow .step::after { display: none; }
+    .brand h1 { font-size: 20px; }
+    .casebar { gap: 6px; }
+    .stat { min-width: 65px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="topline">
+    <div class="brand">
+      <h1>TerraGuard <span style="font-weight:400;color:#a9d7c3;">/ multi-case validation</span></h1>
+      <div class="sub">
+        One pipeline, three study areas. Weather-normalised Sentinel-1 / Sentinel-2 / Landsat screening for buried water networks,
+        tested against the unlabelled Bulgarian demo and two cities with real repair labels.
+      </div>
+    </div>
+    <div class="badge"><span class="dot"></span> Local build · 15 Nov 2026</div>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="Case studies">
+    <button class="active" data-tab="overview" role="tab">Overview</button>
+    <button data-tab="bulgaria" role="tab">Bulgaria <span style="opacity:.65;font-weight:400">demo</span></button>
+    <button data-tab="aguascalientes" role="tab">Aguascalientes <span style="opacity:.65;font-weight:400">50 labels</span></button>
+    <button data-tab="calgary" role="tab">Calgary <span style="opacity:.65;font-weight:400">48 labels</span></button>
+    <button data-tab="method" role="tab">Method &amp; limits</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ================= OVERVIEW ================= -->
+  <section class="tabpane active" id="tab-overview" role="tabpanel">
+    <div class="overview-scroll">
+      <div class="overview-grid">
+        <div class="card">
+          <h2>Where the three cases are</h2>
+          <div class="hint">Click a marker or a case row to open its interactive map. The two labelled cases are the scientific test; Bulgaria is the unlabelled demonstration.</div>
+          <div id="world-map"></div>
+          <div style="padding:14px 18px 18px;">
+            <div class="case-list">
+              <div class="case-item" onclick="showTab('bulgaria')">
+                <span class="swatch" style="background:#1d5f8a"></span>
+                <div><div class="name">Elin Pelin, Bulgaria</div><div class="desc">3.3 km buried water main · no confirmed leak · 194 S1 dates 2022–2026</div></div>
+                <span class="go">open →</span>
+              </div>
+              <div class="case-item" onclick="showTab('aguascalientes')">
+                <span class="swatch" style="background:#0f7a5a"></span>
+                <div><div class="name">Aguascalientes, Mexico</div><div class="desc">5×5 km utility network · 50 repair labels · 28 S1 dates (2022)</div></div>
+                <span class="go">open →</span>
+              </div>
+              <div class="case-item" onclick="showTab('calgary')">
+                <span class="swatch" style="background:#c87816"></span>
+                <div><div class="name">Calgary, Canada</div><div class="desc">10×10 km water network · 48 break labels · 50 S1 dates (2025–2026)</div></div>
+                <span class="go">open →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+          <div class="card metric-card">
+            <h2>What the tests say</h2>
+            <div class="hint">Both labelled cities land at AUC ≈ 0.52–0.53: a weak positive ranking, not a detector. The expected-condition models are much stronger than the final leak score.</div>
+            <table class="compare-table">
+              <thead>
+                <tr><th>Case</th><th>Labels</th><th>S1 dates</th><th>VV R²</th><th>NDMI R²</th><th>Label AUC</th><th>Corridor p</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Bulgaria</td><td>—</td><td>194</td><td>0.611</td><td>0.471</td><td>—</td><td>0.89</td><td><span class="pill none">unlabelled</span></td></tr>
+                <tr><td>Aguascalientes</td><td>50</td><td>28</td><td>0.436</td><td>0.294</td><td><b>0.526</b></td><td>1.00</td><td><span class="pill weak">weak +</span></td></tr>
+                <tr><td>Calgary</td><td>48</td><td>50</td><td>0.650</td><td>0.249</td><td><b>0.524</b></td><td>0.95</td><td><span class="pill weak">weak +</span></td></tr>
+              </tbody>
+            </table>
+            <div class="note">
+              <b>Read this first.</b> AUC 0.5 is random. The repair/break labels mark where a pipe failed, not where a persistent satellite-visible moisture plume existed. The honest conclusion is that the current dry-season residual is a weak screening signal for historical repairs — consistent with the literature and with the Bulgarian negative result.
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Skill vs. label ranking</h2>
+            <div class="hint">Bars are held-out test scores. The red line marks the 0.5 random baseline for AUC.</div>
+            <div class="bars">
+              <div class="bar-group">
+                <div class="bar-label"><span>Bulgaria · VV / NDMI R²</span><span>0.611 / 0.471</span></div>
+                <div class="bar-track"><div class="bar-fill vv" style="width:61.1%"></div></div>
+                <div class="bar-track" style="margin-top:4px"><div class="bar-fill ndmi" style="width:47.1%"></div></div>
+              </div>
+              <div class="bar-group">
+                <div class="bar-label"><span>Aguascalientes · VV / NDMI / AUC</span><span>0.436 / 0.294 / 0.526</span></div>
+                <div class="bar-track"><div class="bar-fill vv" style="width:43.6%"></div></div>
+                <div class="bar-track" style="margin-top:4px"><div class="bar-fill ndmi" style="width:29.4%"></div></div>
+                <div class="bar-track" style="margin-top:4px"><div class="bar-fill auc" style="width:52.6%"></div><div class="baseline" style="left:50%"></div></div>
+              </div>
+              <div class="bar-group">
+                <div class="bar-label"><span>Calgary · VV / NDMI / AUC</span><span>0.650 / 0.249 / 0.524</span></div>
+                <div class="bar-track"><div class="bar-fill vv" style="width:65.0%"></div></div>
+                <div class="bar-track" style="margin-top:4px"><div class="bar-fill ndmi" style="width:24.9%"></div></div>
+                <div class="bar-track" style="margin-top:4px"><div class="bar-fill auc" style="width:52.4%"></div><div class="baseline" style="left:50%"></div></div>
+              </div>
+              <div class="legend">
+                <span><i style="background:#0f7a5a"></i>VV expected-condition R²</span>
+                <span><i style="background:#6fa8c9"></i>NDMI expected-condition R²</span>
+                <span><i style="background:#c87816"></i>Label AUC</span>
+                <span><i style="background:#a83232"></i>0.5 random baseline</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="max-width:1500px;margin:18px auto 0;color:#6b7b73;font-size:11px;line-height:1.55;">
+        Metrics are from each case's <code>outputs/validation.json</code>; the maps are the same analysis rendered in the three case folders.
+        The Bulgarian map is the main NASA Space Apps deliverable; the two labelled cities are local evaluation runs.
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= BULGARIA ================= -->
+  <section class="tabpane" id="tab-bulgaria" role="tabpanel">
+    <div class="casebar">
+      <span class="title">Elin Pelin · Bulgaria</span>
+      <span class="pill none">unlabelled demo</span>
+      <div class="stat"><b>194</b><span>S1 dates</span></div>
+      <div class="stat"><b>69</b><span>dry scenes</span></div>
+      <div class="stat"><b>0.611</b><span>VV R²</span></div>
+      <div class="stat"><b>0.471</b><span>NDMI R²</span></div>
+      <div class="stat"><b>0.89</b><span>corridor p</span></div>
+      <div class="spacer"></div>
+      <a class="linkbtn" href="outputs/terraguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
+    </div>
+    <div class="mapwrap">
+      <div class="loading" id="load-bulgaria"><span class="spinner"></span> Loading Bulgaria map…</div>
+      <iframe data-src="outputs/terraguard_map.html" title="TerraGuard Bulgaria map" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <!-- ================= AGUASCALIENTES ================= -->
+  <section class="tabpane" id="tab-aguascalientes" role="tabpanel">
+    <div class="casebar">
+      <span class="title">Aguascalientes · Mexico</span>
+      <span class="pill weak">50 repair labels</span>
+      <div class="stat"><b>28</b><span>S1 dates</span></div>
+      <div class="stat"><b>0.436</b><span>VV R²</span></div>
+      <div class="stat"><b>0.294</b><span>NDMI R²</span></div>
+      <div class="stat"><b>0.526</b><span>label AUC</span></div>
+      <div class="stat"><b>1.00</b><span>corridor p</span></div>
+      <span class="hintline">Yellow points = repair labels · toggle “Ground-truth labels” in the map control</span>
+      <div class="spacer"></div>
+      <a class="linkbtn" href="case_studies/aguascalientes/outputs/terraguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
+    </div>
+    <div class="mapwrap">
+      <div class="loading" id="load-aguascalientes"><span class="spinner"></span> Loading Aguascalientes map…</div>
+      <iframe data-src="case_studies/aguascalientes/outputs/terraguard_map.html" title="TerraGuard Aguascalientes map" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <!-- ================= CALGARY ================= -->
+  <section class="tabpane" id="tab-calgary" role="tabpanel">
+    <div class="casebar">
+      <span class="title">Calgary · Canada</span>
+      <span class="pill weak">48 break labels</span>
+      <div class="stat"><b>50</b><span>S1 dates</span></div>
+      <div class="stat"><b>0.650</b><span>VV R²</span></div>
+      <div class="stat"><b>0.249</b><span>NDMI R²</span></div>
+      <div class="stat"><b>0.524</b><span>label AUC</span></div>
+      <div class="stat"><b>0.95</b><span>corridor p</span></div>
+      <span class="hintline">Yellow points = break labels · toggle “Ground-truth labels” in the map control</span>
+      <div class="spacer"></div>
+      <a class="linkbtn" href="case_studies/calgary/outputs/terraguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
+    </div>
+    <div class="mapwrap">
+      <div class="loading" id="load-calgary"><span class="spinner"></span> Loading Calgary map…</div>
+      <iframe data-src="case_studies/calgary/outputs/terraguard_map.html" title="TerraGuard Calgary map" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <!-- ================= METHOD ================= -->
+  <section class="tabpane" id="tab-method" role="tabpanel">
+    <div class="method-scroll">
+      <div class="method">
+        <div class="card" style="padding:18px 20px;">
+          <h2>One pipeline, three cases</h2>
+          <p>Every case runs the same code path. Only <code>case.json</code> changes: AOI, grid, date range, Sentinel-1 orbit, pipeline network, labels, dry-season months and train/test split. Each case writes to its own <code>data/</code> and <code>outputs/</code>.</p>
+          <div class="flow">
+            <div class="step"><b>1 · Ingest</b><span>S1 RTC, S2 NDMI, Landsat LST, ERA5, WorldCover, DEM, utility GIS / OSM</span></div>
+            <div class="step"><b>2 · Expectation</b><span>LightGBM predicts VV and NDMI from weather, soil, vegetation, season</span></div>
+            <div class="step"><b>3 · Residual</b><span>Observed − expected; robust z-scores, dry-season mean and persistence</span></div>
+            <div class="step"><b>4 · Fusion</b><span>Moisture + persistence + thermal cooling; network proximity prior</span></div>
+            <div class="step"><b>5 · Triage</b><span>Leak-likelihood map, hotspot cards, label / placebo validation</span></div>
+          </div>
+        </div>
+
+        <div class="cols">
+          <div class="card" style="padding:16px 19px;">
+            <h2>What works</h2>
+            <ul>
+              <li>The expected-condition models are skilful: VV R² <b>0.44–0.65</b>, NDMI R² <b>0.25–0.47</b> on held-out dates.</li>
+              <li>The same code and visual language run on three very different networks: a 3.3 km rural main, a 575 km dense urban grid, and a 10 km² trunk network.</li>
+              <li>Every case produces a map, GeoTIFFs, ranked hotspots, confidence and validation JSON.</li>
+              <li>The Bulgaria map is fully self-contained; the case maps are self-contained too.</li>
+            </ul>
+          </div>
+          <div class="card" style="padding:16px 19px;">
+            <h2>What does not</h2>
+            <ul>
+              <li><b>Label AUC ≈ 0.52–0.53.</b> The final leak score is only weakly associated with historical repairs/breaks.</li>
+              <li>Repair points are not persistent leaks; the score is a multi-month residual, so the temporal match is weak.</li>
+              <li>Urban land cover, irrigation, snow and roads confound 20 m moisture pixels.</li>
+              <li>The Bulgarian AOI has no confirmed leak; the corridor test is not significant (p = 0.89).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px 19px;">
+          <h2>Case data sources</h2>
+          <p><b>Bulgaria:</b> ESA Sentinel-1 RTC via Planetary Computer, Sentinel-2 L2A via Earth Search, Landsat C2 L2 thermal, ERA5/Open-Meteo, SoilGrids / WorldCover / Copernicus DEM, OSM water main and NISAR GCOV browse.</p>
+          <p><b>Aguascalientes:</b> <a href="https://github.com/erickfama/rs_leaks" target="_blank" rel="noopener">erickfama/rs_leaks</a> — utility water network and 985 cleaned repair records; 50 labels in the 5×5 km AOI. Sentinel-1/2 and Landsat acquired by the same pipeline.</p>
+          <p><b>Calgary:</b> City of Calgary Open Data — <a href="https://data.calgary.ca/d/w6h9-w33i" target="_blank" rel="noopener">Public Water Main</a> and <a href="https://data.calgary.ca/d/dpcu-jr23" target="_blank" rel="noopener">Water Main Breaks</a>; 48 labels in the 10×10 km AOI. Sentinel-1 RTC over this AOI starts April 2025, so the test is 2025–2026.</p>
+        </div>
+
+        <div class="card" style="padding:16px 19px;">
+          <h2>How to run a case</h2>
+          <p><code>CASE=case_studies/aguascalientes/case.json</code></p>
+          <p><code>TERRAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16</code><br>
+             <code>TERRAGUARD_CASE=$CASE pixi run python -m pipeline.model</code><br>
+             <code>TERRAGUARD_CASE=$CASE pixi run python -m pipeline.make_map</code></p>
+          <p>Full notes: <code>case_studies/README.md</code> and <code>docs/RESULTS.md</code>. The case folders are local and not committed.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span>TerraGuard · NASA Space Apps 2026 · “Dancing with the SARs” · open data, open code</span>
+  <span><a href="docs/RESULTS.md">docs/RESULTS.md</a> · <a href="case_studies/README.md">case_studies/README.md</a> · <a href="research/Pipeline-Leak-Detection.md">research</a></span>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const CASES = {
+    bulgaria: { name: 'Elin Pelin, Bulgaria', coords: [42.6375, 23.6075], color: '#1d5f8a' },
+    aguascalientes: { name: 'Aguascalientes, Mexico', coords: [21.8840, -102.2661], color: '#0f7a5a' },
+    calgary: { name: 'Calgary, Canada', coords: [51.05, -113.95], color: '#c87816' }
+  };
+
+  function showTab(id, push = true) {
+    const ids = ['overview', 'bulgaria', 'aguascalientes', 'calgary', 'method'];
+    if (!ids.includes(id)) id = 'overview';
+    document.querySelectorAll('nav.tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === id));
+    document.querySelectorAll('.tabpane').forEach(p => p.classList.toggle('active', p.id === 'tab-' + id));
+
+    // lazy-load the iframe only when its tab is first opened
+    const pane = document.getElementById('tab-' + id);
+    if (pane) {
+      const frame = pane.querySelector('iframe[data-src]');
+      if (frame && !frame.getAttribute('src')) {
+        frame.setAttribute('src', frame.dataset.src);
+        const load = document.getElementById('load-' + id);
+        if (load) {
+          frame.addEventListener('load', () => { load.style.display = 'none'; }, { once: true });
+          setTimeout(() => { load.style.display = 'none'; }, 12000);
+        }
+      }
+    }
+    if (push) history.replaceState(null, '', '#' + id);
+    if (id === 'overview' && window.__worldMap) setTimeout(() => window.__worldMap.invalidateSize(), 50);
+  }
+
+  document.querySelectorAll('nav.tabs button').forEach(b => {
+    b.addEventListener('click', () => showTab(b.dataset.tab));
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    // world overview map
+    const map = L.map('world-map', { zoomControl: true, attributionControl: true }).setView([38, -40], 2);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18, attribution: 'Esri, Maxar, Earthstar Geographics'
+    }).addTo(map);
+
+    const points = [];
+    Object.entries(CASES).forEach(([id, c]) => {
+      const marker = L.circleMarker(c.coords, {
+        radius: 11, color: '#ffffff', weight: 2, fillColor: c.color, fillOpacity: 0.95
+      }).addTo(map);
+      marker.bindTooltip(c.name, { direction: 'top', offset: [0, -8] });
+      marker.bindPopup(`<b>${c.name}</b><br><a href="#${id}" onclick="showTab('${id}'); return false;">Open interactive map →</a>`);
+      marker.on('click', () => showTab(id));
+      points.push(c.coords);
+      L.marker(c.coords, { opacity: 0 }).addTo(map)
+        .bindTooltip(c.name, { permanent: true, direction: 'right', className: 'case-label', offset: [12, 0] });
+    });
+    map.fitBounds(L.latLngBounds(points), { padding: [55, 55] });
+    window.__worldMap = map;
+
+    // initial tab
+    const hash = (location.hash || '#overview').replace('#', '');
+    showTab(hash, false);
+  });
+
+  // small permanent-label style
+  const style = document.createElement('style');
+  style.textContent = `.case-label { background: rgba(8,47,36,.82); border: 1px solid rgba(255,255,255,.35); color:#fff; font:11px Inter,Arial,sans-serif; padding:3px 7px; border-radius:5px; box-shadow:none; } .case-label:before { display:none; }`;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>

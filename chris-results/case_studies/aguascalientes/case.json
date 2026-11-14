@@ -1,0 +1,35 @@
+{
+  "name": "Aguascalientes water network \u00b7 Mexico",
+  "grid_epsg": 32613,
+  "res": 20.0,
+  "start": "2022-01-01",
+  "end": "2023-01-01",
+  "s1_orbit_state": "ascending",
+  "s1_relative_orbit": 151,
+  "aoi": {
+    "west": -102.2907218199274,
+    "south": 21.861028134471663,
+    "east": -102.2415161449385,
+    "north": 21.9069530365746,
+    "center_lon": -102.26611898243294,
+    "center_lat": 21.88399058552313
+  },
+  "pipeline_geojson": "data/vectors/water_main.geojson",
+  "gas_geojson": null,
+  "labels_csv": "data/vectors/labels.csv",
+  "dry_months": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    11,
+    12
+  ],
+  "dry_years": [
+    2022
+  ],
+  "train_end": "2022-09-01",
+  "val_end": "2022-11-01",
+  "root": "case_studies/aguascalientes"
+}

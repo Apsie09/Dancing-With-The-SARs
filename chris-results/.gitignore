@@ -1,0 +1,11 @@
+.pixi/
+.venv/
+data/raw/*
+!data/raw/manifest.json
+!data/raw/nisar/
+!data/raw/nisar/**
+data/interim/
+case_studies/*/data/raw/
+case_studies/*/data/interim/
+__pycache__/
+*.pyc

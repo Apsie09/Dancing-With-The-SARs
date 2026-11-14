@@ -1,0 +1,373 @@
+{
+  "generated_utc": "2026-11-14T21:17:09Z",
+  "analysis_grid": {
+    "crs": "EPSG:32634",
+    "res_m": 10.0,
+    "width": 553,
+    "height": 628,
+    "transform": [
+      10.0,
+      0.0,
+      711020.0,
+      0.0,
+      -10.0,
+      4727000.0
+    ],
+    "bounds": [
+      711020.0,
+      4720720.0,
+      716550.0,
+      4727000.0
+    ]
+  },
+  "layers": {
+    "soil_nodata_mask.tif": {
+      "source": "Derived from SoilGrids WCS output",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "units": "0/1",
+      "nodata_px": 30789,
+      "nodata_fraction": 0.08866
+    },
+    "soil_sand_0_5.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/sand.map",
+      "coverage_id": "sand_0-5cm_mean",
+      "units": "g/kg",
+      "source_units": "g/kg",
+      "unit_scale_applied": 1.0,
+      "depth_cm": "0-5",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 230.27415466308594,
+        "max": 382.9993591308594,
+        "mean": 293.8954755106202,
+        "median": 289.99273681640625,
+        "p05": 239.6546287536621,
+        "p95": 361.7153137207031
+      }
+    },
+    "soil_sand_5_15.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/sand.map",
+      "coverage_id": "sand_5-15cm_mean",
+      "units": "g/kg",
+      "source_units": "g/kg",
+      "unit_scale_applied": 1.0,
+      "depth_cm": "5-15",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 228.2798614501953,
+        "max": 387.99945068359375,
+        "mean": 295.7322667718196,
+        "median": 292.73072814941406,
+        "p05": 239.0690544128418,
+        "p95": 368.6714172363281
+      }
+    },
+    "soil_clay_0_5.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/clay.map",
+      "coverage_id": "clay_0-5cm_mean",
+      "units": "g/kg",
+      "source_units": "g/kg",
+      "unit_scale_applied": 1.0,
+      "depth_cm": "0-5",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 248.48643493652344,
+        "max": 361.72491455078125,
+        "mean": 308.5892961453986,
+        "median": 312.0142822265625,
+        "p05": 273.8756622314453,
+        "p95": 337.8369827270508
+      }
+    },
+    "soil_clay_5_15.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/clay.map",
+      "coverage_id": "clay_5-15cm_mean",
+      "units": "g/kg",
+      "source_units": "g/kg",
+      "unit_scale_applied": 1.0,
+      "depth_cm": "5-15",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 254.00038146972656,
+        "max": 382.6974182128906,
+        "mean": 317.9654517172504,
+        "median": 321.2042999267578,
+        "p05": 274.0227279663086,
+        "p95": 354.2991958618164
+      }
+    },
+    "soil_silt_0_5.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/silt.map",
+      "coverage_id": "silt_0-5cm_mean",
+      "units": "g/kg",
+      "source_units": "g/kg",
+      "unit_scale_applied": 1.0,
+      "depth_cm": "0-5",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 319.0,
+        "max": 478.9947509765625,
+        "mean": 397.51857273227773,
+        "median": 401.2872619628906,
+        "p05": 337.3152587890625,
+        "p95": 457.87794036865233
+      }
+    },
+    "soil_silt_5_15.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/silt.map",
+      "coverage_id": "silt_5-15cm_mean",
+      "units": "g/kg",
+      "source_units": "g/kg",
+      "unit_scale_applied": 1.0,
+      "depth_cm": "5-15",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 301.4848937988281,
+        "max": 471.0,
+        "mean": 386.30207680117525,
+        "median": 388.6027526855469,
+        "p05": 325.4549255371094,
+        "p95": 448.55018768310543
+      }
+    },
+    "soil_soc_0_5.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/soc.map",
+      "coverage_id": "soc_0-5cm_mean",
+      "units": "g/kg",
+      "source_units": "dg/kg",
+      "unit_scale_applied": 0.1,
+      "depth_cm": "0-5",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 32.76069641113281,
+        "max": 48.799800872802734,
+        "mean": 41.118051600658625,
+        "median": 41.17999076843262,
+        "p05": 36.60239963531494,
+        "p95": 45.83531894683838
+      }
+    },
+    "soil_soc_5_15.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/soc.map",
+      "coverage_id": "soc_5-15cm_mean",
+      "units": "g/kg",
+      "source_units": "dg/kg",
+      "unit_scale_applied": 0.1,
+      "depth_cm": "5-15",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 17.123815536499023,
+        "max": 30.493453979492188,
+        "mean": 21.24428999713831,
+        "median": 21.040900230407715,
+        "p05": 18.700000762939453,
+        "p95": 24.581781005859373
+      }
+    },
+    "soil_bdod_0_5.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/bdod.map",
+      "coverage_id": "bdod_0-5cm_mean",
+      "units": "g/cm3",
+      "source_units": "cg/cm3",
+      "unit_scale_applied": 0.01,
+      "depth_cm": "0-5",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 1.2899999618530273,
+        "max": 1.3899991512298584,
+        "mean": 1.3413753333421377,
+        "median": 1.3408946990966797,
+        "p05": 1.3055694639682769,
+        "p95": 1.3746075272560119
+      }
+    },
+    "soil_bdod_5_15.tif": {
+      "source": "ISRIC SoilGrids v2.0 WCS GetCoverage",
+      "url": "https://maps.isric.org/mapserv?map=/map/bdod.map",
+      "coverage_id": "bdod_5-15cm_mean",
+      "units": "g/cm3",
+      "source_units": "cg/cm3",
+      "unit_scale_applied": 0.01,
+      "depth_cm": "5-15",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 250,
+      "background_masked": 0,
+      "gap_filled_fraction": 0.08866,
+      "stats": {
+        "valid_px": 347284,
+        "min": 1.3899999856948853,
+        "max": 1.4899996519088745,
+        "mean": 1.4480245436907235,
+        "median": 1.4499999284744263,
+        "p05": 1.4131029009819032,
+        "p95": 1.477525418996811
+      }
+    },
+    "worldcover_aoi.tif": {
+      "source": "ESA WorldCover 2021 v200 (CC BY 4.0)",
+      "url": "https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_N42E021_Map.tif",
+      "tile": "N42E021",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 10,
+      "native_crs": "EPSG:4326",
+      "resampling": "nearest",
+      "crs_note": "reprojected from native EPSG:4326 10m",
+      "class_pixel_counts": {
+        "10": 19630,
+        "20": 36,
+        "30": 44684,
+        "40": 252632,
+        "50": 28394,
+        "60": 1820,
+        "80": 81,
+        "90": 7
+      },
+      "class_area_km2": {
+        "10": 1.963,
+        "20": 0.0036,
+        "30": 4.4684,
+        "40": 25.2632,
+        "50": 2.8394,
+        "60": 0.182,
+        "80": 0.0081,
+        "90": 0.0007
+      },
+      "stats": {
+        "valid_px": 347284,
+        "min": 10,
+        "max": 90
+      }
+    },
+    "dem_aoi.tif": {
+      "source": "Copernicus DEM GLO-30 (ESA 2021)",
+      "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N42_00_E023_00_DEM/Copernicus_DSM_COG_10_N42_00_E023_00_DEM.tif",
+      "tile": "N42E023",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "native_res_m": 30,
+      "native_crs": "EPSG:4326",
+      "vertical_datum": "EGM2008 geoid",
+      "units": "m",
+      "resampling": "bilinear",
+      "stats": {
+        "valid_px": 347284,
+        "min": 535.453125,
+        "max": 630.761962890625,
+        "mean": 558.5546876994762,
+        "median": 549.5461120605469,
+        "p05": 539.2174072265625,
+        "p95": 601.2177734375
+      }
+    },
+    "slope_aoi.tif": {
+      "source": "Derived from Copernicus DEM GLO-30",
+      "url": "https://copernicus-dem-30m.s3.amazonaws.com/Copernicus_DSM_COG_10_N42_00_E023_00_DEM/Copernicus_DSM_COG_10_N42_00_E023_00_DEM.tif",
+      "method": "Horn (1981) 3x3 kernel on 30m UTM34N grid, then bilinear to 10m",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "units": "degrees",
+      "note": "DSM-based slope includes vegetation/buildings",
+      "stats": {
+        "valid_px": 347284,
+        "min": 0.0004728306666947901,
+        "max": 10.241578102111816,
+        "mean": 0.9802549089544017,
+        "median": 0.6957480311393738,
+        "p05": 0.14643661305308342,
+        "p95": 2.6252014875411973
+      }
+    },
+    "dist_built_aoi.tif": {
+      "source": "OpenStreetMap contributors (ODbL) via Overpass API",
+      "query": "[out:json][timeout:180];(way[\"building\"](42.61,23.575,42.665,23.64);way[\"highway\"](42.61,23.575,42.665,23.64););out geom;",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "units": "m",
+      "n_buildings": 1341,
+      "n_road_ways": 478,
+      "road_length_km": 157.426,
+      "stats": {
+        "valid_px": 347284,
+        "min": 0.0,
+        "max": 2521.78515625,
+        "mean": 614.5813227604173,
+        "median": 483.32183837890625,
+        "p05": 14.142135620117188,
+        "p95": 1698.0488952636706
+      }
+    },
+    "dist_road_aoi.tif": {
+      "source": "OpenStreetMap contributors (ODbL) via Overpass API",
+      "crs": "EPSG:32634",
+      "res_m": 10.0,
+      "units": "m",
+      "stats": {
+        "valid_px": 347284,
+        "min": 0.0,
+        "max": 1011.1874389648438,
+        "mean": 195.77060715846085,
+        "median": 130.0,
+        "p05": 10.0,
+        "p95": 629.36474609375
+      }
+    }
+  },
+  "failures": []
+}

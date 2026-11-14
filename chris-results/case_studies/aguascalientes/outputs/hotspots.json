@@ -1,0 +1,302 @@
+[
+  {
+    "id": 1,
+    "lat": 21.906941261846143,
+    "lon": -102.26191212140482,
+    "row": 2,
+    "col": 149,
+    "leak_score": 100.0,
+    "moisture_z": 1.95,
+    "persistence": 1.0,
+    "thermal_z": 0.98,
+    "confidence": 68.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-11-27",
+      "2022-01-31",
+      "2022-05-31"
+    ],
+    "top_z": [
+      1.56,
+      1.41,
+      1.39
+    ]
+  },
+  {
+    "id": 2,
+    "lat": 21.906267598422385,
+    "lon": -102.26482708129086,
+    "row": 6,
+    "col": 134,
+    "leak_score": 100.0,
+    "moisture_z": 0.87,
+    "persistence": 0.82,
+    "thermal_z": 1.26,
+    "confidence": 68.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-11-03",
+      "2022-11-27",
+      "2022-12-09"
+    ],
+    "top_z": [
+      1.57,
+      1.56,
+      1.27
+    ]
+  },
+  {
+    "id": 3,
+    "lat": 21.906150459809773,
+    "lon": -102.2795332499644,
+    "row": 8,
+    "col": 58,
+    "leak_score": 100.0,
+    "moisture_z": 1.58,
+    "persistence": 1.0,
+    "thermal_z": -0.1,
+    "confidence": 54.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-11-15",
+      "2022-11-03",
+      "2022-11-27"
+    ],
+    "top_z": [
+      1.48,
+      1.39,
+      1.37
+    ]
+  },
+  {
+    "id": 4,
+    "lat": 21.90611845119389,
+    "lon": -102.27759912323086,
+    "row": 8,
+    "col": 68,
+    "leak_score": 100.0,
+    "moisture_z": 1.59,
+    "persistence": 1.0,
+    "thermal_z": -0.31,
+    "confidence": 54.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-11-03",
+      "2022-12-09",
+      "2022-01-07"
+    ],
+    "top_z": [
+      1.79,
+      1.59,
+      1.57
+    ]
+  },
+  {
+    "id": 5,
+    "lat": 21.905284338272512,
+    "lon": -102.24917480541822,
+    "row": 10,
+    "col": 215,
+    "leak_score": 100.0,
+    "moisture_z": 0.84,
+    "persistence": 0.76,
+    "thermal_z": 1.26,
+    "confidence": 68.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-11-03",
+      "2022-11-15",
+      "2022-03-08"
+    ],
+    "top_z": [
+      1.37,
+      1.21,
+      1.16
+    ]
+  },
+  {
+    "id": 6,
+    "lat": 21.905265029540892,
+    "lon": -102.26968300547256,
+    "row": 12,
+    "col": 109,
+    "leak_score": 100.0,
+    "moisture_z": 1.31,
+    "persistence": 1.0,
+    "thermal_z": 0.8,
+    "confidence": 68.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-11-03",
+      "2022-11-15",
+      "2022-01-07"
+    ],
+    "top_z": [
+      1.61,
+      1.48,
+      1.34
+    ]
+  },
+  {
+    "id": 7,
+    "lat": 21.904723876368095,
+    "lon": -102.2588590071037,
+    "row": 14,
+    "col": 165,
+    "leak_score": 100.0,
+    "moisture_z": 0.92,
+    "persistence": 0.65,
+    "thermal_z": 0.73,
+    "confidence": 68.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-01-19",
+      "2022-01-07",
+      "2022-01-31"
+    ],
+    "top_z": [
+      1.42,
+      1.4,
+      1.36
+    ]
+  },
+  {
+    "id": 8,
+    "lat": 21.904681947457448,
+    "lon": -102.25634471158435,
+    "row": 14,
+    "col": 178,
+    "leak_score": 100.0,
+    "moisture_z": 1.04,
+    "persistence": 1.0,
+    "thermal_z": 0.78,
+    "confidence": 68.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-12-09",
+      "2022-11-15",
+      "2022-11-27"
+    ],
+    "top_z": [
+      1.5,
+      1.41,
+      1.31
+    ]
+  },
+  {
+    "id": 9,
+    "lat": 21.904701084429703,
+    "lon": -102.26833946413129,
+    "row": 15,
+    "col": 116,
+    "leak_score": 100.0,
+    "moisture_z": 0.26,
+    "persistence": 0.29,
+    "thermal_z": 0.58,
+    "confidence": 41.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-05-31",
+      "2022-11-27",
+      "2022-12-09"
+    ],
+    "top_z": [
+      1.83,
+      1.58,
+      1.32
+    ]
+  },
+  {
+    "id": 10,
+    "lat": 21.9046553286483,
+    "lon": -102.27646610964493,
+    "row": 16,
+    "col": 74,
+    "leak_score": 100.0,
+    "moisture_z": 1.52,
+    "persistence": 1.0,
+    "thermal_z": 0.12,
+    "confidence": 54.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-05-07",
+      "2022-11-27",
+      "2022-11-03"
+    ],
+    "top_z": [
+      1.66,
+      1.59,
+      1.55
+    ]
+  },
+  {
+    "id": 11,
+    "lat": 21.90436796251159,
+    "lon": -102.28092141047476,
+    "row": 18,
+    "col": 51,
+    "leak_score": 100.0,
+    "moisture_z": 1.82,
+    "persistence": 1.0,
+    "thermal_z": 0.07,
+    "confidence": 54.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-12-21",
+      "2022-11-15",
+      "2022-01-07"
+    ],
+    "top_z": [
+      1.6,
+      1.44,
+      1.44
+    ]
+  },
+  {
+    "id": 12,
+    "lat": 21.90404975752163,
+    "lon": -102.2726082217635,
+    "row": 19,
+    "col": 94,
+    "leak_score": 100.0,
+    "moisture_z": 1.27,
+    "persistence": 1.0,
+    "thermal_z": 0.85,
+    "confidence": 68.0,
+    "dist_water_m": 0.0,
+    "dist_gas_m": 10000.0,
+    "landcover": 50,
+    "top_dates": [
+      "2022-11-15",
+      "2022-11-03",
+      "2022-01-07"
+    ],
+    "top_z": [
+      1.43,
+      1.24,
+      1.21
+    ]
+  }
+]

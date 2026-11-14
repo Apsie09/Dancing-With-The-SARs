@@ -1,0 +1,25 @@
+{
+  "aoi": {
+    "name": "Elin Pelin water main",
+    "west": 23.575,
+    "south": 42.61,
+    "east": 23.64,
+    "north": 42.665,
+    "center_lon": 23.6075,
+    "center_lat": 42.6375
+  },
+  "s1_orbit": [
+    7,
+    "descending"
+  ],
+  "generated": "2026-11-14T21:33:32.848631Z",
+  "sources": {
+    "s1": "Planetary Computer sentinel-1-rtc (C-band gamma0)",
+    "s2": "AWS Earth Search sentinel-2-l2a",
+    "landsat": "Planetary Computer landsat-c2-l2",
+    "weather": "Open-Meteo ERA5 archive",
+    "worldcover": "ESA WorldCover 2021 v200",
+    "dem": "Copernicus DEM GLO-30",
+    "nisar": "ASF NISAR GCOV (public)"
+  }
+}

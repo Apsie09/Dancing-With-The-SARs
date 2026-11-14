@@ -1,0 +1,41 @@
+{
+  "name": "Calgary water network \u00b7 Canada",
+  "grid_epsg": 32611,
+  "res": 20.0,
+  "start": "2025-01-01",
+  "end": "2026-11-15",
+  "s1_orbit_state": "ascending",
+  "s1_relative_orbit": 122,
+  "aoi": {
+    "west": -114.0,
+    "south": 51.0,
+    "east": -113.9,
+    "north": 51.1,
+    "center_lon": -113.95,
+    "center_lat": 51.05
+  },
+  "pipeline_geojson": "data/vectors/water_main.geojson",
+  "gas_geojson": null,
+  "labels_csv": "data/vectors/labels.csv",
+  "dry_months": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "dry_years": [
+    2025,
+    2026
+  ],
+  "train_end": "2025-10-01",
+  "val_end": "2026-01-01",
+  "root": "case_studies/calgary"
+}

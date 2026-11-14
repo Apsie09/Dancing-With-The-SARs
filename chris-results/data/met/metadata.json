@@ -1,0 +1,40 @@
+{
+  "source": "Open-Meteo ERA5 archive API (ERA5 + ERA5T)",
+  "request_url": "https://archive-api.open-meteo.com/v1/archive?latitude=42.6375&longitude=23.6075&start_date=2022-01-01&end_date=2026-11-14&hourly=temperature_2m,precipitation,relative_humidity_2m,shortwave_radiation,et0_fao_evapotranspiration,soil_moisture_0_to_7cm,soil_moisture_7_to_28cm,soil_moisture_28_to_100cm,vapor_pressure_deficit,wind_speed_10m&timezone=UTC",
+  "requested_lat": 42.6375,
+  "requested_lon": 23.6075,
+  "returned_lat": 42.636204,
+  "returned_lon": 23.628319,
+  "grid_elevation_m": 548.0,
+  "timezone": "UTC",
+  "start": "2022-01-01",
+  "end": "2026-11-14",
+  "hourly_units": {
+    "time": "iso8601",
+    "temperature_2m": "\u00b0C",
+    "precipitation": "mm",
+    "relative_humidity_2m": "%",
+    "shortwave_radiation": "W/m\u00b2",
+    "et0_fao_evapotranspiration": "mm",
+    "soil_moisture_0_to_7cm": "m\u00b3/m\u00b3",
+    "soil_moisture_7_to_28cm": "m\u00b3/m\u00b3",
+    "soil_moisture_28_to_100cm": "m\u00b3/m\u00b3",
+    "vapor_pressure_deficit": "kPa",
+    "wind_speed_10m": "km/h"
+  },
+  "daily_units": {
+    "precip_sum": "mm/day",
+    "temp_mean/min/max": "degC",
+    "rh_mean": "%",
+    "radiation_sum": "W h/m2/day",
+    "radiation_mj_m2": "MJ/m2/day",
+    "et0_sum": "mm/day",
+    "sm0_7/sm7_28/sm28_100": "m3/m3 (daily mean)",
+    "vpd_mean": "kPa",
+    "wind_mean": "km/h",
+    "n_hours": "count of valid hourly values"
+  },
+  "n_hours": 42696,
+  "first_hour": "2022-01-01T00:00:00Z",
+  "last_hour": "2026-11-14T23:00:00Z"
+}
