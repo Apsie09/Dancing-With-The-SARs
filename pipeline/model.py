@@ -453,7 +453,7 @@ def main() -> None:
     # ------------------------------------------------------------------ #
     # pipeline enrichment test: real corridor vs. translated placebo lines
     # ------------------------------------------------------------------ #
-    validation: dict = {"model_metrics": metrics, "nisar_used": nisar_used}
+    validation: dict = {"model_metrics": metrics, "nisar_layer_present": nisar_used}
     water_main = VECTORS / "water_main.geojson"
     if water_main.exists():
         gdf = gpd.read_file(water_main).to_crs(grid["crs"])

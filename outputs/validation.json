@@ -19,7 +19,7 @@
       "target_std": 0.3928925395011902
     }
   },
-  "nisar_used": true,
+  "nisar_layer_present": true,
   "pipeline_enrichment": {
     "actual_corridor_mean": 0.01883557066321373,
     "placebo_mean": 0.02840852178633213,
