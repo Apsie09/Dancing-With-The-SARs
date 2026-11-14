@@ -27,6 +27,12 @@ records inside the NISAR data window.
 |---|---|
 | `leak_survey.geojson` | Raw export from the service (`outSR=4326`, `f=geojson`). Dates are epoch milliseconds, UTC. |
 | `leak_survey.csv` | Same records, dates converted to ISO 8601 UTC, plus `longitude` / `latitude` (WGS 84) columns. |
+| `waterlines.geojson` | District pipe network, 918 polylines (WGS 84): `Size` (text, e.g. `1.5"`), `Diameter` (inches, blank on 32 lines), `Material`, `Class`, `Depth`, `Year`, `LengthMile`, `MapSource` (remarks). From `CCWSDWaterline2026` layer 16 "Waterline" (last edited 2026-09-10; the most recent and most complete of the three copies on the host, vs 916 lines in `CCWSD_Waterlines_May_2026` and 886 in `CCWSD_Leak_Density_WFL1` layer 16). Downloaded 2026-11-14. The `Notes` field was **dropped** because its only two non-blank values held staff e-mail addresses and a person's name; everything else is unmodified. Class, depth and year are blank on about 99% of lines; material is PVC on 95%. |
+| `pressure_zones.geojson` | The 7 pressure zones ("planes") as polygons: `Name`, `SquareMiles`. From `CCWSD_Leak_Density_WFL1` layer 19 "Coryell Pressure Planes", unmodified, downloaded 2026-11-14. Leak records also name zones not drawn here (Jonesboro Pancake, Turnersville). |
+
+Pipes: `https://services9.arcgis.com/AIKMFC1P7gpNycCX/arcgis/rest/services/CCWSDWaterline2026/FeatureServer/16/query?where=1=1&outFields=*&outSR=4326&f=geojson`;
+zones: same host, `CCWSD_Leak_Density_WFL1/FeatureServer/19/query?...` (both fit in one page). Same licence
+situation as the leak layer. The map in [`viz/`](../../viz/) shows these layers.
 
 To refresh, re-query the service (paginate with `resultOffset`, 1000 records
 per page):

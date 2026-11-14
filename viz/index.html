@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coryell Leak Map</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%234cc9f0'/%3E%3C/svg%3E">
+  <meta name="description" content="Interactive map of water leak repairs in the Coryell City Water Supply District, Texas, for NISAR radar analysis.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+</head>
+<body>
+  <aside id="panel" aria-label="Map controls">
+    <header class="brand">
+      <div>
+        <div class="eyebrow">Dancing with the SARs · NISAR</div>
+        <h1>Coryell City WSD leaks</h1>
+        <p class="sub">Leak repairs logged by the district's crews, central Texas, 2019–2026</p>
+      </div>
+      <button id="panel-close" class="icon-btn" type="button" aria-label="Close panel">
+        <svg viewBox="0 0 20 20" width="18" height="18"><path d="M5 5l10 10M15 5 5 15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </header>
+
+    <section class="sec summary">
+      <div class="count-row">
+        <span id="count" class="count">–</span>
+        <span id="count-of" class="count-of">loading…</span>
+      </div>
+      <div class="stats">
+        <div class="stat"><span class="stat-v" id="st-med">–</span><span class="stat-k">median est. loss</span></div>
+        <div class="stat"><span class="stat-v" id="st-big">–</span><span class="stat-k">on ≥ 4″ pipes</span></div>
+        <div class="stat"><span class="stat-v" id="st-nisar">–</span><span class="stat-k">in NISAR window</span></div>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-time">
+      <h2>Time <span class="h2-aside" id="t-span"></span></h2>
+      <div class="hist-wrap">
+        <div class="hist-top"><span>Leaks per month</span><span id="hist-max"></span></div>
+        <div id="hist" title="Click a month to select it"></div>
+        <div class="range">
+          <div class="range-track"><div id="t-track-fill"></div></div>
+          <input id="t-from" type="range" aria-label="Start date">
+          <input id="t-to" type="range" aria-label="End date">
+        </div>
+        <div id="hist-axis"></div>
+      </div>
+      <div class="range-labels"><span id="t-label-from"></span><span class="dash">→</span><span id="t-label-to"></span></div>
+      <div class="presets">
+        <button id="btn-play" class="play" type="button" aria-label="Play" title="Animate through time (space)"><svg viewBox="0 0 20 20" width="16" height="16"><path d="M6 4.5v11l9-5.5z" fill="currentColor"/></svg></button>
+        <button id="btn-speed" class="pill speed" type="button" data-ms="450" title="Animation speed (click to change)">1×</button>
+        <button type="button" class="pill" data-preset="all">All</button>
+        <button type="button" class="pill nisar" data-preset="nisar" title="NISAR science data from 17 Oct 2025">NISAR window</button>
+        <button type="button" class="pill" data-preset="2026">2026</button>
+        <button type="button" class="pill" data-preset="12m">12 mo</button>
+      </div>
+    </section>
+
+    <section class="sec">
+      <h2>Leaks</h2>
+      <div class="seg" id="seg-mode" role="group" aria-label="Display mode">
+        <button type="button" data-v="points" class="on">Points</button>
+        <button type="button" data-v="clusters">Clusters</button>
+        <button type="button" data-v="heat">Heatmap</button>
+      </div>
+      <div class="field-row">
+        <label>Colour by <select id="sel-color"></select></label>
+        <label>Size by
+          <select id="sel-size">
+            <option value="none">Uniform</option>
+            <option value="loss">Water loss</option>
+            <option value="size">Pipe size</option>
+          </select>
+        </label>
+      </div>
+      <div id="legend-leaks" class="legend"></div>
+      <div id="legend-note" class="note"></div>
+      <label class="check"><input type="checkbox" id="opt-ghosts" checked> Show filtered-out leaks as grey dots</label>
+    </section>
+
+    <section class="sec">
+      <h2>Filters</h2>
+      <div class="filter-label">Pipe size
+        <span class="links"><button type="button" id="size-all">all</button><button type="button" id="size-big">≥ 4″ only</button></span>
+      </div>
+      <div class="chips" id="chips-size"></div>
+      <div class="filter-label">Cause</div>
+      <div class="chips" id="chips-cause"></div>
+    </section>
+
+    <section class="sec">
+      <h2>Basemap</h2>
+      <div id="basemaps" class="bm-grid"></div>
+      <div id="bm-note" class="note"></div>
+    </section>
+
+    <section class="sec">
+      <h2>Layers</h2>
+      <div id="overlays"></div>
+      <label class="check"><input type="checkbox" id="opt-graticule" checked> Coordinate grid</label>
+    </section>
+
+    <footer class="foot">
+      <p>Leak records: Coryell City Water Supply District (ArcGIS Survey123, live layer, downloaded 2026-11-14). No licence stated; credit the district. Test record ObjectId 1611 (Galveston) is excluded; ObjectId 564 has no date and only appears with the full time range. Crew names and notes that name people are not shown.</p>
+      <p>Times are shown in US Central time. Water loss is the crew's on-site estimate.</p>
+    </footer>
+  </aside>
+
+  <main id="map-wrap">
+    <div id="map"></div>
+    <button id="panel-toggle" type="button" aria-label="Show controls">
+      <svg viewBox="0 0 20 20" width="18" height="18"><path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <span>Controls</span>
+    </button>
+    <div id="coords" class="coords"></div>
+    <div id="loading">Loading leak data…</div>
+    <div id="fatal" class="hidden"></div>
+  </main>
+
+  <script>
+    // Browsers block fetch() of local files: explain how to serve the folder instead.
+    if (location.protocol === 'file:') {
+      document.addEventListener('DOMContentLoaded', function () {
+        var f = document.getElementById('fatal');
+        f.innerHTML = '<b>This map needs a local web server.</b><br>Browsers block loading data files from <code>file://</code>. ' +
+          'In a terminal, from the repository root, run:<pre>python -m http.server 8000</pre>then open ' +
+          '<a href="http://localhost:8000/viz/">http://localhost:8000/viz/</a>';
+        f.classList.remove('hidden');
+        document.getElementById('loading').classList.add('hidden');
+      });
+    }
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
