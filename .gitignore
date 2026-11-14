@@ -1,9 +1,22 @@
 # pixi environments
 .pixi/*
 !.pixi/config.toml
-# pixi
 .pixi/
+.venv/
+
 # asen_results pipeline outputs (4+ GB, regenerate with `pixi run ...` inside asen_results/)
 /asen_results/data/
+
+# TerraGuard outputs and data policy
+data/raw/*
+!data/raw/manifest.json
+!data/raw/nisar/
+!data/raw/nisar/**
+data/interim/
+data/static/scripts/
+.playwright-mcp/
+outputs/scratch/
+
 __pycache__/
 .pytest_cache/
+*.pyc

@@ -1,0 +1,127 @@
+{
+  "method": "browse_png_fallback",
+  "hdf5_status": "blocked: ASF PROVISIONAL GCOV HDF5 requires Earthdata Login (GET -> OAuth 302)",
+  "grid": {
+    "crs": "EPSG:32634",
+    "west": 711020.0,
+    "north": 4727000.0,
+    "width": 277,
+    "height": 314,
+    "res_m": 20.0,
+    "transform": [
+      20.0,
+      0.0,
+      711020.0,
+      0.0,
+      -20.0,
+      4727000.0
+    ]
+  },
+  "value_units": "8-bit browse DN (0-255)",
+  "calibration": "NOT calibrated gamma0; browse quicklooks are independently stretched display images",
+  "georeferencing": {
+    "method": "linear mapping of browse PNG extent to ASF footprint bbox",
+    "footprint_bbox_wgs84": [
+      21.03692,
+      41.14741,
+      24.87676,
+      43.96711
+    ],
+    "note": "browse PNG has no embedded geotransform (KML sidecar is login-protected); error is kilometres"
+  },
+  "scenes": [
+    {
+      "granule": "NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001",
+      "date": "2026-06-20T17:28:59Z",
+      "track": 94,
+      "relative_orbit": 94,
+      "flight_direction": "DESCENDING",
+      "frame": 67,
+      "browse_urls": {
+        "LATLON": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001_LATLON.png",
+        "NATIVE": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001_NATIVE.png",
+        "NATIVE_A_HHHH": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001_NATIVE_A_HHHH.png",
+        "NATIVE_A_HVHV": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001_NATIVE_A_HVHV.png"
+      },
+      "url_h5": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001/NISAR_L2_PR_GCOV_023_094_D_067_2005_DHDH_A_20260620T172859_20260620T172934_P05023_N_F_J_001.h5",
+      "layers": {
+        "HH": {
+          "file": "nisar_hh_20260620.tif",
+          "dn_min": 1,
+          "dn_max": 255,
+          "dn_median": 182.0,
+          "valid_fraction": 1.0
+        },
+        "HV": {
+          "file": "nisar_hv_20260620.tif",
+          "dn_min": 19,
+          "dn_max": 255,
+          "dn_median": 175.0,
+          "valid_fraction": 1.0
+        }
+      }
+    },
+    {
+      "granule": "NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001",
+      "date": "2026-10-06T17:28:56Z",
+      "track": 94,
+      "relative_orbit": 94,
+      "flight_direction": "DESCENDING",
+      "frame": 67,
+      "browse_urls": {
+        "LATLON": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001_LATLON.png",
+        "NATIVE": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001_NATIVE.png",
+        "NATIVE_A_HHHH": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001_NATIVE_A_HHHH.png",
+        "NATIVE_A_HVHV": "https://nisar.asf.earthdatacloud.nasa.gov/BROWSE/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001_NATIVE_A_HVHV.png"
+      },
+      "url_h5": "https://nisar.asf.earthdatacloud.nasa.gov/NISAR/NISAR_L2_GCOV_PROVISIONAL_V1/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001/NISAR_L2_PR_GCOV_032_094_D_067_2005_DHDH_A_20261006T172856_20261006T172931_P05023_N_F_J_001.h5",
+      "layers": {
+        "HH": {
+          "file": "nisar_hh_20261006.tif",
+          "dn_min": 1,
+          "dn_max": 255,
+          "dn_median": 166.0,
+          "valid_fraction": 1.0
+        },
+        "HV": {
+          "file": "nisar_hv_20261006.tif",
+          "dn_min": 33,
+          "dn_max": 255,
+          "dn_median": 164.0,
+          "valid_fraction": 1.0
+        }
+      }
+    }
+  ],
+  "changes": {
+    "HH": {
+      "file": "nisar_change_HH.tif",
+      "dn_min": -94,
+      "dn_max": 67,
+      "dn_median": -11.0
+    },
+    "HV": {
+      "file": "nisar_change_HV.tif",
+      "dn_min": -58,
+      "dn_max": 29,
+      "dn_median": -6.0
+    }
+  },
+  "files": [
+    "nisar_hh_20260620.tif",
+    "nisar_hv_20260620.tif",
+    "nisar_hh_20261006.tif",
+    "nisar_hv_20261006.tif",
+    "nisar_change_HH.tif",
+    "nisar_change_HV.tif",
+    "nisar_hh_latest.tif",
+    "nisar_preview.png"
+  ],
+  "limitations": [
+    "Browse PNGs are 8-bit quicklooks, not the GCOV linear-power rasters.",
+    "Each polarization/date is stretched independently, so DN is not radiometrically comparable across dates.",
+    "Georeferencing is a linear approximation from the scene footprint; error is kilometres.",
+    "Change GeoTIFFs are display-only DN differences, not calibrated dB change.",
+    "For calibrated gamma0/sigma0 use the --hdf5 mode with an Earthdata Login."
+  ]
+}

@@ -112,6 +112,61 @@ build on it without checking with the team.
   GCOV file-naming description, "12-day cycles", and the Worldview "12Day"
   layer.)
 
+### 4.1 Direction under evaluation: water pipeline leaks — TerraGuard (2026-11-14)
+
+A second candidate direction has been researched in depth:
+[`research/Pipeline-Leak-Detection.md`](research/Pipeline-Leak-Detection.md),
+with the underlying SAR physics and detection limits in
+[`research/SAR-Pipeline-Leak-Research-Brief.md`](research/SAR-Pipeline-Leak-Research-Brief.md).
+
+**Scope is water only** — drinking-water and wastewater pipelines. Oil, gas,
+methane and district heating are explicitly out of scope.
+
+Summary of the review: a buried water leak is invisible to a satellite, but the
+wet soil around it is not. The strongest formulation is not "find wet ground" but
+**"find ground that stays wet when the weather says it should be dry"** — a
+weather-normalised residual anomaly along a known pipe corridor. Six independent
+signature families are available (electromagnetic, thermal, hydrological,
+biological, mechanical, hydraulic); the strongest system fuses several because
+each fails in a different environment.
+
+Evidence base:
+
+- **Commercial:** Affinity Water / SUEZ / ASTERRA screened 9,045 km of network
+  with L-band SAR, delivered 763 locations, confirmed **902 leaks**, of which
+  **59 % had no surface manifestation**; crews inspected <4 % of the network.
+  Vendor-reported, not an independent trial; every site was confirmed with
+  acoustic equipment.
+- **Peer-reviewed:** MDFLD-Net (2025) reports **86.3 % accuracy** on 1,545
+  field-verified leaks using L-band + C-band + polarimetry + closure phase;
+  Yan et al. (2024) report **91.86 %** on a water/sewer network; an unsupervised
+  study under paved surfaces (2026) found **81 % of leaks with a 93 % reduction
+  in inspection effort**, but many false positives.
+- **Physics:** L-band responds to subsurface moisture (R² = 0.705 predicting
+  relative dielectric constant, validated with GPR); a 5 % moisture increase
+  gives 0.6–3 dB of backscatter, but the **speckle floor at 10 m is ~5.8 dB**, so
+  time-series averaging or 40–60 m multi-looking is mandatory.
+- **Thermal:** 100 m satellite TIR cannot detect a water leak — a 5 K anomaly
+  needs a 40 m-wide patch to register 2 K. Only airborne/UAV TIR and SatVu's
+  3.5 m HotSat approach pipeline scale, and they see the halo, not the pipe.
+
+**Critical constraint:** the NISAR archive starts October 2025, so no historical
+leak can be studied with NISAR. Use Sentinel-1 (2014–present) as the temporal
+backbone and NISAR for the most recent year and the L-band vs C-band comparison.
+NISAR is left-looking, unlike Sentinel-1's right-looking geometry.
+
+**Novelty:** ESA has already funded SECO, WATERLENS and ZOE, and "SAR + NDVI"
+is not novel. The defensible contributions are (A) weather-normalised residual
+anomaly detection with a published rainfall ablation and false-alarm rate per km
+per year, (B) radar + thermal + hydraulic fusion with calibrated uncertainty, or
+(C) physics-informed leak-evolution modelling.
+
+**Validation:** public point-level water-leak data is scarce. Toronto publishes
+both watermain breaks and the pipe network with diameter/material; NYC, Chicago,
+Madison and DC Water publish break records. Treat breaks as weak labels (they are
+bursts, not background leaks) and use the "anomaly appears → repair → anomaly
+disappears" test as the strongest available validation.
+
 Alternatives that fit the brief directly and can use the same Black Sea
 region: coastal or port change, river delta and wetland extent (for example
 the Danube Delta), flooding, agricultural cycles, or land subsidence.

@@ -1,0 +1,43 @@
+[workspace]
+name = "terraguard"
+version = "0.1.0"
+channels = ["conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+python = "3.12.*"
+numpy = "*"
+pandas = "*"
+scipy = "*"
+scikit-learn = "*"
+lightgbm = "*"
+rasterio = "*"
+rioxarray = "*"
+geopandas = "*"
+shapely = "*"
+pyproj = "*"
+requests = "*"
+pystac-client = "*"
+planetary-computer = "*"
+matplotlib = "*"
+folium = "*"
+contextily = "*"
+tqdm = "*"
+xarray = "*"
+netcdf4 = "*"
+h5py = "*"
+pillow = "*"
+pyyaml = "*"
+branca = "*"
+mapclassify = "*"
+
+[tasks]
+pipelines = "python -m scripts.extract_pipelines"
+acquire = "python -m pipeline.acquire"
+model = "python -m pipeline.model"
+map = "python -m pipeline.make_map"
+serve = "python -m http.server 8765 --directory outputs"
+all = { depends-on = ["pipelines", "acquire", "model", "map"] }
+
+[environments]
+default = { solve-group = "default" }

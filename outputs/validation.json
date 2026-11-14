@@ -1,0 +1,267 @@
+{
+  "model_metrics": {
+    "vv": {
+      "n_train": 1879412,
+      "n_test": 867272,
+      "mae": 1.7716218090908218,
+      "rmse": 2.339343528692404,
+      "r2": 0.6108659914818378,
+      "target_mean": -10.631891250610352,
+      "target_std": 3.7501134872436523
+    },
+    "ndmi": {
+      "n_train": 1299710,
+      "n_test": 734421,
+      "mae": 0.17800202402437135,
+      "rmse": 0.2856856798995197,
+      "r2": 0.4712756202058309,
+      "target_mean": 0.11854088306427002,
+      "target_std": 0.3928925395011902
+    }
+  },
+  "nisar_used": true,
+  "pipeline_enrichment": {
+    "actual_corridor_mean": 0.01883557066321373,
+    "placebo_mean": 0.02840852178633213,
+    "placebo_p95": 0.127473846077919,
+    "ratio": 0.6630253195762634,
+    "p_value": 0.5671641791044776,
+    "actual_corridor_p95": 0.3240182399749756,
+    "placebo_p95_of_p95": 0.8858000636100769,
+    "ratio_p95": 0.619563102722168,
+    "p_value_p95": 0.8905472636815921,
+    "n_placebo": 200,
+    "buffer_m": 30
+  },
+  "hotspots": [
+    {
+      "id": 1,
+      "lat": 42.64751584921506,
+      "lon": 23.6155502939135,
+      "row": 100,
+      "col": 169,
+      "leak_score": 59.8,
+      "moisture_z": 0.52,
+      "persistence": 0.48,
+      "thermal_z": 0.51,
+      "confidence": 100.0,
+      "dist_water_m": 0.0,
+      "dist_gas_m": 2295.0,
+      "landcover": 40,
+      "top_dates": [
+        "2026-07-24",
+        "2026-08-05",
+        "2026-07-30"
+      ],
+      "top_z": [
+        2.67,
+        2.44,
+        2.15
+      ]
+    },
+    {
+      "id": 2,
+      "lat": 42.631256958648066,
+      "lon": 23.60194230455358,
+      "row": 192,
+      "col": 116,
+      "leak_score": 57.1,
+      "moisture_z": 1.12,
+      "persistence": 0.72,
+      "thermal_z": -0.06,
+      "confidence": 80.0,
+      "dist_water_m": 28.0,
+      "dist_gas_m": 4211.0,
+      "landcover": 40,
+      "top_dates": [
+        "2022-09-30",
+        "2022-07-08",
+        "2025-07-16"
+      ],
+      "top_z": [
+        2.95,
+        2.13,
+        2.02
+      ]
+    },
+    {
+      "id": 3,
+      "lat": 42.646087584874635,
+      "lon": 23.6150025042922,
+      "row": 108,
+      "col": 167,
+      "leak_score": 49.8,
+      "moisture_z": 0.55,
+      "persistence": 0.45,
+      "thermal_z": 1.03,
+      "confidence": 100.0,
+      "dist_water_m": 20.0,
+      "dist_gas_m": 2409.0,
+      "landcover": 40,
+      "top_dates": [
+        "2023-09-25",
+        "2022-09-06",
+        "2025-09-26"
+      ],
+      "top_z": [
+        1.54,
+        1.36,
+        1.33
+      ]
+    },
+    {
+      "id": 4,
+      "lat": 42.64486150145041,
+      "lon": 23.61348740515584,
+      "row": 115,
+      "col": 161,
+      "leak_score": 43.6,
+      "moisture_z": 0.19,
+      "persistence": 0.33,
+      "thermal_z": 0.97,
+      "confidence": 80.0,
+      "dist_water_m": 0.0,
+      "dist_gas_m": 2583.0,
+      "landcover": 40,
+      "top_dates": [
+        "2022-09-06",
+        "2025-07-04",
+        "2026-06-17"
+      ],
+      "top_z": [
+        2.16,
+        1.88,
+        1.73
+      ]
+    },
+    {
+      "id": 5,
+      "lat": 42.64238147692012,
+      "lon": 23.611675935293814,
+      "row": 129,
+      "col": 154,
+      "leak_score": 40.7,
+      "moisture_z": -0.05,
+      "persistence": 0.2,
+      "thermal_z": 1.02,
+      "confidence": 60.0,
+      "dist_water_m": 0.0,
+      "dist_gas_m": 2847.0,
+      "landcover": 40,
+      "top_dates": [
+        "2023-08-08",
+        "2026-06-17",
+        "2025-09-26"
+      ],
+      "top_z": [
+        1.86,
+        1.79,
+        1.55
+      ]
+    },
+    {
+      "id": 6,
+      "lat": 42.639192824700366,
+      "lon": 23.6093471193543,
+      "row": 147,
+      "col": 145,
+      "leak_score": 37.8,
+      "moisture_z": 0.35,
+      "persistence": 0.33,
+      "thermal_z": 0.39,
+      "confidence": 100.0,
+      "dist_water_m": 20.0,
+      "dist_gas_m": 3197.0,
+      "landcover": 30,
+      "top_dates": [
+        "2022-09-30",
+        "2025-09-26",
+        "2022-08-13"
+      ],
+      "top_z": [
+        2.76,
+        1.8,
+        1.53
+      ]
+    },
+    {
+      "id": 7,
+      "lat": 42.66013000615364,
+      "lon": 23.63877237785037,
+      "row": 27,
+      "col": 262,
+      "leak_score": 34.8,
+      "moisture_z": 0.74,
+      "persistence": 0.41,
+      "thermal_z": -0.22,
+      "confidence": 80.0,
+      "dist_water_m": 2042.0,
+      "dist_gas_m": 28.0,
+      "landcover": 40,
+      "top_dates": [
+        "2026-08-11",
+        "2026-08-17",
+        "2026-09-10"
+      ],
+      "top_z": [
+        3.36,
+        3.33,
+        3.28
+      ]
+    },
+    {
+      "id": 8,
+      "lat": 42.64910175132161,
+      "lon": 23.61708059510765,
+      "row": 91,
+      "col": 175,
+      "leak_score": 34.0,
+      "moisture_z": 0.17,
+      "persistence": 0.42,
+      "thermal_z": -0.01,
+      "confidence": 60.0,
+      "dist_water_m": 0.0,
+      "dist_gas_m": 2102.0,
+      "landcover": 40,
+      "top_dates": [
+        "2026-08-05",
+        "2026-07-24",
+        "2026-06-29"
+      ],
+      "top_z": [
+        1.93,
+        1.62,
+        1.35
+      ]
+    },
+    {
+      "id": 9,
+      "lat": 42.6643524334947,
+      "lon": 23.635290650140647,
+      "row": 4,
+      "col": 247,
+      "leak_score": 30.9,
+      "moisture_z": 0.29,
+      "persistence": 0.38,
+      "thermal_z": 0.09,
+      "confidence": 60.0,
+      "dist_water_m": 2128.0,
+      "dist_gas_m": 0.0,
+      "landcover": 40,
+      "top_dates": [
+        "2023-08-08",
+        "2023-08-20",
+        "2023-06-21"
+      ],
+      "top_z": [
+        2.39,
+        1.6,
+        1.3
+      ]
+    }
+  ],
+  "generated": "2026-11-14T21:52:36.034486Z",
+  "s1_dates": 194,
+  "dry_season_dates": 69,
+  "pixels_valid": 86645
+}
