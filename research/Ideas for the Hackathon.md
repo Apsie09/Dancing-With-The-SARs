@@ -1,0 +1,3 @@
+- Tracking unusual movement/changes of ships in the Black Sea using SARs data
+- SAR works well even in cloudy weather
+- 2 people to work on the data
