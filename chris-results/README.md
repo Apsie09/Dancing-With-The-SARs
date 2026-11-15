@@ -4,7 +4,7 @@
 
 > **New in the `test` branch:** open the unified evidence explorer at `app/index.html`
 > (serve the bundle root, then <http://127.0.0.1:8766/app/>). It brings the Bulgarian demo,
-> Aguascalientes, Calgary and the new Coryell repair-history case into one MapLibre platform.
+> Aguascalientes, Calgary and the new Coryell case into one MapLibre platform.
 > See [`docs/PLATFORM.md`](docs/PLATFORM.md). The original dashboard and maps remain as a legacy appendix.
 
 TerraGuard learns what a 20 m patch of farmland *should* look like given rainfall, soil, vegetation,
@@ -31,7 +31,7 @@ Read the full story in [`docs/RESULTS.md`](docs/RESULTS.md) and the challenge-fa
 ## What is in the box
 
 - `app/` — unified MapLibre evidence explorer: Overview / four sites / Compare / Method.
-- `app/data/coryell/risk.csv` — per-pipe repair-risk percentile and history.
+- `case_studies/coryell/` — fourth Sentinel-1 case: `case.json`, 72 labels, 55 dates, outputs.
 - `outputs/terraguard_map.html` — legacy self-contained interactive map (open it directly; no server or API key).
 - `outputs/terraguard_map.png` — two-panel static map.
 - `outputs/corridor_profile.png` — moisture residual and leak score along the 3.3 km main.
