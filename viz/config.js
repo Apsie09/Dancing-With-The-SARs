@@ -13,6 +13,7 @@
 // See README.md, "Adding a NISAR layer", for worked examples.
 
 // Paths are relative to viz/index.html; serve the repo root (see README.md).
+import { RISK_DIR, RISK_TIERS, RISK_DEFAULT_KEY, riskColor, riskWidth } from './risk.js';
 const DATA = '../data/coryell/';
 
 export const MAP_DEFAULTS = {
@@ -204,6 +205,23 @@ export const PASS_OVERLAYS = Object.fromEntries(DISTRICT_DATES.map((d) => [d, `n
 // Listed top to bottom as they appear in the panel. Raster overlays draw under
 // vector overlays, which draw under the leaks.
 export const OVERLAYS = [
+  geojson({
+    id: 'pipe-risk',
+    title: 'Leak risk by pipe',
+    group: 'Leak risk',
+    visible: true,
+    optional: true, // built by `pixi run coryell-risk` in asen_results/
+    url: RISK_DIR + 'pipe_risk.geojson',
+    attribution: 'Pipes &amp; zones: Coryell City WSD / OEI GIS',
+    legend: { type: 'lines', items: RISK_TIERS.map((t) => [t.color, t.label, Math.max(2, t.w[1] * 0.5)]) },
+    popup: 'risk',
+    layers: [
+      { id: 'risk-casing', type: 'line', layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': '#04121c', 'line-opacity': 0.6, 'line-width': riskWidth(RISK_DEFAULT_KEY, 1.2) } },
+      { id: 'risk-line', type: 'line', layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: { 'line-color': riskColor(RISK_DEFAULT_KEY), 'line-width': riskWidth(RISK_DEFAULT_KEY) } },
+    ],
+  }),
   geojson({
     id: 'pipes',
     title: 'Pipe network',

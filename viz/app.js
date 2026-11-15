@@ -1,6 +1,7 @@
 // Coryell City WSD leak map: map setup, layers, UI and interaction.
 import { MAP_DEFAULTS, BASEMAPS, OVERLAYS, PASS_OVERLAYS } from './config.js';
 import { initSlice } from './slice.js';
+import { initRisk } from './risk.js';
 import {
   LEAKS_URL, NISAR_START, T0, T1, DAY, SIZES, CAUSES, COLOR_MODES,
   prepareLeaks, makeFilter, passesAttr, passesTime, colorExpr, radiusExpr,
@@ -37,6 +38,7 @@ const state = {
   view: 'explore',       // explore | slice (NISAR passes)
 };
 let slice = null;        // slice mode + chip viewer (slice.js)
+let risk = null;         // leak-risk ranking (risk.js)
 
 // -------------------------------------------------------------------- map ---
 const hasHash = /map=/.test(location.hash);
@@ -106,7 +108,9 @@ map.on('load', async () => {
     return;
   }
   addLeakLayers();
-  slice = initSlice({ map, state, renderStats, renderLegend, passOverlays: PASS_OVERLAYS, setOverlayVisibleById });
+  risk = await initRisk({ map, setOverlayVisibleById });
+  slice = initSlice({ map, state, renderStats, renderLegend, passOverlays: PASS_OVERLAYS, setOverlayVisibleById,
+    onPass: (date) => risk?.setMonthFromDate(date) });
   buildLeakUI();
   applyFilter();
   setupInteraction();
@@ -656,6 +660,7 @@ function leakPopup(p, lngLat) {
     ['Repair', p.repair || '–'],
     ['Cause', CAUSES[p.cbin]?.label || '–'],
     ['Pressure zone', p.zone || '–'],
+    ...(risk?.leakRow(p.id) ? [[...risk.leakRow(p.id), true]] : []),
     ['Repair time', p.duration || '–'],
     ['Notes', p.notesHidden ? '<span class="pp-sub">withheld (names a person)</span>' : (p.notes ? esc(p.notes) : '–'), true],
     ['Location', `${fmtLat(lngLat[1], 5)}, ${fmtLon(lngLat[0], 5)}`],
@@ -797,6 +802,7 @@ function setupInteraction() {
       const html = o.popup === 'pipe' ? pipePopup(f.properties)
         : o.popup === 'zone' ? zonePopup(f.properties)
         : o.popup === 'nisar' ? nisarPopup(f.properties, o)
+        : o.popup === 'risk' && risk ? risk.popup(f.properties)
         : genericPopup(f.properties, o.title);
       popupClick.setLngLat(e.lngLat).setHTML(html).addTo(map);
       return;

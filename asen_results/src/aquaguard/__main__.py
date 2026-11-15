@@ -2,7 +2,7 @@
 import argparse
 import time
 
-from . import catalog, controls, coryell, risk_v2, nisar_aux, risk, segments, dataset, features, incidents, mains, matching, probe, report, sar, signal_check
+from . import app, coryell_risk, catalog, controls, coryell, pesho_model, sentinel1, risk_v2, nisar_aux, risk, segments, dataset, features, incidents, mains, matching, probe, report, sar, signal_check
 from .config import Config
 
 STAGES = {"incidents": incidents.run, "catalog": catalog.run, "match": matching.run, "report": report.run}
@@ -10,7 +10,7 @@ STAGES = {"incidents": incidents.run, "catalog": catalog.run, "match": matching.
 
 def main() -> None:
     p = argparse.ArgumentParser(prog="aquaguard")
-    p.add_argument("stage", choices=[*STAGES, "all", "probe", "sar", "patches", "features", "signal", "mains", "controls", "dataset", "signal-controls", "aux", "segments", "risk", "coryell", "risk-v2"])
+    p.add_argument("stage", choices=[*STAGES, "all", "probe", "sar", "patches", "features", "signal", "mains", "controls", "dataset", "signal-controls", "aux", "segments", "risk", "coryell", "risk-v2", "pesho-model", "s1", "app", "coryell-risk"])
     p.add_argument("--incidents", type=int, default=None, help="sar: number of top incidents (default from config)")
     p.add_argument("--all", action="store_true", help="sar: stream every granule with a usable match")
     p.add_argument("--workers", type=int, default=None, help="sar: parallel streaming processes")
@@ -22,6 +22,12 @@ def main() -> None:
     p.add_argument("--config", default=None, help="path to pipeline.toml (default: config/pipeline.toml)")
     a = p.parse_args()
     cfg = Config.load(a.config)
+    if a.stage == "coryell-risk":
+        coryell_risk.run(cfg)
+        return
+    if a.stage == "app":
+        app.run(cfg)
+        return
     if a.stage == "sar":
         sar.run(cfg, a.incidents, a.all, a.workers, a.dry_run)
         return
@@ -37,6 +43,12 @@ def main() -> None:
                 coryell.confirm_test(cfg)
         else:
             coryell.run(c, a.workers or 6, a.dry_run)
+        return
+    if a.stage == "s1":
+        sentinel1.analyse(cfg) if a.analyse else sentinel1.run(cfg, a.workers or 8, a.dry_run)
+        return
+    if a.stage == "pesho-model":
+        pesho_model.run(cfg)
         return
     if a.stage == "risk-v2":
         risk_v2.run(cfg)

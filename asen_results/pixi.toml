@@ -25,7 +25,11 @@ aux = { cmd = "python -m aquaguard aux", description = "Stage 7a: stream GUNW (g
 segments = { cmd = "python -m aquaguard segments", description = "Stage 7b: sample GCOV/GUNW/SME2 along every water-main segment" }
 risk = { cmd = "python -m aquaguard risk", description = "Stage 7c: segment x month break-risk models, baseline vs + NISAR" }
 risk-v2 = { cmd = "python -m aquaguard risk-v2", description = "Stage 7c v2: normalised NISAR features, L1 + nested CV, monotonic baseline" }
+pesho-model = { cmd = "python -m aquaguard pesho-model", description = "Boosting on Peter's Coryell chip package enriched with pipe + leak-history context" }
+s1 = { cmd = "python -m aquaguard s1", description = "Sentinel-1 vs NISAR on Peter's Coryell samples (--dry-run, --workers, --analyse)" }
 coryell = { cmd = "python -m aquaguard coryell", description = "Coryell rural leak-visibility test (--dry-run, --workers W, --analyse)" }
+app = { cmd = "python -m aquaguard app", description = "Build the interactive map bundle (app/data.js + app/img) from existing outputs; open app/index.html" }
+coryell-risk = { cmd = "python -m aquaguard coryell-risk", description = "Coryell leak-risk ranking per pipe piece x month -> data/coryell/risk/ (for viz/) + package risk_context.csv" }
 pipeline = { cmd = "python -m aquaguard all", description = "Run stages 1-3 and the report, in order" }
 
 [dependencies]
@@ -49,6 +53,8 @@ rich = ">=15.0.0,<16"
 scikit-image = ">=0.26.0,<0.27"
 tabulate = ">=0.10.0,<0.11"
 scikit-learn = ">=1.9.1,<2"
+pystac-client = ">=0.9.1,<0.10"
+planetary-computer = ">=1.0.0,<2"
 
 [feature.dev.dependencies]
 pytest = "*"

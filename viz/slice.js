@@ -112,6 +112,7 @@ export function initSlice(ctx) {
     $('#count-of').textContent = `leaks ${S.lo}–${S.hi} d after this pass`;
     ctx.renderLegend();
     renderHeader();
+    ctx.onPass?.(S.acqs[S.i]?.date);
     renderStrip();
     renderList(win, before);
     updateDistrict();
