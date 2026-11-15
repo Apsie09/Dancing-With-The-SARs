@@ -1,4 +1,4 @@
-# TerraGuard — Detecting Buried Water Pipeline Leaks from Space
+# AquaGuard — Detecting Buried Water Pipeline Leaks from Space
 
 A technical review and build plan for satellite-based screening of **drinking-water
 and wastewater pipeline leaks**. Water only: no oil, no gas, no methane.
@@ -253,7 +253,7 @@ failure**. This is a *screening* result at region scale, not metre-level
 localisation. It is also a single metropolitan setting with a specific pipe
 stock and soil.
 
-**Why it matters for TerraGuard:** it is the published template for the
+**Why it matters for AquaGuard:** it is the published template for the
 multi-feature model, and it is the best evidence that **L-band + C-band
 together** outperform either alone. Your differentiator can be adding
 **weather normalisation** (which MDFLD-Net does not do) and **NISAR**
@@ -787,7 +787,7 @@ dams, reservoirs). Not a satellite method, but a strong "what next" slide.
 
 ---
 
-## 6. TerraGuard Leak Intelligence — the architecture
+## 6. AquaGuard Leak Intelligence — the architecture
 
 A **physics-informed, temporal, multisensor anomaly-detection** system. The
 design principle: **learn what normal looks like, then flag persistent
@@ -977,7 +977,7 @@ compared with observed time series.
 **Risk:** high. **Effort:** high. **Best research direction, weakest hackathon
 fit.**
 
-### What *TerraGuard* can uniquely claim in a 48-hour build
+### What *AquaGuard* can uniquely claim in a 48-hour build
 
 Pick one sentence and defend it:
 
@@ -1524,6 +1524,6 @@ corridor, and reject dates within 2 days of >5 mm IMERG rainfall.
 
 ---
 
-*Compiled 2026-11-14 for the TerraGuard project. NISAR availability facts are
+*Compiled 2026-11-14 for the AquaGuard project. NISAR availability facts are
 as of this date and will change; re-check
 `nisar-docs.asf.alaska.edu/availability-overview` before relying on them.*

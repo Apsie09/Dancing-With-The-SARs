@@ -298,7 +298,7 @@ def feasibility(cfg: Config, inc, acq, matches, cov) -> str:
                                       size=("size_bytes", lambda s: human_size(s.sum()))).reset_index()
     w = cfg.section("matching")
     L = [
-        "# TerraGuard - data feasibility report" + ("" if final else " (preliminary: stages 1-3)"),
+        "# AquaGuard - data feasibility report" + ("" if final else " (preliminary: stages 1-3)"),
         f"\n_Generated {date.today()} by `pixi run report`. "
         + ("Covers stages 1-6: incidents, NISAR catalogue, matching, streamed SAR crops/patches, features, "
            "control sites and the labelled dataset._\n" if final else

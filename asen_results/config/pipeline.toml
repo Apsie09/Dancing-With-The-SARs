@@ -1,4 +1,4 @@
-# TerraGuard data pipeline configuration (stages 1-3).
+# AquaGuard data pipeline configuration (stages 1-3).
 # Every value here can be changed without touching code; outputs record the config used.
 
 [paths]

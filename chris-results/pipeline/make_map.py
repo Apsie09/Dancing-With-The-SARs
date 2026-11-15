@@ -1,4 +1,4 @@
-"""Build the TerraGuard interactive map and static figures.
+"""Build the AquaGuard interactive map and static figures.
 
 The HTML is self-contained: every raster overlay is embedded as a base64 PNG,
 so it can be opened offline and submitted as a single file.
@@ -40,8 +40,8 @@ from pipeline.config import (
 )
 from pipeline.acquire import read_to_grid
 
-OUT_HTML = OUTPUTS / "terraguard_map.html"
-OUT_PNG = OUTPUTS / "terraguard_map.png"
+OUT_HTML = OUTPUTS / "aquaguard_map.html"
+OUT_PNG = OUTPUTS / "aquaguard_map.png"
 OUT_PROFILE = OUTPUTS / "corridor_profile.png"
 
 MOIST_CMAP = LinearSegmentedColormap.from_list(
@@ -249,7 +249,7 @@ def _panel(validation, hotspots) -> str:
       background:rgba(255,255,255,0.95);border:1px solid #b8b8b8;border-radius:10px;
       padding:14px 16px;font-family:Inter,Arial,sans-serif;color:#1b1b1b;
       box-shadow:0 4px 18px rgba(0,0,0,0.18);font-size:12px;line-height:1.45;">
-      <div style="font-size:18px;font-weight:700;letter-spacing:0.2px;">TerraGuard</div>
+      <div style="font-size:18px;font-weight:700;letter-spacing:0.2px;">AquaGuard</div>
       <div style="font-size:11px;color:#555;margin-bottom:8px;">{CASE_NAME}</div>
       <div style="background:#f4f7f4;border-radius:7px;padding:8px 10px;margin-bottom:8px;">
         <b>Satellite leak screening.</b> A weather-normalised model asks: where is the ground
@@ -619,7 +619,7 @@ def build_static() -> None:
         cb = fig.colorbar(im, ax=ax, fraction=0.035, pad=0.02)
         cb.ax.tick_params(labelsize=7)
     fig.suptitle(
-        f"TerraGuard — {CASE_NAME} · weather-normalised multi-sensor screening",
+        f"AquaGuard — {CASE_NAME} · weather-normalised multi-sensor screening",
         fontsize=12,
         x=0.01,
         ha="left",

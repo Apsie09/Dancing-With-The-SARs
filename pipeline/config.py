@@ -1,4 +1,4 @@
-"""TerraGuard configuration: study area, paths, analysis grid."""
+"""AquaGuard configuration: study area, paths, analysis grid."""
 from __future__ import annotations
 
 import json

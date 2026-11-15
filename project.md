@@ -112,7 +112,7 @@ build on it without checking with the team.
   GCOV file-naming description, "12-day cycles", and the Worldview "12Day"
   layer.)
 
-### 4.1 Direction under evaluation: water pipeline leaks — TerraGuard (2026-11-14)
+### 4.1 Direction under evaluation: water pipeline leaks — AquaGuard (2026-11-14)
 
 A second candidate direction has been researched in depth:
 [`research/Pipeline-Leak-Detection.md`](research/Pipeline-Leak-Detection.md),

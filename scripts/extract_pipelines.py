@@ -19,7 +19,7 @@ from pipeline.config import AOI, VECTORS
 
 CACHE = VECTORS / "overpass_pipelines_raw.json"
 OVERPASS = "https://overpass-api.de/api/interpreter"
-USER_AGENT = "TerraGuard/1.0 (NASA Space Apps hackathon)"
+USER_AGENT = "AquaGuard/1.0 (NASA Space Apps hackathon)"
 
 
 def fetch_overpass() -> dict:

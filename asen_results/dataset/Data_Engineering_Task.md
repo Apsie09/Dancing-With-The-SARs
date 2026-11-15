@@ -1,8 +1,8 @@
-# TerraGuard — NISAR and Water Infrastructure Incident Data Integration
+# AquaGuard — NISAR and Water Infrastructure Incident Data Integration
 
 ## Project Overview
 
-TerraGuard is an Earth-observation and machine-learning project we are developping for the **NASA Space Apps Challenge 2026 — Dancing with the SARs**.
+AquaGuard is an Earth-observation and machine-learning project we are developping for the **NASA Space Apps Challenge 2026 — Dancing with the SARs**.
 
 The objective is to identify potentially significant surface changes associated with water-pipeline failures using Synthetic Aperture Radar (SAR) imagery and geospatial water-infrastructure data.
 
@@ -289,4 +289,4 @@ This phase is successful when we have:
 
 **The final goal is not to claim that leaks have already been detected, but to establish whether the available satellite and infrastructure data can support training a scientifically credible detection model.**
 
-This preprocessing pipeline will form the foundation of TerraGuard's future ML development and its eventual application to Bulgarian water infrastructure.
+This preprocessing pipeline will form the foundation of AquaGuard's future ML development and its eventual application to Bulgarian water infrastructure.

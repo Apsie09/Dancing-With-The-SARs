@@ -1,4 +1,4 @@
-"""Build the TerraGuard platform dataset from the bundled case outputs.
+"""Build the AquaGuard platform dataset from the bundled case outputs.
 
 Outputs a single static contract under ``app/data/``:
 

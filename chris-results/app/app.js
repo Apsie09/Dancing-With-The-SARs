@@ -1,4 +1,4 @@
-/* TerraGuard Evidence Explorer — static MapLibre app.
+/* AquaGuard Evidence Explorer — static MapLibre app.
  *
  * One dataset contract, four sites. Everything is loaded from ./data/.
  * The app deliberately keeps three evidence types separate:
@@ -330,7 +330,7 @@ function siteSidebar(site, payload) {
       <div class="evidence-actions">
         ${meta.sources?.length ? `<button id="sources-btn">Sources</button>` : ''}
         ${site.kind === 'raster' ? `<a href="../${site.id === 'bulgaria' ? 'outputs' : `case_studies/${site.id}/outputs`}/validation.json" target="_blank" rel="noopener">validation.json</a>` : ''}
-        ${site.kind === 'raster' ? `<a href="../${site.id === 'bulgaria' ? 'outputs' : `case_studies/${site.id}/outputs`}/terraguard_map.html" target="_blank" rel="noopener">legacy evidence map</a>` : ''}
+        ${site.kind === 'raster' ? `<a href="../${site.id === 'bulgaria' ? 'outputs' : `case_studies/${site.id}/outputs`}/aquaguard_map.html" target="_blank" rel="noopener">legacy evidence map</a>` : ''}
         ${site.id === 'coryell' ? '<a href="../data/coryell/README.md" target="_blank" rel="noopener">data note</a>' : ''}
       </div>
     </div>`;
@@ -890,7 +890,7 @@ function renderMethod() {
       <div class="doc-inner">
         <div class="eyebrow">Method & limits</div>
         <h1>One workflow, four evidence checks</h1>
-        <p class="lead">TerraGuard asks a narrower question than “where is the leak?”: where does the surface
+        <p class="lead">AquaGuard asks a narrower question than “where is the leak?”: where does the surface
           stay wetter (or cooler) than weather, soil, land cover and season predict — and does that anomaly
           line up with a pipe, a repair record, or a radar change?</p>
 
@@ -966,9 +966,9 @@ soil / terrain ─┘                                            ▼
 pixi install                       # or use the parent .pixi environment
 python scripts/fetch_coryell.py    # public ArcGIS vectors, no login
 CASE=case_studies/coryell/case.json
-TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
-TERRAGUARD_CASE=$CASE python -m pipeline.model
-TERRAGUARD_CASE=$CASE python -m pipeline.make_map
+AQUAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+AQUAGUARD_CASE=$CASE python -m pipeline.model
+AQUAGUARD_CASE=$CASE python -m pipeline.make_map
 python scripts/build_platform_data.py
 ./run_dashboard.sh                 # http://127.0.0.1:8766/app/</pre>
         <p>Full method notes: <a href="../docs/RESULTS.md">docs/RESULTS.md</a> ·
@@ -1034,7 +1034,7 @@ document.head.appendChild(style);
 
 boot().catch((err) => {
   console.error(err);
-  document.body.innerHTML = `<pre style="padding:24px;color:#ffb4a8">TerraGuard failed to start:\n${esc(err.stack || err)}</pre>`;
+  document.body.innerHTML = `<pre style="padding:24px;color:#ffb4a8">AquaGuard failed to start:\n${esc(err.stack || err)}</pre>`;
 });
 
 // Exposed for browser smoke tests; harmless in production.

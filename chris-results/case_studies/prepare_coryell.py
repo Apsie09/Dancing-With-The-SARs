@@ -1,4 +1,4 @@
-"""Prepare the Coryell case for the shared TerraGuard pipeline.
+"""Prepare the Coryell case for the shared AquaGuard pipeline.
 
 The case is a 10 x 10 km rural AOI in UTM 14N chosen as the densest 2025-26
 summer repair cell in the district. It uses the same `case.json` contract and
@@ -11,9 +11,9 @@ Usage (from chris-results/):
     python scripts/fetch_coryell.py
     python case_studies/prepare_coryell.py
     CASE=case_studies/coryell/case.json
-    TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
-    TERRAGUARD_CASE=$CASE python -m pipeline.model
-    TERRAGUARD_CASE=$CASE python -m pipeline.make_map
+    AQUAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+    AQUAGUARD_CASE=$CASE python -m pipeline.model
+    AQUAGUARD_CASE=$CASE python -m pipeline.make_map
 """
 from __future__ import annotations
 

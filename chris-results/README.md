@@ -1,4 +1,4 @@
-# TerraGuard
+# AquaGuard
 
 **Satellite leak screening for buried water pipelines — NASA Space Apps 2026, "Dancing with the SARs".**
 
@@ -7,11 +7,11 @@
 > Aguascalientes, Calgary and the new Coryell case into one MapLibre platform.
 > See [`docs/PLATFORM.md`](docs/PLATFORM.md). The original dashboard and maps remain as a legacy appendix.
 
-TerraGuard learns what a 20 m patch of farmland *should* look like given rainfall, soil, vegetation,
+AquaGuard learns what a 20 m patch of farmland *should* look like given rainfall, soil, vegetation,
 season and evapotranspiration, then flags ground that stays wet (and cool) when the weather says it
 should dry. The flags are constrained to a mapped water main and ranked as inspection candidates.
 
-![TerraGuard map](outputs/terraguard_map.png)
+![AquaGuard map](outputs/aquaguard_map.png)
 
 ## The honest result
 
@@ -32,8 +32,8 @@ Read the full story in [`docs/RESULTS.md`](docs/RESULTS.md) and the challenge-fa
 
 - `app/` — unified MapLibre evidence explorer: Overview / four sites / Compare / Method.
 - `case_studies/coryell/` — fourth Sentinel-1 case: `case.json`, 72 labels, 55 dates, outputs.
-- `outputs/terraguard_map.html` — legacy self-contained interactive map (open it directly; no server or API key).
-- `outputs/terraguard_map.png` — two-panel static map.
+- `outputs/aquaguard_map.html` — legacy self-contained interactive map (open it directly; no server or API key).
+- `outputs/aquaguard_map.png` — two-panel static map.
 - `outputs/corridor_profile.png` — moisture residual and leak score along the 3.3 km main.
 - `outputs/hotspots.csv` / `.json` — ranked candidates with evidence.
 - `outputs/validation.json` — temporal holdout, placebo-corridor test, data counts.
@@ -59,7 +59,7 @@ Read the full story in [`docs/RESULTS.md`](docs/RESULTS.md) and the challenge-fa
 
 # 5. Open the map (the HTML also opens directly from disk)
 ~/.pixi/bin/pixi run serve
-# http://127.0.0.1:8765/terraguard_map.html
+# http://127.0.0.1:8765/aquaguard_map.html
 ```
 
 Runtime: acquisition is the long pole (10–20 min; Sentinel-1 is 434 dates), model ~5 min, map <1 min.

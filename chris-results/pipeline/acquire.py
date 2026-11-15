@@ -1,4 +1,4 @@
-"""Acquire and align multi-sensor data over the TerraGuard study area.
+"""Acquire and align multi-sensor data over the AquaGuard study area.
 
 Sources
 -------

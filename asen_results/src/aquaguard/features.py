@@ -201,7 +201,7 @@ def build(cfg: Config, index_name: str = "sar_patches.parquet", h5_name: str = "
     # ---- infrastructure (pre-incident only) + incident attribute known at report time
     if infra is None:
         inc = pd.read_parquet(cfg.incidents_parquet)
-        roles = json.loads(pq.read_schema(cfg.incidents_parquet).metadata[b"terraguard"])["column_roles"]
+        roles = json.loads(pq.read_schema(cfg.incidents_parquet).metadata[b"aquaguard"])["column_roles"]
         pre_cols = [c for c, role in roles.items() if role == "pre_incident" and c in inc.columns]
         infra = inc[["incident_id", *pre_cols]].rename(columns={c: f"inf_{c}" for c in pre_cols})
         infra["site_id"] = "inc_" + infra.pop("incident_id").astype(str)
@@ -246,7 +246,7 @@ def run(cfg: Config) -> pd.DataFrame:
             "config": cfg.section("features")}
     feat.to_parquet(out)
     t = pq.read_table(out)
-    pq.write_table(t.replace_schema_metadata({**(t.schema.metadata or {}), b"terraguard": json.dumps(meta, default=str).encode()}), out)
+    pq.write_table(t.replace_schema_metadata({**(t.schema.metadata or {}), b"aquaguard": json.dumps(meta, default=str).encode()}), out)
     print(f"  rows: {len(feat)} ({int(feat['q_usable'].sum())} usable), incidents: {feat['incident_id'].nunique()}")
     for g, cols in groups.items():
         print(f"  {g:4s} {len(cols):3d} columns")

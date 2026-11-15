@@ -1,4 +1,4 @@
-# TerraGuard — implementation and results
+# AquaGuard — implementation and results
 
 **Study area:** Elin Pelin, Sofia Province, Bulgaria — a 5.5 × 6.3 km farmland AOI crossed by a 3.3 km buried water transmission main (OSM way `1106343159`).
 
@@ -196,7 +196,7 @@ The full list is in `outputs/hotspots.csv` and `outputs/hotspots.json`.
 
 ## 5. The interactive map
 
-Open `outputs/terraguard_map.html` directly in a browser (it is self-contained, ~3 MB, no server or API key needed). Layers:
+Open `outputs/aquaguard_map.html` directly in a browser (it is self-contained, ~3 MB, no server or API key needed). Layers:
 
 - **Leak likelihood (2022–2026)** — corridor-weighted evidence score, 0–20+.
 - **Soil-moisture anomaly (z)** — dry-season residual, dry (red) ↔ wet (blue).
@@ -211,7 +211,7 @@ The left panel reports the number of S1 dates, dry-season scenes, the top score 
 
 Static outputs:
 
-- `outputs/terraguard_map.png` — two-panel map (soil moisture and leak likelihood) over a Sentinel-2 true-colour basemap.
+- `outputs/aquaguard_map.png` — two-panel map (soil moisture and leak likelihood) over a Sentinel-2 true-colour basemap.
 - `outputs/corridor_profile.png` — moisture residual and leak score along the 3.3 km main.
 - `outputs/soil_moisture_anomaly.tif`, `outputs/leak_likelihood.tif`, `outputs/persistence.tif`, `outputs/thermal_anomaly.tif`, `outputs/confidence.tif`, `outputs/moisture_raw_z.tif`, `outputs/moisture_smooth_z.tif`.
 
@@ -237,7 +237,7 @@ Static outputs:
 
 # 6. serve it (optional; the HTML also opens from disk)
 python3 -m http.server 8765 --directory outputs
-# http://127.0.0.1:8765/terraguard_map.html
+# http://127.0.0.1:8765/aquaguard_map.html
 ```
 
 Runtime on this machine: acquisition ~10–20 min (S1 is the long pole), model ~5 min, map <1 min. Disk: raw stacks ~190 MB; outputs ~17 MB.
@@ -286,4 +286,4 @@ For the authenticated HDF5 path, put Earthdata credentials in `~/.netrc` and use
 
 ## 9. One-paragraph conclusion
 
-TerraGuard is a working, open-source, end-to-end satellite leak-screening pipeline: it ingests five sensors, learns the weather- and land-cover-expected behaviour of every 20 m pixel, extracts persistent dry-season moisture and thermal residuals, fuses them with pipeline geometry, validates against placebo corridors, and presents an interactive map with evidence cards. On the Elin Pelin water main the pipeline association is **not statistically significant**, so the correct conclusion is a ranked list of inspection candidates — not a leak detection. That negative result is itself useful: it defines the conditions (known leak, calibrated NISAR L-band, ground truth, hydraulic data) under which the next iteration can become a real detector.
+AquaGuard is a working, open-source, end-to-end satellite leak-screening pipeline: it ingests five sensors, learns the weather- and land-cover-expected behaviour of every 20 m pixel, extracts persistent dry-season moisture and thermal residuals, fuses them with pipeline geometry, validates against placebo corridors, and presents an interactive map with evidence cards. On the Elin Pelin water main the pipeline association is **not statistically significant**, so the correct conclusion is a ranked list of inspection candidates — not a leak detection. That negative result is itself useful: it defines the conditions (known leak, calibrated NISAR L-band, ground truth, hydraulic data) under which the next iteration can become a real detector.

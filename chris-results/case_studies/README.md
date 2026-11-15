@@ -1,4 +1,4 @@
-# TerraGuard ground-truth case studies
+# AquaGuard ground-truth case studies
 
 Three independent tests of the **same pipeline**, each in its own folder, using real water-utility
 labels rather than the unlabelled Bulgarian demo. Run with a single environment variable; the code
@@ -106,11 +106,11 @@ hydraulic data — not a bigger model on the same labels.
 ```bash
 CASE=case_studies/aguascalientes/case.json
 
-TERRAGUARD_CASE=$CASE ~/.pixi/bin/pixi run python -m pipeline.acquire --workers 16
-TERRAGUARD_CASE=$CASE ~/.pixi/bin/pixi run python -m pipeline.model
-TERRAGUARD_CASE=$CASE ~/.pixi/bin/pixi run python -m pipeline.make_map
+AQUAGUARD_CASE=$CASE ~/.pixi/bin/pixi run python -m pipeline.acquire --workers 16
+AQUAGUARD_CASE=$CASE ~/.pixi/bin/pixi run python -m pipeline.model
+AQUAGUARD_CASE=$CASE ~/.pixi/bin/pixi run python -m pipeline.make_map
 
-# open $CASE's outputs/terraguard_map.html
+# open $CASE's outputs/aquaguard_map.html
 ```
 
 Calgary:
@@ -145,10 +145,10 @@ case_studies/
 CSV at `/tmp/opencode/cases/calgary/breaks.csv`; the case outputs are already generated here.
 `prepare_coryell.py` expects `data/coryell/` from `scripts/fetch_coryell.py`.
 
-Maps: `case_studies/aguascalientes/outputs/terraguard_map.html`,
-`case_studies/calgary/outputs/terraguard_map.html` and
-`case_studies/coryell/outputs/terraguard_map.html`. Static previews are the matching
-`terraguard_map.png` files.
+Maps: `case_studies/aguascalientes/outputs/aquaguard_map.html`,
+`case_studies/calgary/outputs/aquaguard_map.html` and
+`case_studies/coryell/outputs/aquaguard_map.html`. Static previews are the matching
+`aquaguard_map.png` files.
 
 ## Case 3 — Coryell City WSD, Texas
 
@@ -176,9 +176,9 @@ Run it with the same commands as the other cases:
 
 ```bash
 CASE=case_studies/coryell/case.json
-TERRAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16
-TERRAGUARD_CASE=$CASE pixi run python -m pipeline.model
-TERRAGUARD_CASE=$CASE pixi run python -m pipeline.make_map
+AQUAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16
+AQUAGUARD_CASE=$CASE pixi run python -m pipeline.model
+AQUAGUARD_CASE=$CASE pixi run python -m pipeline.make_map
 ```
 
 ## Caveats

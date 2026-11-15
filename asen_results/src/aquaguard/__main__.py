@@ -1,4 +1,4 @@
-"""CLI: python -m terraguard {incidents,catalog,match,report,all} [--config PATH]"""
+"""CLI: python -m aquaguard {incidents,catalog,match,report,all} [--config PATH]"""
 import argparse
 import time
 
@@ -9,7 +9,7 @@ STAGES = {"incidents": incidents.run, "catalog": catalog.run, "match": matching.
 
 
 def main() -> None:
-    p = argparse.ArgumentParser(prog="terraguard")
+    p = argparse.ArgumentParser(prog="aquaguard")
     p.add_argument("stage", choices=[*STAGES, "all", "probe", "sar", "patches", "features", "signal", "mains", "controls", "dataset", "signal-controls", "aux", "segments", "risk", "coryell", "risk-v2"])
     p.add_argument("--incidents", type=int, default=None, help="sar: number of top incidents (default from config)")
     p.add_argument("--all", action="store_true", help="sar: stream every granule with a usable match")

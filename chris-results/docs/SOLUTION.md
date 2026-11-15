@@ -1,18 +1,18 @@
-# TerraGuard: satellite leak screening for buried water pipelines
+# AquaGuard: satellite leak screening for buried water pipelines
 
 **NASA Space Apps Challenge 2026 — "Dancing with the SARs"**
 
-**Status:** implemented 15 November 2026. The working pipeline, interactive map, metrics and caveats are in [`docs/RESULTS.md`](RESULTS.md). No TerraGuard accuracy is claimed; the AOI has no confirmed leak.
+**Status:** implemented 15 November 2026. The working pipeline, interactive map, metrics and caveats are in [`docs/RESULTS.md`](RESULTS.md). No AquaGuard accuracy is claimed; the AOI has no confirmed leak.
 
 ## 1. Pitch
 
-TerraGuard is an open-source, map-first screening tool for buried water pipelines. It combines a 2018–2026 Sentinel-1 C-band time series, Sentinel-2 optical moisture, Landsat thermal data, ERA5 weather, soil/land-cover/DEM layers, NISAR L-band browse imagery and OpenStreetMap pipeline geometry. A physics-informed LightGBM model learns what each 20 m pixel should look like given rainfall, temperature, evapotranspiration, soil, vegetation and season; the residual flags ground that stays wet when the weather says it should dry. Persistence, optical moisture and a thermal-cooling check are fused into a corridor-weighted leak-likelihood map with evidence cards. The output is an **inspection-priority map**, not a verified leak detection.
+AquaGuard is an open-source, map-first screening tool for buried water pipelines. It combines a 2018–2026 Sentinel-1 C-band time series, Sentinel-2 optical moisture, Landsat thermal data, ERA5 weather, soil/land-cover/DEM layers, NISAR L-band browse imagery and OpenStreetMap pipeline geometry. A physics-informed LightGBM model learns what each 20 m pixel should look like given rainfall, temperature, evapotranspiration, soil, vegetation and season; the residual flags ground that stays wet when the weather says it should dry. Persistence, optical moisture and a thermal-cooling check are fused into a corridor-weighted leak-likelihood map with evidence cards. The output is an **inspection-priority map**, not a verified leak detection.
 
 ## 2. Challenge alignment
 
-The brief asks for an interactive NISAR application that visualizes surface change, explains its drivers and is open-source. TerraGuard maps persistent soil-moisture anomalies and tests one driver: leakage from a buried main.
+The brief asks for an interactive NISAR application that visualizes surface change, explains its drivers and is open-source. AquaGuard maps persistent soil-moisture anomalies and tests one driver: leakage from a buried main.
 
-| Challenge requirement | How TerraGuard satisfies it | Honest caveat |
+| Challenge requirement | How AquaGuard satisfies it | Honest caveat |
 |---|---|---|
 | **Study area** | Elin Pelin, Sofia Province, Bulgaria; 5.5×6.3 km farmland crossed by a 3.3 km buried water transmission main (OSM 1106343159). | No confirmed leak; method demonstration. |
 | **NISAR data** | Public ASF NISAR GCOV **browse** imagery for 2026-06-20 and 2026-10-06 (track 094), shown as L-band HH and HH/HV change layers. A calibrated HDF5 extraction path (`scripts/nisar_extract.py --hdf5`) is implemented and validated on ASF's public sample. | Full Bulgaria HDF5 download needs Earthdata auth and was blocked; browse is 8-bit, ~160 m, approximate georeferencing, display-only. |
@@ -107,7 +107,7 @@ A 20 m pixel is 400 m²; a 0.1–0.6 m pipe occupies a tiny fraction of it. A 1 
 
 ## 6. Novelty versus existing work
 
-| Prior work | What it establishes | Gap TerraGuard addresses |
+| Prior work | What it establishes | Gap AquaGuard addresses |
 |---|---|---|
 | **ASTERRA/SUEZ, Affinity Water (2025)** | L-band screening of 9,045 km; 902 leaks; 59% non-surfacing; vendor-reported, acoustically confirmed. | Proprietary; no open, weather-normalised method. |
 | **MDFLD-Net, Li et al. (2025)** | L + C + polarimetry + closure phase; 1,545 leaks; 86.3% accuracy. | Supervised, selected dates, quad-pol/labels, no weather normalisation. |
@@ -115,11 +115,11 @@ A 20 m pixel is 400 m²; a 0.1–0.6 m pipe occupies a tiny fraction of it. A 1 
 | **ESA SECO, WATERLENS, ZOE** | Funded SAR/optical/InSAR route screening. | Combination is not novel; the method must be. |
 | **Cyprus, Theocharidis et al. (2025)** | Dry-season optical; NMDI/NDWI beat NDVI; acoustic/GPR; one valve false positive. | Optical only; design evidence. |
 
-TerraGuard's testable claim is the combination: weather-normalised residual, multi-sensor evidence, pipeline-constrained scoring and NISAR L-band context in an open implementation. The research review found no published study combining all four with an open codebase. We do not claim first use of SAR for leaks or metre-level localisation.
+AquaGuard's testable claim is the combination: weather-normalised residual, multi-sensor evidence, pipeline-constrained scoring and NISAR L-band context in an open implementation. The research review found no published study combining all four with an open codebase. We do not claim first use of SAR for leaks or metre-level localisation.
 
 ## 7. Validation and results
 
-There is **no confirmed leak ground truth in the AOI** — no repair records, acoustic surveys or excavations. The output is a screening prioritisation, not a verified detection; TerraGuard does not report precision, recall or accuracy against leaks it cannot confirm.
+There is **no confirmed leak ground truth in the AOI** — no repair records, acoustic surveys or excavations. The output is a screening prioritisation, not a verified detection; AquaGuard does not report precision, recall or accuracy against leaks it cannot confirm.
 
 | Test | Design | Result |
 |---|---|---|
@@ -160,7 +160,7 @@ If the demo is capped at 30 seconds: map → NISAR toggle → likelihood + top h
 
 ## 10. Judging criteria mapping
 
-| Criterion | TerraGuard evidence |
+| Criterion | AquaGuard evidence |
 |---|---|
 | **Impact** | Non-revenue water is a global utility problem; the tool ranks a 3.3 km corridor instead of sending crews blindly. |
 | **Creativity** | Weather-normalised expected-condition residual + multi-sensor evidence + pipeline-constrained scoring + NISAR L-band context, in one open pipeline. |

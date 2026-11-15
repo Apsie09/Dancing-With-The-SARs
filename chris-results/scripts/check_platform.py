@@ -1,4 +1,4 @@
-"""Validate the TerraGuard platform data contract before serving or publishing.
+"""Validate the AquaGuard platform data contract before serving or publishing.
 
 Checks:
   * the site registry and every referenced file exist;

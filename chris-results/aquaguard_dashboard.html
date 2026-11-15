@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TerraGuard — multi-case validation</title>
+<title>AquaGuard — multi-case validation</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root {
@@ -172,7 +172,7 @@
 <header>
   <div class="topline">
     <div class="brand">
-      <h1>TerraGuard <span style="font-weight:400;color:#a9d7c3;">/ multi-case validation</span></h1>
+      <h1>AquaGuard <span style="font-weight:400;color:#a9d7c3;">/ multi-case validation</span></h1>
       <div class="sub">
         One pipeline, three study areas. Weather-normalised Sentinel-1 / Sentinel-2 / Landsat screening for buried water networks,
         tested against the unlabelled Bulgarian demo and two cities with real repair labels.
@@ -287,11 +287,11 @@
       <div class="stat"><b>0.471</b><span>NDMI R²</span></div>
       <div class="stat"><b>0.89</b><span>corridor p</span></div>
       <div class="spacer"></div>
-      <a class="linkbtn" href="outputs/terraguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
+      <a class="linkbtn" href="outputs/aquaguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
     </div>
     <div class="mapwrap">
       <div class="loading" id="load-bulgaria"><span class="spinner"></span> Loading Bulgaria map…</div>
-      <iframe data-src="outputs/terraguard_map.html" title="TerraGuard Bulgaria map" loading="lazy"></iframe>
+      <iframe data-src="outputs/aquaguard_map.html" title="AquaGuard Bulgaria map" loading="lazy"></iframe>
     </div>
   </section>
 
@@ -307,11 +307,11 @@
       <div class="stat"><b>1.00</b><span>corridor p</span></div>
       <span class="hintline">Yellow points = repair labels · toggle “Ground-truth labels” in the map control</span>
       <div class="spacer"></div>
-      <a class="linkbtn" href="case_studies/aguascalientes/outputs/terraguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
+      <a class="linkbtn" href="case_studies/aguascalientes/outputs/aquaguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
     </div>
     <div class="mapwrap">
       <div class="loading" id="load-aguascalientes"><span class="spinner"></span> Loading Aguascalientes map…</div>
-      <iframe data-src="case_studies/aguascalientes/outputs/terraguard_map.html" title="TerraGuard Aguascalientes map" loading="lazy"></iframe>
+      <iframe data-src="case_studies/aguascalientes/outputs/aquaguard_map.html" title="AquaGuard Aguascalientes map" loading="lazy"></iframe>
     </div>
   </section>
 
@@ -327,11 +327,11 @@
       <div class="stat"><b>0.95</b><span>corridor p</span></div>
       <span class="hintline">Yellow points = break labels · toggle “Ground-truth labels” in the map control</span>
       <div class="spacer"></div>
-      <a class="linkbtn" href="case_studies/calgary/outputs/terraguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
+      <a class="linkbtn" href="case_studies/calgary/outputs/aquaguard_map.html" target="_blank" rel="noopener">Open full map ↗</a>
     </div>
     <div class="mapwrap">
       <div class="loading" id="load-calgary"><span class="spinner"></span> Loading Calgary map…</div>
-      <iframe data-src="case_studies/calgary/outputs/terraguard_map.html" title="TerraGuard Calgary map" loading="lazy"></iframe>
+      <iframe data-src="case_studies/calgary/outputs/aquaguard_map.html" title="AquaGuard Calgary map" loading="lazy"></iframe>
     </div>
   </section>
 
@@ -382,9 +382,9 @@
         <div class="card" style="padding:16px 19px;">
           <h2>How to run a case</h2>
           <p><code>CASE=case_studies/aguascalientes/case.json</code></p>
-          <p><code>TERRAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16</code><br>
-             <code>TERRAGUARD_CASE=$CASE pixi run python -m pipeline.model</code><br>
-             <code>TERRAGUARD_CASE=$CASE pixi run python -m pipeline.make_map</code></p>
+          <p><code>AQUAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16</code><br>
+             <code>AQUAGUARD_CASE=$CASE pixi run python -m pipeline.model</code><br>
+             <code>AQUAGUARD_CASE=$CASE pixi run python -m pipeline.make_map</code></p>
           <p>Full notes: <code>case_studies/README.md</code> and <code>docs/RESULTS.md</code>. The case folders are local and not committed.</p>
         </div>
       </div>
@@ -393,7 +393,7 @@
 </main>
 
 <footer>
-  <span>TerraGuard · NASA Space Apps 2026 · “Dancing with the SARs” · open data, open code</span>
+  <span>AquaGuard · NASA Space Apps 2026 · “Dancing with the SARs” · open data, open code</span>
   <span><a href="docs/RESULTS.md">docs/RESULTS.md</a> · <a href="case_studies/README.md">case_studies/README.md</a> · <a href="research/Pipeline-Leak-Detection.md">research</a></span>
 </footer>
 

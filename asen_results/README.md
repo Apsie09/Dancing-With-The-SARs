@@ -1,4 +1,4 @@
-# TerraGuard: Kitchener water-main breaks × NISAR GCOV
+# AquaGuard: Kitchener water-main breaks × NISAR GCOV
 
 Data pipeline for the task in [`dataset/Data_Engineering_Task.md`](dataset/Data_Engineering_Task.md).
 All six stages are implemented. The final summary is in `data/reports/data_feasibility_report.md`
@@ -40,19 +40,19 @@ All parameters (AOI, collections, temporal windows, patch size, controls, splits
 
 | Stage | Module | Output |
 |---|---|---|
-| 1. Incidents (ArcGIS, paginated) | `src/terraguard/incidents.py` | `kitchener_incidents.parquet` |
-| 2. NISAR catalogue (CMR via earthaccess) | `src/terraguard/catalog.py` | `nisar_acquisitions.parquet` |
-| 3. Spatiotemporal matching | `src/terraguard/matching.py` | `incident_nisar_matches.parquet`, `incident_coverage_summary.parquet` |
-| 4. Streamed SAR crops + patches | `src/terraguard/sar.py` | `data/sar/crops/`, `patches.h5`, `sar_patches.parquet` |
-| 5. Features | `src/terraguard/features.py` | `radar_features.parquet` |
-| 6. Controls + labelled dataset | `src/terraguard/controls.py`, `dataset.py` | `control_*`, `ml_dataset.parquet` |
-| Signal checks | `src/terraguard/signal_check.py` | `data/reports/signal_check*.md` |
-| Reports | `src/terraguard/report.py` | `data/reports/data_feasibility_report.md`, `incidents_summary.md`, charts, map |
+| 1. Incidents (ArcGIS, paginated) | `src/aquaguard/incidents.py` | `kitchener_incidents.parquet` |
+| 2. NISAR catalogue (CMR via earthaccess) | `src/aquaguard/catalog.py` | `nisar_acquisitions.parquet` |
+| 3. Spatiotemporal matching | `src/aquaguard/matching.py` | `incident_nisar_matches.parquet`, `incident_coverage_summary.parquet` |
+| 4. Streamed SAR crops + patches | `src/aquaguard/sar.py` | `data/sar/crops/`, `patches.h5`, `sar_patches.parquet` |
+| 5. Features | `src/aquaguard/features.py` | `radar_features.parquet` |
+| 6. Controls + labelled dataset | `src/aquaguard/controls.py`, `dataset.py` | `control_*`, `ml_dataset.parquet` |
+| Signal checks | `src/aquaguard/signal_check.py` | `data/reports/signal_check*.md` |
+| Reports | `src/aquaguard/report.py` | `data/reports/data_feasibility_report.md`, `incidents_summary.md`, charts, map |
 
 `data/` is git-ignored and fully regenerable. Raw ArcGIS snapshots are kept in `data/raw/`.
 
 ## Conventions
-- Column roles are stored in the incidents parquet metadata (`terraguard` key). Only `pre_incident`
+- Column roles are stored in the incidents parquet metadata (`aquaguard` key). Only `pre_incident`
   columns may be used as predictive features. `post_incident` fields (repair type, cause, status…) are
   for labelling and analysis only.
 - Nothing is silently dropped. Duplicates, suspect dates and suspect locations are **flagged**

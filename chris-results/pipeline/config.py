@@ -1,8 +1,8 @@
-"""TerraGuard configuration: study area, paths, analysis grid.
+"""AquaGuard configuration: study area, paths, analysis grid.
 
 Default: Elin Pelin, Bulgaria (the NASA Space Apps demo).
 
-Case mode: set TERRAGUARD_CASE=/path/to/case.json to run the same pipeline on
+Case mode: set AQUAGUARD_CASE=/path/to/case.json to run the same pipeline on
 another AOI.  The JSON overrides the AOI, grid, date range, sensor orbit,
 pipeline network, labels, dry-season months and train/test split.  Case data
 lives under the case root's data/ and outputs/ directories, so cases never
@@ -61,7 +61,7 @@ CASE_NAME = "Elin Pelin water main"
 # --------------------------------------------------------------------------- #
 # Case override
 # --------------------------------------------------------------------------- #
-_case_env = os.environ.get("TERRAGUARD_CASE")
+_case_env = os.environ.get("AQUAGUARD_CASE")
 if _case_env:
     case_path = Path(_case_env)
     if not case_path.is_absolute():
@@ -97,7 +97,7 @@ if _case_env:
     DRY_YEARS = tuple(CASE["dry_years"]) if CASE.get("dry_years") else None
     TRAIN_END = CASE.get("train_end", "2025-07-01")
     VAL_END = CASE.get("val_end", "2026-01-01")
-    CASE_NAME = CASE.get("name", "TerraGuard case")
+    CASE_NAME = CASE.get("name", "AquaGuard case")
 
 for _p in (DATA, RAW, INTERIM, STATIC, MET, VECTORS, OUTPUTS):
     _p.mkdir(parents=True, exist_ok=True)

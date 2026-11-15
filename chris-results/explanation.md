@@ -1,6 +1,6 @@
-# TerraGuard — `chris-results` bundle
+# AquaGuard — `chris-results` bundle
 
-This folder is a **self-contained, shareable copy** of the TerraGuard work: code, docs, four
+This folder is a **self-contained, shareable copy** of the AquaGuard work: code, docs, four
 case datasets, validation metrics, small data layers and one **interactive evidence explorer**.
 It is meant to be opened by someone who has never seen the repository.
 
@@ -17,12 +17,12 @@ pre-exported GeoJSON and PNG overlays. The app loads MapLibre and the basemap ti
 internet; the data itself is local.
 
 > **Test branch:** the unified platform lives in `app/`. The older
-> `terraguard_dashboard.html` and per-case Leaflet maps are kept as a legacy appendix.
+> `aquaguard_dashboard.html` and per-case Leaflet maps are kept as a legacy appendix.
 > Platform architecture, data contract and rebuild steps: [`docs/PLATFORM.md`](docs/PLATFORM.md).
 
 ---
 
-## 1. What TerraGuard is
+## 1. What AquaGuard is
 
 A weather-normalised, multi-sensor **screening** pipeline for buried water networks:
 
@@ -72,8 +72,8 @@ but its p95 test is 0.24, so the evidence is not strong enough to call it detect
 - Sentinel-1 RTC orbit 7 descending, 434 dates 2018–2026; 194 dates used 2022–2026.
 - No confirmed leak. The corridor enrichment test is **not significant** (p = 0.89 at the 95th
   percentile vs 200 translated placebo corridors).
-- Map: [`outputs/terraguard_map.html`](outputs/terraguard_map.html)
-- Static: [`outputs/terraguard_map.png`](outputs/terraguard_map.png)
+- Map: [`outputs/aquaguard_map.html`](outputs/aquaguard_map.html)
+- Static: [`outputs/aquaguard_map.png`](outputs/aquaguard_map.png)
 - App: the Bulgaria site also has a fourth **NISAR HH browse** overlay, clearly marked display-only.
 
 **Aguascalientes, Mexico**
@@ -82,7 +82,7 @@ but its p95 test is 0.24, so the evidence is not strong enough to call it detect
 - Sentinel-1 RTC ascending 151, 28 dates in 2022.
 - VV MAE 2.10 dB / R² 0.436; NDMI MAE 0.076 / R² 0.294.
 - Label AUC **0.526**, median percentile 56.2; corridor p 1.00 (not significant).
-- Map: [`case_studies/aguascalientes/outputs/terraguard_map.html`](case_studies/aguascalientes/outputs/terraguard_map.html)
+- Map: [`case_studies/aguascalientes/outputs/aquaguard_map.html`](case_studies/aguascalientes/outputs/aquaguard_map.html)
 
 **Calgary, Canada**
 - 10 × 10 km AOI, EPSG:32611; public water main network (5,879 clipped segments).
@@ -90,7 +90,7 @@ but its p95 test is 0.24, so the evidence is not strong enough to call it detect
 - Sentinel-1 RTC ascending 122, 50 dates (2025–2026; the RTC archive over this AOI starts April 2025).
 - VV MAE 1.85 dB / R² 0.650; NDMI MAE 0.137 / R² 0.249.
 - Label AUC **0.524**, median percentile 51.7; corridor p 0.90 mean / 0.95 p95 (not significant).
-- Map: [`case_studies/calgary/outputs/terraguard_map.html`](case_studies/calgary/outputs/terraguard_map.html)
+- Map: [`case_studies/calgary/outputs/aquaguard_map.html`](case_studies/calgary/outputs/aquaguard_map.html)
 
 **Coryell City WSD, Texas**
 - Fixed 10 × 10 km rural AOI, EPSG:32614; 184 clipped water-main segments; 7 pressure zones in
@@ -98,11 +98,11 @@ but its p95 test is 0.24, so the evidence is not strong enough to call it detect
 - 72 summer repairs (June–September 2025–2026) on 184 segments; Sentinel-1 RTC ascending 34,
   **55 dates** (2025-01-07 to 2026-11-05); 76 Sentinel-2 dates; 47 Landsat LST dates.
 - Same pipeline and parameters as the other cases via
-  `TERRAGUARD_CASE=case_studies/coryell/case.json`.
+  `AQUAGUARD_CASE=case_studies/coryell/case.json`.
 - VV MAE 1.32 dB / R² **0.426**; NDMI MAE 0.113 / R² **0.505**.
 - Label AUC **0.548**, median percentile 59.1; corridor mean p **0.024**, p95 **0.244**.
 - **No NISAR imagery** in this case; it is a Sentinel-1/2 case like Aguascalientes and Calgary.
-- Map: [`case_studies/coryell/outputs/terraguard_map.html`](case_studies/coryell/outputs/terraguard_map.html)
+- Map: [`case_studies/coryell/outputs/aquaguard_map.html`](case_studies/coryell/outputs/aquaguard_map.html)
 - Data note and licence: [`data/coryell/README.md`](data/coryell/README.md).
 
 Full case notes: [`case_studies/README.md`](case_studies/README.md); platform contract:
@@ -117,7 +117,7 @@ Full case notes: [`case_studies/README.md`](case_studies/README.md); platform co
 | `app/` | **Main entry:** unified MapLibre evidence explorer (overview, four sites, compare, method) |
 | `app/data/` | Site registry, GeoJSON layers, raster overlays, metrics |
 | `docs/PLATFORM.md` | Platform architecture, data contract, rebuild and validation process |
-| `terraguard_dashboard.html` | Legacy tabbed dashboard (kept for reference) |
+| `aquaguard_dashboard.html` | Legacy tabbed dashboard (kept for reference) |
 | `run_dashboard.sh` | Local HTTP server helper (prints the `/app/` URL) |
 | `scripts/fetch_coryell.py` | Public Coryell ArcGIS vectors (no login) |
 | `scripts/build_platform_data.py` | One exporter for all four sites |
@@ -164,9 +164,9 @@ of local files.
 python scripts/fetch_coryell.py             # public ArcGIS vectors
 python case_studies/prepare_coryell.py      # 10 x 10 km case subset
 CASE=case_studies/coryell/case.json
-TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
-TERRAGUARD_CASE=$CASE python -m pipeline.model
-TERRAGUARD_CASE=$CASE python -m pipeline.make_map
+AQUAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+AQUAGUARD_CASE=$CASE python -m pipeline.model
+AQUAGUARD_CASE=$CASE python -m pipeline.make_map
 python scripts/build_platform_data.py       # export all four cases
 python scripts/check_platform.py            # contract and privacy checks
 ```
@@ -200,9 +200,9 @@ already generated; you do not need to rerun to view them.
 ```bash
 CASE=case_studies/aguascalientes/case.json
 
-TERRAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16
-TERRAGUARD_CASE=$CASE pixi run python -m pipeline.model
-TERRAGUARD_CASE=$CASE pixi run python -m pipeline.make_map
+AQUAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16
+AQUAGUARD_CASE=$CASE pixi run python -m pipeline.model
+AQUAGUARD_CASE=$CASE pixi run python -m pipeline.make_map
 ```
 
 Replace with `case_studies/calgary/case.json` or `case_studies/coryell/case.json`. The prepared
@@ -284,7 +284,7 @@ imagery, display-only, not calibrated gamma0.
 | `case_studies/*/outputs/validation.json` | Case model metrics + label AUC + placebo test |
 | `case_studies/coryell/` | Fourth case: `case.json`, network, labels, outputs, same pipeline |
 | `case_studies/*/outputs/hotspots.csv` | Case hotspots |
-| `case_studies/*/outputs/terraguard_map.html` | Legacy case interactive map |
+| `case_studies/*/outputs/aquaguard_map.html` | Legacy case interactive map |
 
 ---
 
@@ -297,7 +297,7 @@ imagery, display-only, not calibrated gamma0.
 - Calgary case data: City of Calgary Open Data (`w6h9-w33i`, `dpcu-jr23`).
 - Coryell data: Coryell City Water Supply District and its GIS consultant (no stated licence;
   bundled for the hackathon only).
-- Research review and implementation: TerraGuard / “Dancing with the SARs”.
+- Research review and implementation: AquaGuard / “Dancing with the SARs”.
 
 Prepared as a portable hand-off bundle. The main repository remains at
 `Apsie09/Dancing-With-The-SARs`; this folder is the self-contained copy.

@@ -393,7 +393,7 @@ osm = None
 for attempt in range(3):
     try:
         r = requests.get(OVERPASS, params={"data": OSM_QUERY},
-                         headers={"User-Agent": "TerraGuard-Research/0.1 (NASA Space Apps)"},
+                         headers={"User-Agent": "AquaGuard-Research/0.1 (NASA Space Apps)"},
                          timeout=240)
         if r.status_code == 200:
             osm = r.json()

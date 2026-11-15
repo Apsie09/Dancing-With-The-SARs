@@ -1,4 +1,4 @@
-"""Fetch the public Coryell City WSD vector layers used by the TerraGuard platform.
+"""Fetch the public Coryell City WSD vector layers used by the AquaGuard platform.
 
 Only the open ArcGIS query endpoints are used; no Earthdata login is needed.
 The source layers have **no stated licence** (see data/coryell/README.md), so

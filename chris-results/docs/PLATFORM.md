@@ -1,4 +1,4 @@
-# TerraGuard Evidence Explorer — platform notes
+# AquaGuard Evidence Explorer — platform notes
 
 This document describes the platform added inside `chris-results/` on the `test` branch:
 the single data contract, the MapLibre application, the Coryell case, and the checks that
@@ -15,7 +15,7 @@ platform replaces that as the main entry point:
 
 | Before | After |
 |---|---|
-| `terraguard_dashboard.html` with case tabs | `app/` — one MapLibre explorer with four sites, compare and method views |
+| `aquaguard_dashboard.html` with case tabs | `app/` — one MapLibre explorer with four sites, compare and method views |
 | each case map built by `pipeline/make_map.py` | one export contract (`app/data/`) consumed by one app |
 | no Coryell case | Coryell added as a normal fourth Sentinel-1 case: 72 summer repairs, 55 dates, same model and validation |
 | no cross-site comparison | compare view separates model skill from label ranking across all four sites |
@@ -42,7 +42,7 @@ The old dashboard and per-case Leaflet maps are kept as a **legacy appendix**; t
 - **Sensors:** Sentinel-1 RTC ascending relative orbit 34, **55 dates** (2025-01-07 to 2026-11-05);
   76 Sentinel-2 dates; 47 Landsat LST dates; ERA5 weather.
 - **Pipeline:** exactly the same modules and parameters as the other cases, selected by
-  `TERRAGUARD_CASE=case_studies/coryell/case.json`.
+  `AQUAGUARD_CASE=case_studies/coryell/case.json`.
 - **Model skill:** VV MAE 1.32 dB / R² **0.426**; NDMI MAE 0.113 / R² **0.505**.
 - **Label ranking:** AUC **0.548**, median percentile 59.1 on 72 repairs.
 - **Corridor test:** mean placebo p **0.024**, p95 placebo p **0.244**. The mean is nominally
@@ -113,9 +113,9 @@ python case_studies/prepare_coryell.py
 
 # 2. Run the same pipeline as the other cases
 CASE=case_studies/coryell/case.json
-TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
-TERRAGUARD_CASE=$CASE python -m pipeline.model
-TERRAGUARD_CASE=$CASE python -m pipeline.make_map
+AQUAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+AQUAGUARD_CASE=$CASE python -m pipeline.model
+AQUAGUARD_CASE=$CASE python -m pipeline.make_map
 
 # 3. Export every case to the app contract
 python scripts/build_platform_data.py
@@ -148,7 +148,7 @@ The platform is a continuation, not a replacement:
   processed data was not available in this bundle, so the app does not reproduce its risk model.
 - **From the Coryell NISAR viewer:** the MapLibre interaction patterns, time filtering and
   before/after idea. NISAR chips are not bundled because they need an Earthdata login.
-- **From the original TerraGuard pipeline:** the weather-normalised expected-condition method,
+- **From the original AquaGuard pipeline:** the weather-normalised expected-condition method,
   per-land-cover robust residuals, persistence, thermal cooling and corridor placebo tests.
 - **New here:** the unified contract, the four-site app, the evidence panel, the comparison view,
   the fourth Coryell case run through the same pipeline, and the reproducibility checks.

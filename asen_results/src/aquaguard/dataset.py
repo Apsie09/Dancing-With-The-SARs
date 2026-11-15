@@ -127,7 +127,7 @@ def run(cfg: Config) -> pd.DataFrame:
         "never_negative": "control rows are `unknown`, not negatives; verified_non_leak is never assigned",
     }
     t = pq.read_table(out)
-    pq.write_table(t.replace_schema_metadata({**(t.schema.metadata or {}), b"terraguard": json.dumps(meta).encode()}), out)
+    pq.write_table(t.replace_schema_metadata({**(t.schema.metadata or {}), b"aquaguard": json.dumps(meta).encode()}), out)
 
     u = gdf[gdf["q_usable"]]
     print(f"  rows: {len(gdf)} ({len(u)} usable) | sites: {gdf['site_id'].nunique()} "

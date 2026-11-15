@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import box
 
-from terraguard.catalog import annotate
-from terraguard.config import Config
-from terraguard.matching import categorize, incident_reference_time
+from aquaguard.catalog import annotate
+from aquaguard.config import Config
+from aquaguard.matching import categorize, incident_reference_time
 
 WINDOWS = {"pre_event": (-120, -21), "potential_event_window": (-14, 3), "post_event": (10, 120)}
 

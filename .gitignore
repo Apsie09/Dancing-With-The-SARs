@@ -7,7 +7,7 @@
 # asen_results pipeline outputs (4+ GB, regenerate with `pixi run ...` inside asen_results/)
 /asen_results/data/
 
-# TerraGuard outputs and data policy
+# AquaGuard outputs and data policy
 data/raw/*
 !data/raw/manifest.json
 !data/raw/nisar/

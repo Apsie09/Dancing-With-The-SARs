@@ -240,7 +240,7 @@ def run(cfg: Config) -> gpd.GeoDataFrame:
     meta = {"column_roles": COLUMN_ROLES, "cleaning_log": log,
             "source": cfg.section("incidents")["feature_service"], "fetched": str(date.today())}
     gdf.to_parquet(cfg.incidents_parquet, schema_version="1.0.0")
-    _attach_metadata(cfg.incidents_parquet, {"terraguard": json.dumps(meta)})
+    _attach_metadata(cfg.incidents_parquet, {"aquaguard": json.dumps(meta)})
     for k, v in log.items():
         print(f"  {k:32s} {v}")
     print(f"  clean dataset -> {report_file(cfg.incidents_parquet)}")

@@ -1,4 +1,4 @@
-# TerraGuard: data pipeline, decisions and results
+# AquaGuard: data pipeline, decisions and results
 
 _Status as of 2026-11-15 (updated 11:00 EET). NASA Space Apps Challenge 2026, "Dancing with the SARs"._
 
@@ -47,7 +47,7 @@ Facts we checked against the brief, and corrections:
 
 ## 3. What was built (stages)
 
-All code is in `src/terraguard/`. All parameters are in `config/pipeline.toml`. Everything runs through `pixi run <task>`.
+All code is in `src/aquaguard/`. All parameters are in `config/pipeline.toml`. Everything runs through `pixi run <task>`.
 
 | Stage | Task | Output | Size |
 |---|---|---|---|
