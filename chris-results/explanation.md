@@ -99,8 +99,9 @@ radar detection.
   repair-risk test, not a radar test.
 - Train: pre-2023 conditions → repairs in 2023–2024. Test: pre-2025 conditions → repairs in
   2025–2026.
-- Risk AUC **0.787**, average precision 0.511, top-10 % capture **28.1 %**, base rate 22.1 %;
-  recurrence baseline AUC 0.719.
+- Risk AUC **0.787**, average precision 0.511, top-10 % capture **28.1 %**, base rate 22.1 %.
+  The recurrence baseline has AUC 0.719 and top-10 % capture 29.1 %, so the model improves global
+  ranking but not top-decile capture; treat the ranking as modest.
 - Data note and licence: [`data/coryell/README.md`](data/coryell/README.md).
 
 Full case notes: [`case_studies/README.md`](case_studies/README.md); platform contract:

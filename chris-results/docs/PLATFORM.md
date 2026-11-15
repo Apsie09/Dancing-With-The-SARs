@@ -45,7 +45,9 @@ The old dashboard and per-case Leaflet maps are kept as a **legacy appendix**; t
 - **Train:** features before 2023-01-01 → target any repair in 2023–2024.
 - **Test:** features before 2025-01-01 → target any repair in 2025-01-01..2026-11-11.
 - **Results:** AUC **0.787**, average precision **0.511**, top-10 % capture **28.1 %** of repairs,
-  base rate **22.1 %** of pipes, transparent recurrence baseline AUC **0.719**.
+  base rate **22.1 %** of pipes. The transparent recurrence baseline has AUC **0.719** and top-10 %
+  capture **29.1 %**, so the model improves global ranking but not top-decile capture; treat the
+  ranking as modest.
 - **Map score:** model trained on 2023–24, applied to pre-2025 features; displayed as a percentile.
 - **Why it is different:** this is *infrastructure risk*, not a radar observation. The target is
   "a repair was recorded on this pipe in the next two years", not "a leak is visible now".
