@@ -1,0 +1,10 @@
+rule,detail
+Verified leak,"Record from a utility leak/break layer, leak report form or leak job (any kind of leak)."
+Not caused during work,"Dropped where the recorded cause says construction, contractor, dig-in, strike or cut."
+Gold,"A NISAR GCOV scene covering the point taken between the leak's report/found time and its repair, or within 25 hours before the repair."
+Why 25 hours,"In the 495 leaks with exact report and repair times (Wellington 417, Tuolumne 78), 80% had already been reported 25 hours before the repair. So a scene within 25 h of the repair caught an existing leak at least 80% of the time (more, since leaks start before they're reported). See window_derivation.csv."
+Silver,"Not gold, but a scene within 117 hours (about 5 days) before the repair: the 50% level in the same data."
+Date-only repairs,Calgary and Troy record dates only; their window is measured back from the start of the repair day so it is never too generous.
+Setting,"US: Census incorporated places, census-designated places and 2020 urban areas. NZ: Stats NZ Urban Rural 2023. Calgary: city. Rural = outside all of them."
+Scene conditions,"ERA5-Land via Open-Meteo, ~10 km grid. good = under 2 mm rain in 72 h and soil moisture at or below the 60th percentile; poor = 10+ mm in 72 h, 5+ mm in 24 h, or at/above the 85th percentile; fair = in between. Percentile against every hour Aug 2025–Nov 2026 in the same cell."
+Last rain,"Rain events = hours with 0.2 mm or more, joined when fewer than 6 dry hours separate them; reported for any size and for 2 mm or more."
