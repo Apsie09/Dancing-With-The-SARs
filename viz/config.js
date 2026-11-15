@@ -129,6 +129,20 @@ export function cog({ id, title, url, colorRamp, ...rest }) {
 }
 
 /**
+ * A single georeferenced image (PNG/JPG) stretched over four lon/lat corners
+ * [top-left, top-right, bottom-right, bottom-left]. The image must already be
+ * in Web Mercator (EPSG:3857) so it lines up. Works with python http.server.
+ * scripts/render_gcov_png.py writes such PNGs plus a JSON with the corners.
+ */
+export function image({ id, title, url, coordinates, ...rest }) {
+  return {
+    id, title, z: 'raster', opacity: 1, ...rest,
+    sources: { [id]: { type: 'image', url: new URL(url, window.location.href).href, coordinates } },
+    layers: [{ id, type: 'raster', source: id, paint: { 'raster-opacity': 1, 'raster-fade-duration': 0, 'raster-resampling': 'nearest' } }],
+  };
+}
+
+/**
  * GeoJSON overlay. `layers` are MapLibre style layers without `source`
  * (filled in automatically). `optional: true` means the file may not exist
  * yet: the layer is then listed as "not available" instead of failing.
@@ -177,6 +191,14 @@ const WORLDCOVER_LEGEND = [
   ['#006400', 'Tree cover'], ['#ffbb22', 'Shrubland'], ['#ffff4c', 'Grassland'], ['#f096ff', 'Cropland'],
   ['#fa0000', 'Built-up'], ['#b4b4b4', 'Bare / sparse'], ['#0064c8', 'Water'], ['#0096a0', 'Herbaceous wetland'],
 ];
+
+// District-wide NISAR images (scripts/render_gcov_png.py --downsample 2 --format webp).
+// All three share one grid, so one set of corners (from gcov_041D073_<date>_district.json).
+const DISTRICT_DATES = ['2026-08-28', '2026-09-09', '2026-09-21'];
+const DISTRICT_CORNERS = [[-97.90398322757241, 31.68611024477773], [-97.41230638527239, 31.68611024477773],
+  [-97.41230638527239, 31.33692130847318], [-97.90398322757241, 31.33692130847318]];
+/** Pass date (UTC) -> overlay id; slice mode shows the matching image. */
+export const PASS_OVERLAYS = Object.fromEntries(DISTRICT_DATES.map((d) => [d, `nisar-district-${d.replace(/-/g, '')}`]));
 
 // -------------------------------------------------------------- overlays ----
 // Listed top to bottom as they appear in the panel. Raster overlays draw under
@@ -246,6 +268,56 @@ export const OVERLAYS = [
         paint: { 'text-color': NISAR_DIR, 'text-halo-color': 'rgba(8,12,18,0.9)', 'text-halo-width': 1.3 } },
     ],
   }),
+  // --- NISAR GCOV, whole district, track 41 descending frame 73 ------------
+  // 20 m (3x3 boxcar at 10 m, then 2x2 average of linear power), false colour,
+  // made with scripts/subset_gcov.py + scripts/render_gcov_png.py (see README).
+  // Slice mode ("NISAR passes") switches these on for the matching pass date.
+  ...DISTRICT_DATES.map((d) => image({
+    id: `nisar-district-${d.replace(/-/g, '')}`,
+    title: `NISAR district ${d} (false colour, 20 m)`,
+    group: 'NISAR', visible: false, opacity: 0.85,
+    url: DATA + `nisar/gcov_041D073_${d.replace(/-/g, '')}_district_rgb.webp`,
+    coordinates: DISTRICT_CORNERS,
+    attribution: 'NISAR GCOV: NASA/JPL-Caltech, ISRO (ASF DAAC), P05023',
+    info: `NISAR GCOV ${d} (evening pass the day before, about 20:18 CDT), track 41 descending, frame 73, CRID P05023, whole district ` +
+      '(about 46 x 39 km) at 20 m. Red = HH (-22 to -3 dB), green = HV (-28 to -11 dB), blue = HH/HV ratio (3 to 12 dB); same stretch as the chips. ' +
+      'Data: NASA/JPL-Caltech, ISRO (ASF DAAC).',
+    legend: { type: 'fills', items: [['#ff3b3b', 'R: HH (surface)'], ['#3bff6a', 'G: HV (vegetation volume)'], ['#3b8bff', 'B: HH/HV ratio']] },
+  })),
+  // --- NISAR GCOV backscatter, track 41 descending frame 73, 2026-09-09 -----
+  // Riddle cluster subset only (10 m). Off by default: the district images
+  // above cover it (at 20 m) and the leak chips cover each leak at 10 m. Rendered by scripts/render_gcov_png.py from
+  // data/coryell/nisar/gcov_041D073_20260909_riddle.tif (3x3 boxcar, then dB).
+  // Corners and stretch ranges: data/coryell/nisar/gcov_041D073_20260909_riddle.json
+  ...(() => {
+    const corners = [[-97.5716333474374, 31.499715596324812], [-97.50818752163184, 31.499715596324812],
+      [-97.50818752163184, 31.430201276538096], [-97.5716333474374, 31.430201276538096]];
+    const base = DATA + 'nisar/gcov_041D073_20260909_riddle';
+    const attribution = 'NISAR GCOV: NASA/JPL-Caltech, ISRO (ASF DAAC), P05023';
+    const when = 'NISAR GCOV, 2026-09-09 (evening pass 2026-09-08 20:18 CDT), track 41 descending, frame 73, 10 m, Riddle cluster subset. Data: NASA/JPL-Caltech, ISRO (ASF DAAC), CRID P05023.';
+    return [
+      image({
+        id: 'nisar-rgb', title: 'NISAR Riddle 2026-09-09, 10 m (false colour)', group: 'NISAR', visible: false, opacity: 0.85,
+        url: base + '_rgb.png', coordinates: corners, attribution,
+        info: `${when} Red = HH (-22 to -3 dB), green = HV (-28 to -11 dB), blue = HH/HV ratio (3 to 12 dB). ` +
+          'Purple/blue: smooth or bare ground (strong HH, weak HV). Green/yellow: trees and shrubs (volume scattering lifts HV). ' +
+          'Bright pink/white: buildings, fences and other hard edges. Wetter soil raises HH more than HV.',
+        legend: { type: 'fills', items: [['#ff3b3b', 'R: HH (surface)'], ['#3bff6a', 'G: HV (vegetation volume)'], ['#3b8bff', 'B: HH/HV ratio']] },
+      }),
+      image({
+        id: 'nisar-hh', title: 'NISAR Riddle 2026-09-09, 10 m (HH, magma)', group: 'NISAR', visible: false, opacity: 0.85,
+        url: base + '_hh.png', coordinates: corners, attribution,
+        info: `${when} Co-polarized backscatter; most sensitive to soil moisture and surface roughness.`,
+        legend: { type: 'ramp', colors: ['#000004', '#4f127b', '#b5367a', '#fb8761', '#fcfdbf'], labels: ['-22 dB', '-3 dB'] },
+      }),
+      image({
+        id: 'nisar-hv', title: 'NISAR Riddle 2026-09-09, 10 m (HV, viridis)', group: 'NISAR', visible: false, opacity: 0.85,
+        url: base + '_hv.png', coordinates: corners, attribution,
+        info: `${when} Cross-polarized backscatter; mostly vegetation volume.`,
+        legend: { type: 'ramp', colors: ['#440154', '#3b528b', '#21918c', '#5ec962', '#fde725'], labels: ['-28 dB', '-11 dB'] },
+      }),
+    ];
+  })(),
   // --- Example NISAR raster layers. Uncomment and point at your file. -------
   // xyz({
   //   id: 'nisar-hh', title: 'NISAR GCOV HH (dB)', group: 'NISAR', visible: true, opacity: 0.8,

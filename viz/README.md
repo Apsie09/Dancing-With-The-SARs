@@ -8,6 +8,37 @@ radar layers.
 Plain HTML/CSS/JS with [MapLibre GL JS](https://maplibre.org/) 4.7.1 from a CDN.
 No build step and nothing to install.
 
+## Get the data first
+
+`data/coryell/` is **git-ignored** (only its `README.md`, which documents the
+sources, fields and licence, is tracked). After cloning, rebuild it with:
+
+```sh
+# from the repo root
+python scripts/fetch_coryell_data.py                         # everything
+python scripts/fetch_coryell_data.py --steps vectors,footprints   # no login, < 1 min
+```
+
+| Step | Makes | Needs | Time |
+|---|---|---|---|
+| `vectors` | `leak_survey.geojson`/`.csv`, `waterlines.geojson`, `pressure_zones.geojson` (district consultant's public ArcGIS layers) | nothing | seconds |
+| `footprints` | `nisar_gcov_footprints.geojson` (NISAR GCOV frames over the district, from the ASF archive) | `asf_search`, `shapely` | seconds |
+| `chips` | `nisar/acquisitions_041D073.json`, `nisar/leak_chips.json`, `nisar/chips/*.png` (runs `scripts/make_leak_chips.py`) | Earthdata login | ~5-10 min, ~1.4 GB transfer |
+| `images` | district images for 08-28 / 09-09 / 09-21 and the Riddle subset (runs `subset_gcov.py` + `render_gcov_png.py`) | Earthdata login, `chips` step first | ~4 min and ~180 MB per date |
+
+Python packages: `numpy requests shapely asf_search` for the first two steps,
+plus `h5py fsspec aiohttp pyproj rasterio` for the NISAR steps. The NISAR
+steps read only the needed pieces of each 7 GB granule remotely; they need a
+free Earthdata login (<https://urs.earthdata.nasa.gov/>) in `~/.netrc`
+(`C:/Users/<you>/.netrc` on Windows):
+
+```
+machine urs.earthdata.nasa.gov login <username> password <password>
+```
+
+Without the NISAR steps the map still works: leaks, pipes, zones and frame
+footprints show; the NISAR passes tab and radar layers say what is missing.
+
 ## Run it
 
 Browsers block `fetch()` of local files, so opening `index.html` by
@@ -45,7 +76,82 @@ layers and the MapLibre library.
 - **Basemaps and overlays** with legends and opacity sliders.
 - **NISAR frames**: click a frame to see its track, direction, polarization
   and acquisition dates; the dates are also marked on the time histogram.
+- **NISAR passes** tab (slice mode) and the **before/after radar viewer**:
+  see the next section.
 - Narrow screens get a slide-out panel.
+
+## NISAR passes (slice mode) and the before/after viewer
+
+The **NISAR passes** tab steps through the 24 passes of stack `041_D_073`
+(track 41 descending, frame 73, CRID P05023, 2025-12-31 to 2026-10-15) and
+shows which leaks were repaired shortly after each one.
+
+- **Prev / Next** buttons, the **←/→ keys**, or a click on a date in the
+  strip. Each date shows how many leaks fall in the current window (a dotted
+  mark flags the 2026-07-27 to 08-10 data gap). On entering, the most recent
+  pass with natural leaks in the window is selected.
+- **Days after the pass**: a two-handle slider from 0 to 12 days (default
+  0-6). Day *n* means repaired between *n* x 24 h and (*n*+1) x 24 h after
+  the acquisition start time (about 01:18 UTC, which is 20:18 CDT / 19:18 CST
+  the evening before the UTC date in the file name).
+- **Also show leaks repaired up to N days before the pass**: hollow dots (on
+  by default, N = 3). Their "after" chip is the current pass.
+- **Natural leaks only** (default) and **pipes ≥ 4″ only**. All other leaks
+  are grey dots (hide them with the "grey dots" option in the Leaks section).
+- **District radar image of this pass**: if a district-wide image exists for
+  the pass date (2026-08-28, 09-09, 09-21) it is switched on; for other dates
+  nothing is shown and the chips are the radar view.
+- The **list** under the controls has every leak in the window, sorted by
+  time after the pass: offset, repair time (Central), pipe size, parsed loss,
+  and how many of its 3 chips exist. Click a row (or a dot on the map) to
+  select the leak, fly to it and open the viewer.
+
+**Before/after viewer** (also from the "Radar before / after" button in any
+leak popup of the NISAR window):
+
+- Three 1.2 km chips at 10 m, side by side: **baseline** (the pass before
+  "before"), **before** (last pass at or before the repair time) and
+  **after** (first pass after it), each with its date and its time relative
+  to the repair. The leak is marked with a 30 m ring (the stats disc), plus
+  dashed 100 m and 300 m rings (the background annulus). Chips are north-up
+  in the UTM grid.
+- **False colour / HH / HV** toggle with a fixed, shared stretch (HH -22 to
+  -3 dB, HV -28 to -11 dB, HH/HV 3 to 12 dB; the same as the district images
+  and `scripts/render_gcov_png.py`).
+- **On map: Off / Baseline / Before / After** puts that chip on the map at
+  its true location (dashed square = chip footprint), with an opacity slider
+  and **Blink**, which alternates before and after.
+- **Stats (exploratory)**: mean gamma-0 within 30 m of the leak and in a
+  100-300 m annulus, their difference (contrast), and the before − baseline
+  and after − before changes. Speckle on a 30 m disc is about ±1 dB; regional
+  wetting moves the disc and the annulus together (09-21 → 10-03: background
+  HH +2.5 dB median), so prefer the contrast change.
+- `–` minimises the viewer; `×` or Esc closes it.
+- The popup's privacy rules still apply: the viewer shows only the ObjectId,
+  repair time, cause, pipe size, parsed loss and zone.
+
+Leaks within 200 m of each other share one chip footprint (a "site"), so
+their marker is not always exactly in the centre.
+
+### Regenerating the chips and district images
+
+```sh
+# chips + manifest (resumable: raw chips are cached as .npz in --cache-dir)
+python scripts/make_leak_chips.py --cache-dir <scratch dir> --granules-csv <gcov_granules.csv> --workers 6
+python scripts/make_leak_chips.py --cache-dir <scratch dir> --render-only     # re-render, no network
+python scripts/make_leak_chips.py --cache-dir <scratch dir> --dates 2026-10-03   # refetch one pass
+# district image for one pass: subset (about 180 MB transfer, 4 min), then render
+python scripts/subset_gcov.py <granule .h5 URL> district.tif -97.900 31.342 -97.418 31.681
+python scripts/render_gcov_png.py district.tif --out-dir data/coryell/nisar --boxcar 3 \
+  --downsample 2 --products rgb --format webp --quality 85
+```
+
+Without `--granules-csv`, `make_leak_chips.py` reuses
+`data/coryell/nisar/acquisitions_041D073.json` (or queries the ASF search
+API). Earthdata login comes from `~/.netrc`. A full run reads 24 granules
+(703 chips) in about 6 minutes with 6 workers and transfers about 1.4 GB.
+To show a district image for another pass, render it and add its date to
+`DISTRICT_DATES` in `config.js`.
 
 ## Privacy rules (built in)
 
@@ -84,6 +190,9 @@ CARTO's dark basemap was tried first, but it now needs an API key.
 | Leaks | `data/coryell/leak_survey.geojson`, CCWSD Survey123 layer (see `data/coryell/README.md`) | No licence stated; credit the district |
 | Pipe network | `data/coryell/waterlines.geojson`, 918 lines from the consultant layer `CCWSDWaterline2026` (Sept 2026, the newest and most complete copy). Width and colour by diameter; click for size, material, class, depth, install year, length | As above (district / OEI GIS) |
 | Pressure zones | `data/coryell/pressure_zones.geojson`, 7 polygons (`CCWSD_Leak_Density_WFL1` layer 19). Click for area and leak count / density under the current filters | As above |
+| NISAR district images | `data/coryell/nisar/gcov_041D073_{20260828,20260909,20260921}_district_rgb.webp`: whole district (about 46 x 39 km), 20 m, false colour (HH, HV, HH/HV). Off in Explore; slice mode shows the one matching the pass | NASA/JPL-Caltech, ISRO (ASF DAAC), CRID P05023 |
+| NISAR Riddle subset | `data/coryell/nisar/gcov_041D073_20260909_riddle_*.png`, 10 m, off by default | As above |
+| NISAR leak chips | `data/coryell/nisar/chips/*.png` + `leak_chips.json`, shown by the viewer | As above |
 | NISAR GCOV frames | `data/coryell/nisar_gcov_footprints.geojson` (6 frames, made by another script in this repo). Orange = ascending, pink = descending | NASA/JPL-Caltech, ISRO; footprints from CMR / ASF DAAC |
 | Hillshade | USGS The National Map `USGSShadedReliefOnly` (3DEP) | Public domain |
 | Land cover, NLCD 2021 (30 m) | USGS/MRLC WMS `NLCD_2021_Land_Cover_L48` (`www.mrlc.gov/geoserver`). Separates pasture/hay, grassland, crops, shrub and forest | Public domain |
@@ -109,6 +218,7 @@ Attribution for the visible layers is shown in the map's bottom-right corner
 | `leaks.js` | Leak parsing (sizes, free-text water loss), privacy rules, filters, colour schemes |
 | `graticule.js` | Adaptive lat/lon grid and the UTM conversion for the cursor readout |
 | `app.js` | Map, UI and interaction |
+| `slice.js` | NISAR passes (slice mode) and the before/after chip viewer |
 
 ## Adding a NISAR layer
 
@@ -117,7 +227,28 @@ helper. The panel row, toggle, opacity slider, legend, attribution and drawing
 order come for free. Rasters draw under the pipes and leaks; vector layers
 draw above rasters. Within a group, earlier entries draw on top.
 
-**1. XYZ tiles** (simplest for a demo). Reproject the GCOV band to Web
+**0. A single false-colour image (what the map uses now).** A pre-rendered
+image stretched over its corners is the simplest option and works with
+`python -m http.server`. The `image()` helper does this. The district images
+(`nisar-district-YYYYMMDD`, 20 m WebP, see "Regenerating" above) are made
+this way. The older Riddle-only layers (`nisar-rgb`, `nisar-hh`, `nisar-hv`:
+track 41 descending frame 73, 2026-09-09, 10 m, now off by default) were
+made with:
+
+```sh
+python scripts/render_gcov_png.py data/coryell/nisar/gcov_041D073_20260909_riddle.tif \
+  --out-dir data/coryell/nisar --boxcar 3
+```
+
+The script boxcar-filters the linear power, converts to dB, reprojects to
+EPSG:3857, and writes `<stem>_rgb.png` (R = HH, G = HV, B = HH/HV ratio),
+`<stem>_hh.png` (magma), `<stem>_hv.png` (viridis) and `<stem>.json`, which
+holds the corner coordinates to paste into `config.js`. Display ranges are
+fixed (HH -22..-3 dB, HV -28..-11 dB, ratio 3..12 dB), so images from
+different dates render with comparable colours. To add another date, subset
+it the same way, run the script, and copy one of the `image({...})` entries.
+
+**1. XYZ tiles** (better for large areas). Reproject the GCOV band to Web
 Mercator, scale it to 8-bit, and cut tiles:
 
 ```sh

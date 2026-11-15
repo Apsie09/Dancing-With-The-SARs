@@ -20,3 +20,7 @@ outputs/scratch/
 __pycache__/
 .pytest_cache/
 *.pyc
+
+# Coryell data: rebuilt by scripts/fetch_coryell_data.py (see viz/README.md)
+/data/coryell/*
+!/data/coryell/README.md

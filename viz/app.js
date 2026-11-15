@@ -1,5 +1,6 @@
 // Coryell City WSD leak map: map setup, layers, UI and interaction.
-import { MAP_DEFAULTS, BASEMAPS, OVERLAYS } from './config.js';
+import { MAP_DEFAULTS, BASEMAPS, OVERLAYS, PASS_OVERLAYS } from './config.js';
+import { initSlice } from './slice.js';
 import {
   LEAKS_URL, NISAR_START, T0, T1, DAY, SIZES, CAUSES, COLOR_MODES,
   prepareLeaks, makeFilter, passesAttr, passesTime, colorExpr, radiusExpr,
@@ -33,7 +34,9 @@ const state = {
   playing: null,
   overlayData: {},       // id -> FeatureCollection (for popups / counts)
   overlayOk: {},         // id -> true | false (optional layers that failed)
+  view: 'explore',       // explore | slice (NISAR passes)
 };
+let slice = null;        // slice mode + chip viewer (slice.js)
 
 // -------------------------------------------------------------------- map ---
 const hasHash = /map=/.test(location.hash);
@@ -103,6 +106,7 @@ map.on('load', async () => {
     return;
   }
   addLeakLayers();
+  slice = initSlice({ map, state, renderStats, renderLegend, passOverlays: PASS_OVERLAYS, setOverlayVisibleById });
   buildLeakUI();
   applyFilter();
   setupInteraction();
@@ -135,7 +139,8 @@ function addOverlays() {
     for (const [sid, src] of Object.entries(o.sources)) {
       const s = { ...src };
       if (s.type === 'geojson') s.data = { type: 'FeatureCollection', features: [] };
-      if (o.attribution && !s.attribution) s.attribution = o.attribution;
+      // Image sources reject an `attribution` property; their credit goes in the layer info text.
+      if (o.attribution && !s.attribution && s.type !== 'image') s.attribution = o.attribution;
       map.addSource(sid, s);
     }
     for (const l of o.layers) {
@@ -176,6 +181,14 @@ function setOverlayVisible(o, v) {
   for (const l of o.layers) map.setLayoutProperty(l.id, 'visibility', v ? 'visible' : 'none');
 }
 
+function setOverlayVisibleById(id, v) {
+  const o = OVERLAYS.find((x) => x.id === id);
+  if (!o || o.visible === v) return;
+  setOverlayVisible(o, v);
+  const row = document.getElementById(`ov-${o.id}`);
+  if (row) { $('input[type=checkbox]', row).checked = v; row.classList.toggle('open', v); }
+}
+
 function setOverlayOpacity(o, k) {
   o.opacity = k;
   for (const l of o.layers) {
@@ -195,6 +208,17 @@ function addLeakLayers() {
       'circle-color': '#dfe5ea', 'circle-opacity': 0.45,
       'circle-stroke-color': 'rgba(10,14,20,0.6)', 'circle-stroke-width': 0.5,
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 1.8, 11, 2.6, 14, 4.5],
+    } });
+
+  // Slice mode: outline of the selected leak's chip, and leaks repaired just before the pass (hollow).
+  map.addSource('chip-foot', { type: 'geojson', data: empty });
+  map.addLayer({ id: 'chip-foot', type: 'line', source: 'chip-foot',
+    paint: { 'line-color': '#ffffff', 'line-width': 1.4, 'line-opacity': 0.8, 'line-dasharray': [3, 2] } });
+  map.addSource('slice-before', { type: 'geojson', data: empty });
+  map.addLayer({ id: 'slice-before-c', type: 'circle', source: 'slice-before',
+    paint: {
+      'circle-color': 'rgba(0,0,0,0.25)', 'circle-radius': radiusExpr(state.sizeBy),
+      'circle-stroke-color': colorExpr(state.color), 'circle-stroke-width': 2.2, 'circle-stroke-opacity': 0.95,
     } });
 
   map.addLayer({ id: 'leaks-heat', type: 'heatmap', source: 'leaks', maxzoom: 16,
@@ -233,6 +257,10 @@ function addLeakLayers() {
       'circle-color': colorExpr(state.color), 'circle-radius': radiusExpr(state.sizeBy),
       'circle-stroke-color': '#0b0f14', 'circle-stroke-width': 0.9,
     } });
+  map.addSource('leak-sel', { type: 'geojson', data: empty });
+  map.addLayer({ id: 'leak-sel', type: 'circle', source: 'leak-sel',
+    paint: { 'circle-color': 'rgba(0,0,0,0)', 'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 9, 14, 14, 17, 18],
+      'circle-stroke-color': '#ffffff', 'circle-stroke-width': 2.5 } });
 }
 
 const MODE_LAYERS = {
@@ -254,6 +282,8 @@ function applyStyle() {
     map.setPaintProperty(id, 'circle-color', colorExpr(state.color));
     map.setPaintProperty(id, 'circle-radius', radiusExpr(state.sizeBy));
   }
+  map.setPaintProperty('slice-before-c', 'circle-stroke-color', colorExpr(state.color));
+  map.setPaintProperty('slice-before-c', 'circle-radius', radiusExpr(state.sizeBy));
   map.setPaintProperty('leaks-heat', 'heatmap-weight', state.sizeBy === 'loss'
     ? ['case', ['<', ['get', 'gpm'], 0], 0.5, ['min', 3, ['/', ['ln', ['+', 1, ['get', 'gpm']]], 2.5]]]
     : 1);
@@ -261,6 +291,7 @@ function applyStyle() {
 }
 
 function applyFilter() {
+  if (state.view === 'slice') { slice.apply(); return; }
   const f = state.filter;
   const shown = [], out = [], attrOnly = [];
   for (const ft of state.leaks) {
@@ -283,7 +314,20 @@ const sliderMax = Math.round((T1 - T0) / DAY);
 const dayToT = (d) => T0 + d * DAY;
 const tToDay = (t) => Math.round((t - T0) / DAY);
 
+function setView(v) {
+  if (state.view === v) return;
+  stopPlay();
+  state.view = v;
+  document.body.classList.toggle('view-slice', v === 'slice');
+  document.querySelectorAll('#tabs button').forEach((b) => b.classList.toggle('on', b.dataset.view === v));
+  // Arrow keys step through passes in slice mode instead of panning the map.
+  if (v === 'slice') { map.keyboard.disable(); slice.enter(); }
+  else { map.keyboard.enable(); map.keyboard.disableRotation(); slice.exit(); applyFilter(); }
+}
+
 function buildLeakUI() {
+  document.querySelectorAll('#tabs button').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+
   // Display mode (segmented control)
   for (const b of document.querySelectorAll('#seg-mode button')) {
     b.addEventListener('click', () => {
@@ -620,6 +664,7 @@ function leakPopup(p, lngLat) {
     <div class="pp-head"><span class="lg-dot" style="background:${leakColor(p)}"></span><b>Leak repair</b>${p.t >= NISAR_START ? '<span class="badge">NISAR window</span>' : ''}</div>
     <div class="pp-time">${esc(fmtDateCT(p.t))}</div>
     <dl>${rows.map(([k, v, raw]) => `<dt>${k}</dt><dd>${raw ? v : esc(v)}</dd>`).join('')}</dl>
+    ${slice?.hasChips(p.id) ? `<button type="button" class="pill pp-chips" data-viewer="${p.id}">Radar before / after</button>` : ''}
     <div class="pp-foot">ObjectId ${p.id} · local time (US Central)</div>
   </div>`;
 }
@@ -690,7 +735,7 @@ function setupInteraction() {
   const overlayClick = OVERLAYS.filter((o) => o.popup).map((o) => ({
     o, layers: o.layers.filter((l) => l.type !== 'symbol').map((l) => l.id),
   }));
-  const leakLayers = ['leaks-circle', 'cl-point'];
+  const leakLayers = ['leaks-circle', 'cl-point', 'slice-before-c'];
   const visibleLayers = (ids) => ids.filter((id) => map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none');
 
   let hoverId = null;
@@ -734,6 +779,10 @@ function setupInteraction() {
       popupHover.remove();
       const src = state.byId.get(leak.properties.id);
       popupClick.setLngLat(src.geometry.coordinates).setHTML(leakPopup(src.properties, src.geometry.coordinates)).addTo(map);
+      if (state.view === 'slice') {
+        slice.select(src.id);
+        if (window.innerWidth <= 820) popupClick.remove(); // the viewer takes the screen on phones
+      }
       return;
     }
     const cl = map.queryRenderedFeatures(box, { layers: visibleLayers(['cl-circle']) })[0];
@@ -777,8 +826,19 @@ $('#panel-toggle').addEventListener('click', () => document.body.classList.toggl
 $('#panel-close').addEventListener('click', () => document.body.classList.remove('panel-open'));
 document.querySelectorAll('.sec > h2').forEach((h) => h.addEventListener('click', () => h.parentElement.classList.toggle('collapsed')));
 window.addEventListener('keydown', (e) => {
-  if (e.key === ' ' && e.target === document.body) { e.preventDefault(); $('#btn-play').click(); }
+  const typing = e.target.closest?.('input, select, textarea');
+  if (e.key === ' ' && e.target === document.body && state.view === 'explore') { e.preventDefault(); $('#btn-play').click(); }
+  if (state.view === 'slice' && !typing && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+    e.preventDefault();
+    slice.step(e.key === 'ArrowLeft' ? -1 : 1);
+  }
+  if (e.key === 'Escape' && !typing) slice?.closeViewer();
+});
+// "Radar before / after" button in the leak popup.
+document.addEventListener('click', (e) => {
+  const b = e.target.closest?.('[data-viewer]');
+  if (b && slice) { popupClick.remove(); slice.select(+b.dataset.viewer); }
 });
 
 // For debugging in the console.
-window.leakMap = { map, state, applyFilter, setRange };
+window.leakMap = { map, state, applyFilter, setRange, setView, get slice() { return slice; } };

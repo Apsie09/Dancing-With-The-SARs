@@ -10,6 +10,12 @@ This is our main ground-truth candidate for leaks **outside city limits**: a
 rural network in open pasture, scrub and farmland, with exact coordinates and
 records inside the NISAR data window.
 
+> **The data files are not in git.** This folder is git-ignored except for
+> this README. Rebuild everything listed below with
+> `python scripts/fetch_coryell_data.py` (see [`viz/README.md`](../../viz/README.md),
+> "Get the data first"). The full NISAR district stack goes to `nisar/district/`
+> via `scripts/download_nisar_coryell.py`.
+
 ## Source
 
 | | |
@@ -29,6 +35,13 @@ records inside the NISAR data window.
 | `leak_survey.csv` | Same records, dates converted to ISO 8601 UTC, plus `longitude` / `latitude` (WGS 84) columns. |
 | `waterlines.geojson` | District pipe network, 918 polylines (WGS 84): `Size` (text, e.g. `1.5"`), `Diameter` (inches, blank on 32 lines), `Material`, `Class`, `Depth`, `Year`, `LengthMile`, `MapSource` (remarks). From `CCWSDWaterline2026` layer 16 "Waterline" (last edited 2026-09-10; the most recent and most complete of the three copies on the host, vs 916 lines in `CCWSD_Waterlines_May_2026` and 886 in `CCWSD_Leak_Density_WFL1` layer 16). Downloaded 2026-11-14. The `Notes` field was **dropped** because its only two non-blank values held staff e-mail addresses and a person's name; everything else is unmodified. Class, depth and year are blank on about 99% of lines; material is PVC on 95%. |
 | `pressure_zones.geojson` | The 7 pressure zones ("planes") as polygons: `Name`, `SquareMiles`. From `CCWSD_Leak_Density_WFL1` layer 19 "Coryell Pressure Planes", unmodified, downloaded 2026-11-14. Leak records also name zones not drawn here (Jonesboro Pancake, Turnersville). |
+| `nisar_gcov_footprints.geojson` | NISAR GCOV frame footprints over the district, one polygon per stack (track, direction, frame, dates, CRIDs). See `research/NISAR coverage - Coryell.md`. |
+| `nisar/gcov_041D073_20260909_riddle.tif` | NISAR GCOV subset, track 41 descending frame 73, 2026-09-09 (CRID P05023), Riddle cluster only (lon -97.571 to -97.509, lat 31.430 to 31.500). UTM 14N, 10 m, float32 bands: HHHH and HVHV gamma-0 **linear power**, numberOfLooks. Read remotely from the granule without downloading it (recipe in the coverage note). |
+| `nisar/gcov_041D073_20260909_riddle_{rgb,hh,hv}.png`, `.json` | Web Mercator false-colour renderings of that subset for the map (RGB = HH, HV, HH/HV ratio; HH magma; HV viridis), plus corner coordinates and stretch ranges. Made with `scripts/render_gcov_png.py`. |
+| `nisar/acquisitions_041D073.json` | The 24 passes of stack 041_D_073 used by the map (P05023, 2025-12-31 to 2026-10-15; `_002` where two versions exist): date, UTC start time, epoch ms, granule name, CRID, size, download URL. Made by `scripts/make_leak_chips.py`. |
+| `nisar/leak_chips.json` | Manifest of the leak chips: per leak (ObjectId, repair time, cause, parsed pipe size and loss, lon/lat, site) the **baseline / before / after** passes with day offsets (`days` = acquisition − repair in days; negative = pass before the repair), chip name, leak pixel position in the chip, and **exploratory** stats (mean HH/HV dB within 30 m vs a 100-300 m annulus, contrast, changes between passes); per chip its file, date and lon/lat corners; plus the encoding and conventions. No staff names, notes or raw loss text. |
+| `nisar/chips/s<seed>_<yyyymmdd>.png` | 703 chips, 120 x 120 px (1.2 km at 10 m) in the UTM 14N grid, north-up, one per site and pass. R = HH dB (−25..0 → 0..255), G = HV dB (−32..−7), B = 255 valid / 0 invalid, after a 3x3 boxcar on linear gamma-0. Leaks within 200 m share a site, named after its seed leak's ObjectId. Read remotely, no full downloads (`scripts/make_leak_chips.py`). |
+| `nisar/gcov_041D073_<date>_district_rgb.webp`, `.json` | Whole-district false-colour images (lon −97.904 to −97.412, lat 31.337 to 31.686) for 2026-08-28, 09-09 and 09-21: 20 m (3x3 boxcar at 10 m, then 2x2 average of linear power), Web Mercator, lossy WebP, same stretch as the chips. The JSON has the corners and value percentiles. Made with `scripts/subset_gcov.py` + `scripts/render_gcov_png.py`. |
 
 Pipes: `https://services9.arcgis.com/AIKMFC1P7gpNycCX/arcgis/rest/services/CCWSDWaterline2026/FeatureServer/16/query?where=1=1&outFields=*&outSR=4326&f=geojson`;
 zones: same host, `CCWSD_Leak_Density_WFL1/FeatureServer/19/query?...` (both fit in one page). Same licence
