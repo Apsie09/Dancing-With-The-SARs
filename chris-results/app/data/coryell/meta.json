@@ -1,0 +1,32 @@
+{
+  "id": "coryell",
+  "name": "Coryell City WSD",
+  "subtitle": "Rural water district \u00b7 Texas, USA",
+  "country": "United States",
+  "center": [
+    -97.66,
+    31.5
+  ],
+  "zoom": 9.4,
+  "kind": "vector",
+  "network_file": "network.geojson",
+  "events_file": "events.geojson",
+  "zones_file": "zones.geojson",
+  "stats_file": "stats.json",
+  "timeline": {
+    "field": "date",
+    "min": "2019-09-30",
+    "max": "2026-11-11"
+  },
+  "sources": [
+    "Coryell City WSD leak survey (ArcGIS, no stated licence)",
+    "CCWSD waterline network (ArcGIS)",
+    "CCWSD pressure planes (ArcGIS)"
+  ],
+  "caveats": [
+    "Coryell is a repair-history test, not a radar detection test.",
+    "The source layers have no stated open licence; bundled for this hackathon only.",
+    "Repair coordinates are where the crew logged the point, accuracy a few to tens of metres.",
+    "NISAR chips are not bundled because they need an Earthdata login."
+  ]
+}

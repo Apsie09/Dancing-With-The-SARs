@@ -9,3 +9,7 @@ case_studies/*/data/raw/
 case_studies/*/data/interim/
 __pycache__/
 *.pyc
+
+# Coryell source vectors are fetched, not committed (no stated licence; raw fields include staff names).
+data/coryell/*.geojson
+data/coryell/*.csv

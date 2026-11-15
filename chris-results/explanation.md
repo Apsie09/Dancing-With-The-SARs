@@ -1,20 +1,24 @@
 # TerraGuard — `chris-results` bundle
 
-This folder is a **self-contained, shareable copy** of the TerraGuard work: code, docs, the three
-case maps, validation metrics, small data layers and the tabbed dashboard. It is meant to be opened
-by someone who has never seen the repository.
+This folder is a **self-contained, shareable copy** of the TerraGuard work: code, docs, four
+case datasets, validation metrics, small data layers and one **interactive evidence explorer**.
+It is meant to be opened by someone who has never seen the repository.
 
-**Start here:** run the dashboard, then read the results and caveats.
+**Start here:** run the app, then read the results and caveats.
 
 ```bash
 cd chris-results
 ./run_dashboard.sh
-# open http://127.0.0.1:8766/terraguard_dashboard.html
+# open http://127.0.0.1:8766/app/
 ```
 
-No Python environment is needed just to view the maps — the HTML files are self-contained
-(base64 raster overlays). The dashboard and maps load Leaflet/Esri tiles from the internet; the
-data overlays themselves are embedded.
+No Python environment is needed just to view the app — the maps are rendered in the browser from
+pre-exported GeoJSON and PNG overlays. The app loads MapLibre and the basemap tiles from the
+internet; the data itself is local.
+
+> **Test branch:** the unified platform lives in `app/`. The older
+> `terraguard_dashboard.html` and per-case Leaflet maps are kept as a legacy appendix.
+> Platform architecture, data contract and rebuild steps: [`docs/PLATFORM.md`](docs/PLATFORM.md).
 
 ---
 
@@ -43,18 +47,23 @@ The challenge-facing design is in [`docs/SOLUTION.md`](docs/SOLUTION.md).
 
 ---
 
-## 2. The three cases
+## 2. The four cases
 
-| Tab | Case | Labels | S1 dates | VV R² | NDMI R² | Label AUC | Corridor p | Verdict |
+| Site | Case | Labels | S1 dates | VV R² | NDMI R² | Final test | Corridor p95 | Verdict |
 |---|---|---|---:|---:|---:|---:|---:|---|
-| Bulgaria | Elin Pelin rural water main | — | 194 | 0.611 | 0.471 | — | 0.89 | unlabelled demo; negative corridor test |
-| Aguascalientes | 5×5 km urban utility network | 50 repairs | 28 | 0.436 | 0.294 | **0.526** | 1.00 | weak positive, not significant |
-| Calgary | 10×10 km trunk water network | 48 breaks | 50 | 0.650 | 0.249 | **0.524** | 0.95 | weak positive, not significant |
+| Bulgaria | Elin Pelin rural water main | — | 194 | 0.611 | 0.471 | — | 0.89 (p95) | unlabelled demo; negative corridor test |
+| Aguascalientes | 5×5 km urban utility network | 50 repairs | 28 | 0.436 | 0.294 | AUC **0.526** | 1.00 | weak positive, not significant |
+| Calgary | 10×10 km trunk water network | 48 breaks | 50 | 0.650 | 0.249 | AUC **0.524** | 0.95 (p95) | weak positive, not significant |
+| Coryell | rural water district, Texas | 1,690 repairs | — | — | — | risk AUC **0.787** | — | repair-history ranking, not radar |
 
 **The honest headline:** the expected-condition models are skilful (VV R² 0.44–0.65, NDMI R²
 0.25–0.47), but the final leak score is only weakly associated with historical repair/break
 locations (AUC ≈ 0.52–0.53, close to random). The pipeline is a triage tool, not a detector.
 This is consistent with the published literature and with the unlabelled Bulgarian result.
+
+The Coryell result is different in kind: it ranks **pipes** by repair history and attributes, with a
+temporal holdout. It is the strongest ranking in the bundle, but it is infrastructure risk, not a
+radar detection.
 
 ### Case details
 
@@ -82,7 +91,19 @@ This is consistent with the published literature and with the unlabelled Bulgari
 - Label AUC **0.524**, median percentile 51.7; corridor p 0.90 mean / 0.95 p95 (not significant).
 - Map: [`case_studies/calgary/outputs/terraguard_map.html`](case_studies/calgary/outputs/terraguard_map.html)
 
-Full case notes: [`case_studies/README.md`](case_studies/README.md).
+**Coryell City WSD, Texas**
+- Rural district around Gatesville; 918 pipe features, 7 pressure zones, EPSG:32614.
+- 1,690 usable repair records (2019-09-30 to 2026-11-11); 322 in the NISAR era.
+- **No NISAR chips** are bundled (they need an Earthdata login). The result is a temporal
+  repair-risk test, not a radar test.
+- Train: pre-2023 conditions → repairs in 2023–2024. Test: pre-2025 conditions → repairs in
+  2025–2026.
+- Risk AUC **0.787**, average precision 0.511, top-10 % capture **28.1 %**, base rate 22.1 %;
+  recurrence baseline AUC 0.719.
+- Data note and licence: [`data/coryell/README.md`](data/coryell/README.md).
+
+Full case notes: [`case_studies/README.md`](case_studies/README.md); platform contract:
+[`docs/PLATFORM.md`](docs/PLATFORM.md).
 
 ---
 
@@ -90,15 +111,21 @@ Full case notes: [`case_studies/README.md`](case_studies/README.md).
 
 | Path | Contents |
 |---|---|
-| `terraguard_dashboard.html` | Tabbed dashboard: Overview / Bulgaria / Aguascalientes / Calgary / Method |
-| `run_dashboard.sh` | Local HTTP server helper |
+| `app/` | **Main entry:** unified MapLibre evidence explorer (overview, four sites, compare, method) |
+| `app/data/` | Site registry, GeoJSON layers, raster overlays, metrics, Coryell risk CSV |
+| `docs/PLATFORM.md` | Platform architecture, data contract, rebuild and validation process |
+| `terraguard_dashboard.html` | Legacy tabbed dashboard (kept for reference) |
+| `run_dashboard.sh` | Local HTTP server helper (prints the `/app/` URL) |
+| `scripts/fetch_coryell.py` | Public Coryell ArcGIS vectors (no login) |
+| `scripts/build_platform_data.py` | One exporter for all four sites |
+| `scripts/check_platform.py` | Contract, privacy, PNG and metric checks |
 | `pipeline/` | Acquisition, feature engineering, model, map builder |
-| `scripts/` | OSM pipeline extraction and NISAR browse/HDF5 extraction |
-| `docs/` | `SOLUTION.md` (challenge design) and `RESULTS.md` (implementation + metrics) |
+| `scripts/` | OSM pipeline extraction, NISAR browse/HDF5 extraction, platform scripts |
+| `docs/` | `SOLUTION.md` (challenge design), `RESULTS.md` (implementation), `PLATFORM.md` |
 | `research/` | Literature review, data audit, static-data audit, NISAR audit |
-| `data/` | Small static/vector/met layers and NISAR browse; **no large raw stacks** |
+| `data/` | Small static/vector/met layers, NISAR browse; Coryell source vectors are fetched and git-ignored |
 | `outputs/` | Bulgaria map, GeoTIFFs, hotspots, validation, scores, dashboard screenshots |
-| `case_studies/` | Two labelled cases: `case.json`, network, labels, small layers, outputs |
+| `case_studies/` | Two labelled Sentinel-1 cases: `case.json`, network, labels, small layers, outputs |
 | `pixi.toml` / `pixi.lock` | Pinned conda-forge environment |
 | `README.md` | Original project README |
 | `LICENSE` | MIT |
@@ -116,16 +143,27 @@ Everything else needed to inspect the results and rerun the pipeline is here.
 
 ## 4. Quick start
 
-### View the dashboard (no install)
+### View the app (no install)
 
 ```bash
 cd chris-results
 ./run_dashboard.sh          # or: python3 -m http.server 8766 --directory .
-# open http://127.0.0.1:8766/terraguard_dashboard.html
+# open http://127.0.0.1:8766/app/
 ```
 
-You can also open `terraguard_dashboard.html` directly from disk; the case maps are relative
-links. A local server is recommended because browsers restrict local iframes.
+Start from the **Overview** world map, open a site, click a repair or pipe, and use the
+**Compare** and **Method** views. A local server is required because browsers block `fetch()`
+of local files.
+
+### Rebuild the platform data (no login)
+
+```bash
+python scripts/fetch_coryell.py        # public ArcGIS vectors
+python scripts/build_platform_data.py  # normalise + render + validate Coryell
+python scripts/check_platform.py       # contract and privacy checks
+```
+
+Coryell vectors have **no stated open licence**; see `data/coryell/README.md`.
 
 ### Install the environment (for reruns)
 
@@ -212,7 +250,13 @@ imagery, display-only, not calibrated gamma0.
   covariates start in 2022.
 - The case maps use the same pipeline but a slightly smaller feature set (no SoilGrids/terrain/roads
   in the case folders).
-- The dashboard and maps load Leaflet/Esri tiles from the internet; raster overlays are embedded.
+- **Coryell is not a radar result.** Its AUC measures repair-history risk, not a surface anomaly.
+- **Coryell has no stated open licence.** The vectors are bundled for the hackathon only; see
+  `data/coryell/README.md`. Do not redistribute without asking the district.
+- **No calibrated NISAR imagery is bundled.** Bulgarian NISAR layers are 8-bit browse, display-only;
+  Coryell NISAR chips need an Earthdata login.
+- The app loads MapLibre and Esri/OSM/CARTO basemap tiles from the internet; raster overlays and
+  vector data are local.
 
 ---
 
@@ -220,13 +264,17 @@ imagery, display-only, not calibrated gamma0.
 
 | File | Meaning |
 |---|---|
+| `app/data/sites.json` | Site registry and headline metrics |
+| `app/data/<site>/meta.json` | Layers, bounds, timeline, sources, caveats |
+| `app/data/<site>/stats.json` | Counts, by-year series, validation details |
+| `app/data/coryell/risk.csv` | Per-pipe risk percentile and repair history |
 | `outputs/validation.json` | Bulgaria S1 counts, model metrics, corridor placebo test |
 | `outputs/model_metrics.json` | VV/NDMI metrics |
 | `outputs/hotspots.csv` / `.json` | Ranked candidates with evidence |
 | `outputs/*.tif` | Soil-moisture anomaly, leak likelihood, persistence, thermal, confidence |
 | `case_studies/*/outputs/validation.json` | Case model metrics + label AUC + placebo test |
 | `case_studies/*/outputs/hotspots.csv` | Case hotspots |
-| `case_studies/*/outputs/terraguard_map.html` | Case interactive map |
+| `case_studies/*/outputs/terraguard_map.html` | Legacy case interactive map |
 
 ---
 
@@ -237,6 +285,8 @@ imagery, display-only, not calibrated gamma0.
   WorldCover: ESA; weather: Open-Meteo/ERA5; OSM: OpenStreetMap contributors (ODbL).
 - Aguascalientes case data: [`erickfama/rs_leaks`](https://github.com/erickfama/rs_leaks).
 - Calgary case data: City of Calgary Open Data (`w6h9-w33i`, `dpcu-jr23`).
+- Coryell data: Coryell City Water Supply District and its GIS consultant (no stated licence;
+  bundled for the hackathon only).
 - Research review and implementation: TerraGuard / “Dancing with the SARs”.
 
 Prepared as a portable hand-off bundle. The main repository remains at

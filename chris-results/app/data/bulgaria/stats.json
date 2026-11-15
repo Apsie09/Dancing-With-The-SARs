@@ -1,0 +1,23 @@
+{
+  "network": 1,
+  "events": 0,
+  "hotspots": 9,
+  "period": null,
+  "by_year": {},
+  "metrics": {
+    "vv_r2": 0.6108659914818378,
+    "vv_mae": 1.7716218090908218,
+    "ndmi_r2": 0.4712756202058309,
+    "ndmi_mae": 0.17800202402437135,
+    "label_auc": null,
+    "label_percentile": null,
+    "n_labels": null,
+    "corridor_p": 0.5671641791044776,
+    "corridor_p95": 0.8905472636815921,
+    "corridor_ratio": 0.6630253195762634,
+    "s1_dates": 194,
+    "dry_season_dates": 69,
+    "pixels": 86645,
+    "nisar_layer": true
+  }
+}

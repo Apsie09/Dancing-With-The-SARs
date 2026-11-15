@@ -1,0 +1,168 @@
+[
+  {
+    "id": "bulgaria",
+    "name": "Elin Pelin",
+    "subtitle": "Buried water main \u00b7 Bulgaria",
+    "country": "Bulgaria",
+    "center": [
+      23.6075,
+      42.6375
+    ],
+    "zoom": 13.1,
+    "kind": "raster",
+    "labels": 0,
+    "dates": 194,
+    "sensors": [
+      "Sentinel-1",
+      "Sentinel-2",
+      "Landsat",
+      "ERA5"
+    ],
+    "status": "Unlabelled demonstration",
+    "headline": "Weather-normalised Sentinel-1 moisture and thermal anomalies along a 3.3 km rural main.",
+    "metrics": {
+      "vv_r2": 0.6108659914818378,
+      "vv_mae": 1.7716218090908218,
+      "ndmi_r2": 0.4712756202058309,
+      "ndmi_mae": 0.17800202402437135,
+      "label_auc": null,
+      "label_percentile": null,
+      "n_labels": null,
+      "corridor_p": 0.5671641791044776,
+      "corridor_p95": 0.8905472636815921,
+      "corridor_ratio": 0.6630253195762634,
+      "s1_dates": 194,
+      "dry_season_dates": 69,
+      "pixels": 86645,
+      "nisar_layer": true
+    },
+    "caveats": [
+      "No confirmed leak: this is a screening demonstration.",
+      "The corridor enrichment test is not significant (p = 0.89).",
+      "NISAR layers here are public 8-bit browse imagery, display-only."
+    ]
+  },
+  {
+    "id": "aguascalientes",
+    "name": "Aguascalientes",
+    "subtitle": "Urban utility network \u00b7 Mexico",
+    "country": "Mexico",
+    "center": [
+      -102.2661,
+      21.884
+    ],
+    "zoom": 13.2,
+    "kind": "raster",
+    "labels": 50,
+    "dates": 28,
+    "sensors": [
+      "Sentinel-1",
+      "Sentinel-2",
+      "Landsat",
+      "ERA5"
+    ],
+    "status": "50 repair records",
+    "headline": "A dense 5 \u00d7 5 km urban network, 28 Sentinel-1 dates and 50 dry-season repairs.",
+    "metrics": {
+      "vv_r2": 0.43636475958721777,
+      "vv_mae": 2.102240423913676,
+      "ndmi_r2": 0.2935439345885982,
+      "ndmi_mae": 0.07624650803458141,
+      "label_auc": 0.5262396591953618,
+      "label_percentile": 56.19741214735205,
+      "n_labels": 50,
+      "corridor_p": 1.0,
+      "corridor_p95": 1.0,
+      "corridor_ratio": -0.6847250461578369,
+      "s1_dates": 28,
+      "dry_season_dates": 17,
+      "pixels": 64274,
+      "nisar_layer": false
+    },
+    "caveats": [
+      "Label ranking AUC 0.526: weak positive, not significant.",
+      "Repair dates are not leak-start dates.",
+      "No NISAR imagery in this case."
+    ]
+  },
+  {
+    "id": "calgary",
+    "name": "Calgary",
+    "subtitle": "Trunk water network \u00b7 Canada",
+    "country": "Canada",
+    "center": [
+      -113.95,
+      51.05
+    ],
+    "zoom": 13.0,
+    "kind": "raster",
+    "labels": 48,
+    "dates": 50,
+    "sensors": [
+      "Sentinel-1",
+      "Sentinel-2",
+      "Landsat",
+      "ERA5"
+    ],
+    "status": "48 main breaks",
+    "headline": "A 10 \u00d7 10 km trunk network, 50 Sentinel-1 dates and 48 breaks across 2025\u20132026.",
+    "metrics": {
+      "vv_r2": 0.650211954312018,
+      "vv_mae": 1.850860601939285,
+      "ndmi_r2": 0.24892665208748488,
+      "ndmi_mae": 0.13691759499244152,
+      "label_auc": 0.5236516727226187,
+      "label_percentile": 51.70815305950441,
+      "n_labels": 48,
+      "corridor_p": 0.9024390243902439,
+      "corridor_p95": 0.9512195121951219,
+      "corridor_ratio": 0.5550976991653442,
+      "s1_dates": 50,
+      "dry_season_dates": 50,
+      "pixels": 192215,
+      "nisar_layer": false
+    },
+    "caveats": [
+      "Label ranking AUC 0.524: weak positive, not significant.",
+      "The Sentinel-1 RTC archive here starts April 2025.",
+      "No NISAR imagery in this case."
+    ]
+  },
+  {
+    "id": "coryell",
+    "name": "Coryell City WSD",
+    "subtitle": "Rural water district \u00b7 Texas, USA",
+    "country": "United States",
+    "center": [
+      -97.66,
+      31.5
+    ],
+    "zoom": 9.4,
+    "kind": "vector",
+    "labels": 1690,
+    "dates": 0,
+    "sensors": [
+      "Repair records",
+      "Pipe network",
+      "Pressure zones"
+    ],
+    "status": "1,690 usable repairs \u00b7 918 pipes",
+    "headline": "Seven years of point-level repairs over a rural network: a temporal repair-risk test.",
+    "metrics": {
+      "vv_r2": null,
+      "ndmi_r2": null,
+      "label_auc": null,
+      "corridor_p": null,
+      "risk_auc": 0.7865410451617348,
+      "risk_ap": 0.5108418649959929,
+      "risk_top10": 0.28078817733990147,
+      "base_rate": 0.22113289760348584
+    },
+    "caveats": [
+      "Coryell is a repair-history test, not a radar detection test.",
+      "The source layers have no stated open licence; bundled for this hackathon only.",
+      "Repair coordinates are where the crew logged the point, accuracy a few to tens of metres.",
+      "NISAR chips are not bundled because they need an Earthdata login."
+    ]
+  }
+]

@@ -1,0 +1,71 @@
+{
+  "id": "aguascalientes",
+  "name": "Aguascalientes",
+  "subtitle": "Urban utility network \u00b7 Mexico",
+  "country": "Mexico",
+  "center": [
+    -102.2661,
+    21.884
+  ],
+  "zoom": 13.2,
+  "kind": "raster",
+  "layers": [
+    {
+      "file": "overlay_leak.png",
+      "bounds": [
+        -102.29170562408345,
+        21.86010952647,
+        -102.24053172183973,
+        21.90787142431673
+      ],
+      "label": "Leak likelihood",
+      "unit": "0-100",
+      "kind": "leak"
+    },
+    {
+      "file": "overlay_moisture.png",
+      "bounds": [
+        -102.29170562408345,
+        21.86010952647,
+        -102.24053172183973,
+        21.90787142431673
+      ],
+      "label": "Moisture anomaly (robust z)",
+      "unit": "z",
+      "kind": "moisture"
+    },
+    {
+      "file": "overlay_persistence.png",
+      "bounds": [
+        -102.29170562408345,
+        21.86010952647,
+        -102.24053172183973,
+        21.90787142431673
+      ],
+      "label": "Dry-season persistence",
+      "unit": "fraction",
+      "kind": "persistence"
+    }
+  ],
+  "network_file": "network.geojson",
+  "events_file": "events.geojson",
+  "hotspots_file": "hotspots.geojson",
+  "stats_file": "stats.json",
+  "timeline": {
+    "field": "date",
+    "min": "2022-01-06",
+    "max": "2022-12-29"
+  },
+  "sources": [
+    "Sentinel-1 RTC (Planetary Computer)",
+    "Sentinel-2 L2A NDMI",
+    "Landsat C2 L2 LST",
+    "ERA5 via Open-Meteo",
+    "ESA WorldCover / Copernicus DEM / SoilGrids"
+  ],
+  "caveats": [
+    "Label ranking AUC 0.526: weak positive, not significant.",
+    "Repair dates are not leak-start dates.",
+    "No NISAR imagery in this case."
+  ]
+}

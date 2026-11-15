@@ -4,8 +4,9 @@ Two independent tests of the **same pipeline**, each in its own folder, using re
 labels rather than the unlabelled Bulgarian demo. Run with a single environment variable; the code
 is identical, only `case.json` changes.
 
-> These case folders are local experiments. They are excluded through `.git/info/exclude` and have
-> **not** been committed.
+> In the original repository these folders are local experiments. **This `chris-results` bundle
+> includes their prepared vectors, small layers and generated outputs** so the platform can be
+> opened without rerunning acquisition. The raw satellite stacks are still excluded.
 
 ## Case 1 — Aguascalientes, Mexico
 
@@ -140,6 +141,22 @@ CSV at `/tmp/opencode/cases/calgary/breaks.csv`; the case outputs are already ge
 Maps: `case_studies/aguascalientes/outputs/terraguard_map.html` and
 `case_studies/calgary/outputs/terraguard_map.html`. Static previews are the matching
 `terraguard_map.png` files.
+
+## Third case: Coryell City WSD (repair history)
+
+Coryell is **not** a Sentinel-1 case and does not live in this folder. It is a seven-year
+point-repair dataset on a 918-pipe rural network in Texas, fetched from the district's public
+ArcGIS services into `data/coryell/`.
+
+- 1,690 usable repairs, 2019-09-30 to 2026-11-11; 322 in the NISAR era.
+- Temporal risk test: pre-2023 conditions → 2023–24 repairs; pre-2025 conditions → 2025–26 repairs.
+- Risk AUC **0.787**, average precision 0.511, top-10 % capture **28.1 %**, base rate 22.1 %;
+  recurrence baseline AUC 0.719.
+- The map is a **pipe-risk ranking**, not a radar detection. No NISAR chips are bundled.
+- Licence: **none stated**; bundled for the hackathon only. See `data/coryell/README.md`.
+
+The platform export and the risk computation live in `scripts/build_platform_data.py`; the
+resulting layers are in `app/data/coryell/`.
 
 ## Caveats
 

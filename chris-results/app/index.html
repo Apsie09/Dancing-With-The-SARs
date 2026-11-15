@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TerraGuard · Evidence Explorer</title>
+  <meta name="description" content="Multi-sensor water-leak screening evidence explorer: Bulgaria, Aguascalientes, Calgary and Coryell.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%237ee0b0'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="style.css?v=13">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="brand"><span class="dot"></span>TerraGuard <span>evidence explorer</span></div>
+    <nav class="sites" id="site-nav" aria-label="Sites and views"></nav>
+    <div class="top-actions">
+      <button class="ghost" id="layers-btn" title="Layers">Layers</button>
+      <button class="ghost" id="evidence-btn" title="Evidence">Evidence</button>
+      <button class="ghost" id="about-btn">About</button>
+    </div>
+  </header>
+
+  <main>
+    <aside id="sidebar" aria-label="Site summary and layers"></aside>
+    <div id="map">
+      <div id="tooltip"></div>
+    </div>
+    <aside id="evidence" aria-label="Evidence panel"></aside>
+    <section id="doc" class="doc" hidden></section>
+  </main>
+</div>
+
+<dialog id="about">
+  <div class="dialog-head">
+    <strong id="about-title">About TerraGuard</strong>
+    <button class="ghost" onclick="document.getElementById('about').close()">Close</button>
+  </div>
+  <div class="dialog-body" id="about-body">
+    <p><strong>TerraGuard</strong> is a NASA Space Apps 2026 “Dancing with the SARs” project. It combines
+      weather-normalised Sentinel-1/2 and Landsat evidence with pipe networks and repair records.</p>
+    <p>It is a <strong>screening and triage</strong> tool, not a leak detector. The final score ranks places
+      where the surface stays wetter than weather and land cover predict; it does not prove a leak.</p>
+    <p>Built from the team’s TerraGuard pipeline, the Kitchener/NISAR data work, and the Coryell NISAR viewer.
+      The code and case notes are in the <code>chris-results/</code> bundle.</p>
+  </div>
+</dialog>
+
+<script type="module" src="app.js?v=13"></script>
+</body>
+</html>
