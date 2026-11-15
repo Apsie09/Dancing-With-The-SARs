@@ -73,6 +73,8 @@ pesho_coryell_data_package/
   passes.csv         one row per pass (24): time, granule, CRID, district-wide stats, exception-mask fractions
   summary.json       counts per split x cause / zone / quarter / cell, excluded leaks, negative-sampling log
   load_example.py    loading example
+  risk_context.csv   one row per sample (3,014): leak-risk score of the nearest pipe piece for the month of `t0`
+                     (added by `cd asen_results && pixi run coryell-risk`; join on `sample_id`)
   train/index.csv    one row per sample (2,420)
   train/<sample_id>/sar.npz     chips: passes x bands x 20 x 20
   train/<sample_id>/meta.json   sample metadata, chip geotransform, point position, per-pass stats
@@ -443,3 +445,37 @@ consultant; no licence stated, publicly queryable. **Ask them before any use
 beyond the hackathon.** NISAR data: NASA/JPL and ISRO, distributed by the
 Alaska Satellite Facility DAAC. Aerial imagery used only for the geolocation
 check (not included): Esri World Imagery.
+
+## 15. Leak-risk score per sample (`risk_context.csv`)
+
+Added 2026-11-15 by `asen_results/src/terraguard/coryell_risk.py` (`pixi run coryell-risk`
+in `asen_results/`). It is a tabular baseline to compare any SAR model against, and a
+candidate extra input.
+
+The pipe network is cut into 3,007 pieces of at most 250 m. A gradient-boosting model
+ranks every piece for every month from leak history and pipe attributes only (no SAR):
+leaks on the piece and within 200 m / 500 m, months since the last one, length, diameter,
+galvanised flag, pressure zone, month of year. Features use only leaks repaired **before
+the month starts**. It is trained on 2020-10 to 2025-10 and scored on 2025-11 to 2026-10,
+so every sample's score (all `t0` dates fall in that period) is out of sample.
+
+| Column | Meaning |
+|---|---|
+| `sample_id`, `split`, `label` | as in `index.csv` |
+| `risk_month` | month of `t0` (YYYY-MM) |
+| `piece`, `piece_dist_m` | nearest pipe piece and the distance to it |
+| `risk_score` | model probability that the piece leaks in `risk_month` |
+| `risk_pct` | percentile rank among all piece-months of the hold-out (1 = riskiest 1%) |
+| `own_all`, `own_24`, `own_12` | leaks on the piece: ever, last 24 months, last 12 months |
+| `n200_all`, `n200_24`, `n500_all`, `n500_24` | leaks within 200 m / 500 m of the piece |
+| `mo_since_own`, `mo_since_200` | months since the last leak on the piece / within 200 m (999 = never) |
+
+Results (full table in `asen_results/data/reports/coryell_risk.md`): on all piece-months
+of the hold-out the ranking reaches AUC 0.79 [0.76, 0.82], and the top 5% of piece-months
+hold 32% of the leaks. On this package's test split `risk_score` alone gives AUC 0.79
+(594 samples, 54 leaks).
+
+Caveat: negatives in this package are drawn in proportion to pipe length, while leaks
+cluster where there are customers and service lines. Part of the package AUC therefore
+reflects where leaks concentrate; the piece-month evaluation does not have this problem,
+because it scores every piece.

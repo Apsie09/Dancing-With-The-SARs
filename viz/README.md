@@ -23,6 +23,7 @@ python scripts/fetch_coryell_data.py --steps vectors,footprints   # no login, < 
 |---|---|---|---|
 | `vectors` | `leak_survey.geojson`/`.csv`, `waterlines.geojson`, `pressure_zones.geojson` (district consultant's public ArcGIS layers) | nothing | seconds |
 | `footprints` | `nisar_gcov_footprints.geojson` (NISAR GCOV frames over the district, from the ASF archive) | `asf_search`, `shapely` | seconds |
+| `risk` (separate: `cd asen_results && pixi run coryell-risk`) | `risk/pipe_risk.geojson`, `risk/risk_summary.json`, and `pesho_coryell_data_package/risk_context.csv` | the `vectors` step first | ~15 s, no download |
 | `chips` | `nisar/acquisitions_041D073.json`, `nisar/leak_chips.json`, `nisar/chips/*.png` (runs `scripts/make_leak_chips.py`) | Earthdata login | ~5-10 min, ~1.4 GB transfer |
 | `images` | district images for 08-28 / 09-09 / 09-21 and the Riddle subset (runs `subset_gcov.py` + `render_gcov_png.py`) | Earthdata login, `chips` step first | ~4 min and ~180 MB per date |
 
@@ -66,6 +67,18 @@ layers and the MapLibre library.
 - **Leaks**: one dot per repair. Hover shows the details, click pins them.
   Colour by pipe size, water loss, cause or year; size by water loss or pipe
   size; switch between points, clusters and heatmap.
+- **Leak risk by pipe** (top of the Layers list, on by default when its data
+  exists): the pipe network cut into pieces of at most 250 m and coloured by
+  where each piece ranks for the chosen month (top 1%, 5%, 20% of all
+  pipe-months from Nov 2025 to Oct 2026). Pick the month in the layer row; in
+  the NISAR passes tab it follows the selected pass. Click a piece for its
+  rank, leak history and a 12-month strip. Leak popups in that period show
+  where the leaking pipe stood in the ranking. The ranking uses past leaks and
+  pipe attributes only, no radar: trained on Oct 2020 to Oct 2025, it reaches
+  AUC 0.79 on the 12 held-out months, and the top 5% of pipe-months hold 32%
+  of the leaks (report: `asen_results/data/reports/coryell_risk.md`). The
+  diameter-coloured pipe layer is switched off while the risk layer loads;
+  tick "Pipe network" to bring it back.
 - **Time filter**: histogram of leaks per month for the current filters,
   a two-handle date slider (Sep 2019 to Nov 2026), presets (All,
   **NISAR window** from 2025-10-17, 2026, last 12 months), click a month bar to
@@ -219,6 +232,7 @@ Attribution for the visible layers is shown in the map's bottom-right corner
 | `graticule.js` | Adaptive lat/lon grid and the UTM conversion for the cursor readout |
 | `app.js` | Map, UI and interaction |
 | `slice.js` | NISAR passes (slice mode) and the before/after chip viewer |
+| `risk.js` | Leak-risk layer: tier colours, month control, popups (data from `asen_results/src/terraguard/coryell_risk.py`) |
 
 ## Adding a NISAR layer
 

@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TerraGuard · Kitchener</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{
+  color-scheme:dark;
+  --plane:#0d0d0d; --surface:#1a1a19; --raised:#242422; --ink:#f0efec; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,.10);
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70;
+  --t0:#6f7782; --t20:#f0c08a; --t5:#f08a3c; --t1:#e8432a;
+  --neg:#3987e5; --pos:#e66767;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--plane);color:var(--ink);
+  font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+#app{display:grid;grid-template-columns:1fr 440px;height:100%}
+#mapwrap{position:relative;min-width:0}
+#map{position:absolute;inset:0;background:#0d0d0d}
+#panel{background:var(--surface);border-left:1px solid var(--border);overflow-y:auto;padding:20px 20px 40px;position:relative}
+h1{font-size:20px;margin:0 0 4px;line-height:1.2}
+h2{font-size:13px;font-weight:600;margin:24px 0 8px;color:var(--ink)}
+p{margin:0 0 10px;color:var(--ink2)}
+.lede{color:var(--ink2);margin-bottom:16px}
+.small{font-size:12px;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--raised);border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+.tile b{display:block;font-size:24px;font-weight:650;line-height:1.15}
+.tile span{font-size:12px;color:var(--ink2)}
+.callout{background:var(--raised);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-top:8px}
+.callout b{font-weight:650}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+td,th{text-align:left;padding:6px 8px 6px 0;border-bottom:1px solid var(--grid);vertical-align:top}
+th{color:var(--muted);font-weight:500}
+td.n{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink)}
+td{color:var(--ink2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;color:var(--ink)}
+.back{background:none;border:0;color:var(--s1);padding:0;margin:0 0 12px;cursor:pointer;font:inherit}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:10px;border:1px solid var(--border);color:var(--ink2);margin-left:6px;vertical-align:2px}
+.meas{border-left:3px solid var(--s3);padding-left:10px;margin:8px 0}
+.hyp{border-left:3px solid var(--muted);padding-left:10px;margin:8px 0}
+.meas b,.hyp b{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);display:block}
+/* bars */
+.bar{display:grid;grid-template-columns:112px 1fr 44px;align-items:center;gap:8px;font-size:12.5px;margin:5px 0;color:var(--ink2)}
+.bar i{display:block;height:10px;background:var(--s1);border-radius:0 4px 4px 0}
+.bar em{font-style:normal;color:var(--ink);font-variant-numeric:tabular-nums;text-align:right}
+.strip{display:flex;gap:2px;margin:6px 0 2px}
+.strip i{flex:1;height:14px;border-radius:2px}
+.striplab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+/* charts */
+.chart{position:relative;margin:4px 0 6px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{fill:var(--muted);font-size:10.5px;font-variant-numeric:tabular-nums}
+.ctitle{font-size:12.5px;color:var(--ink2);margin-top:10px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--ink2);margin:2px 0}
+.legend i{display:inline-block;width:14px;height:0;border-top:2px solid;margin-right:5px;vertical-align:middle}
+.legend i.band{height:8px;border:0;background:rgba(195,194,183,.22)}
+#tip{position:fixed;pointer-events:none;background:#0d0d0d;border:1px solid var(--border);border-radius:6px;
+  padding:6px 8px;font-size:12px;color:var(--ink2);display:none;z-index:9999;white-space:nowrap}
+#tip b{color:var(--ink);font-weight:600}
+#tip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+/* map controls */
+#bar{position:absolute;left:12px;right:12px;bottom:26px;z-index:1000;background:rgba(26,26,25,.94);
+  border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:grid;gap:8px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.seg button{background:none;border:0;color:var(--ink2);padding:5px 10px;font:inherit;font-size:12.5px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--border)}
+.seg button.on{background:var(--ink);color:#0b0b0b}
+.lab{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+#when{font-size:15px;font-weight:600;min-width:118px}
+#slider{flex:1;min-width:160px;accent-color:var(--s1)}
+#play{background:var(--raised);border:1px solid var(--border);color:var(--ink);border-radius:7px;padding:5px 10px;cursor:pointer;font:inherit;font-size:12.5px}
+#note{font-size:12px;color:var(--muted)}
+label.chk{font-size:12.5px;color:var(--ink2);display:inline-flex;gap:5px;align-items:center}
+#legend{position:absolute;left:12px;top:12px;z-index:1000;background:rgba(26,26,25,.94);border:1px solid var(--border);
+  border-radius:10px;padding:10px 12px;font-size:12px;color:var(--ink2);max-width:250px}
+#legend b{color:var(--ink);font-weight:600;display:block;margin-bottom:4px}
+#legend .l{display:flex;align-items:center;gap:8px;margin:3px 0}
+#legend .l i{display:inline-block;width:22px;border-top:3px solid}
+#legend .dot{width:12px;height:12px;border-radius:50%;border:2px solid #fff;background:#1a1a19;margin:0 5px}
+#legend .grad{height:8px;border-radius:4px;margin:4px 0 2px}
+#legend .ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.leaflet-container{font:inherit}
+.leaflet-control-attribution{background:rgba(13,13,13,.7)!important;color:var(--muted)!important}
+.leaflet-control-attribution a{color:var(--ink2)!important}
+@media (max-width:900px){#app{grid-template-columns:1fr;grid-template-rows:60vh auto;height:auto}#panel{border-left:0}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="mapwrap">
+    <div id="map"></div>
+    <div id="legend"></div>
+    <div id="bar">
+      <div class="row">
+        <span class="lab">NISAR track</span>
+        <span class="seg" id="tracks"></span>
+        <button id="play">▶ Play</button>
+        <span id="when"></span>
+        <input id="slider" type="range" min="0" step="1">
+      </div>
+      <div class="row">
+        <span class="lab">Radar layer</span>
+        <span class="seg" id="modes">
+          <button data-m="rgb">HH / HV image</button><button data-m="chg">Change vs typical</button><button data-m="off">Off</button>
+        </span>
+        <label class="chk"><input type="checkbox" id="pipes" checked> Pipes by break risk</label>
+        <label class="chk"><input type="checkbox" id="allbreaks"> All breaks since Oct 2025</label>
+        <span id="note"></span>
+      </div>
+    </div>
+  </div>
+  <aside id="panel"></aside>
+</div>
+<div id="tip"></div>
+<script src="data.js"></script>
+<script>
+const D = window.TG, $ = s => document.querySelector(s), css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const u8 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const NM = D.risk.months.length, NP = D.passes.length, NS = D.mains.id.length;
+const PCT = u8(D.risk.pct), BROKE = u8(D.risk.broke);
+const HH = new Int16Array(u8(D.series.hh).buffer), HV = new Int16Array(u8(D.series.hv).buffer);
+const TRACKS = {"090A":"090 ascending","127D":"127 descending","162A":"162 ascending"};
+const TCOL = {"090A":"--s1","127D":"--s2","162A":"--s3"};
+const MONTH = m => new Date(m + "-15").toLocaleString("en", {month:"long", year:"numeric"});
+const fmtD = d => new Date(d).toLocaleDateString("en", {day:"numeric", month:"short", year:"numeric"});
+const state = {track:"090A", k:1, mode:"rgb", view:"overview", sel:null};
+const byTrack = t => D.passes.map((p,i) => p.track === t ? i : -1).filter(i => i >= 0);
+const passIdx = () => byTrack(state.track)[state.k];
+const monthIdx = () => Math.max(0, D.risk.months.indexOf(D.passes[passIdx()].t.slice(0,7)));
+const tier = p => p <= 1 ? 3 : p <= 5 ? 2 : p <= 20 ? 1 : 0;
+const TSTYLE = [["--t0",1,.5],["--t20",1.6,.9],["--t5",2.6,1],["--t1",4,1]];
+
+/* ---------- map ---------- */
+const map = L.map("map", {preferCanvas:true, zoomControl:false}).fitBounds(D.img_bounds);
+L.control.zoom({position:"topright"}).addTo(map);
+L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+  {attribution:'Basemap: Esri, HERE, Garmin, © OpenStreetMap contributors · NISAR GCOV: NASA/ISRO via ASF · Pipes and breaks: City of Kitchener open data', maxZoom:16}).addTo(map);
+map.createPane("radar").style.zIndex = 350;
+map.createPane("marks").style.zIndex = 620;
+const radar = L.imageOverlay("", D.img_bounds, {pane:"radar", opacity:.85});
+const canvas = L.canvas({tolerance:7});
+const lines = D.mains.lines.map((ls, i) => L.polyline(ls.map(l => l.map(c => [c[1], c[0]])), {renderer:canvas})
+  .on("click", e => { L.DomEvent.stopPropagation(e); select("segment", i); }));
+const pipeLayer = L.layerGroup(lines).addTo(map);
+const halo = L.polyline([], {color:"#fff", weight:8, opacity:.9, interactive:false, renderer:canvas}).addTo(map);
+const breakLayer = L.layerGroup().addTo(map);
+map.on("click", () => select("overview", null));
+
+function stylePipes(){
+  const mi = monthIdx(), top = [];
+  lines.forEach((l, i) => { const t = tier(PCT[i*NM+mi]), s = TSTYLE[t];
+    l.setStyle({color:css(s[0]), weight:s[1], opacity:s[2]}); if (t >= 2) top.push([t, l]); });
+  top.sort((a,b) => a[0]-b[0]).forEach(x => x[1].bringToFront());
+}
+function drawBreaks(){
+  breakLayer.clearLayers();
+  const mo = D.risk.months[monthIdx()], all = $("#allbreaks").checked;
+  D.breaks.forEach((b, j) => { if (!all && b.date.slice(0,7) !== mo) return;
+    L.circleMarker([b.lat, b.lon], {pane:"marks", radius:6, color:"#fff", weight:2, fillColor:"#1a1a19", fillOpacity:1})
+      .bindTooltip(`${b.street || "Break"} · ${fmtD(b.date)}`).on("click", e => { L.DomEvent.stopPropagation(e); select("break", j); })
+      .addTo(breakLayer); });
+}
+function drawRadar(){
+  const i = passIdx(), p = D.passes[i];
+  if (state.mode === "off" || !p.img) { radar.remove(); } else { radar.setUrl(`img/p${i}_${state.mode}.webp`); radar.addTo(map); }
+  const twin = D.passes.some((q, j) => j !== i && q.track === p.track && q.t.slice(0,10) === p.t.slice(0,10));
+  $("#when").textContent = fmtD(p.t) + (twin ? " · frame " + p.frame : "");
+  $("#note").textContent = p.exc_frac > .05
+    ? `This pass carries NISAR's sample-slip quality flag over ${Math.round(p.exc_frac*100)}% of the area (reads about 1 dB dark).`
+    : p.cov < .9 ? `This pass covers ${Math.round(p.cov*100)}% of the area; the city sits near the edge of the swath or frame.` : "";
+}
+function legend(){
+  const pipe = `<b>Break risk, ${MONTH(D.risk.months[monthIdx()])}</b>` +
+    [["--t1","Top 1% of pipe-months"],["--t5","Top 5%"],["--t20","Top 20%"],["--t0","Everything else"]]
+      .map(([c,t]) => `<div class="l"><i style="border-color:var(${c})"></i>${t}</div>`).join("") +
+    `<div class="l"><span class="dot"></span>Reported break</div>`;
+  const rad = state.mode === "rgb"
+    ? `<b style="margin-top:8px">NISAR L-band image</b>Red = HH, green = HV, blue = HH ÷ HV. Buildings read pink-white, trees and crops green, bare or frozen fields purple, water dark.`
+    : state.mode === "chg"
+    ? `<b style="margin-top:8px">HH change vs this track's median</b><div class="grad" style="background:linear-gradient(90deg,var(--neg),#383835,var(--pos))"></div><div class="ends"><span>3 dB darker</span><span>3 dB brighter</span></div>`
+    : "";
+  $("#legend").innerHTML = ($("#pipes").checked ? pipe : "") + rad;
+}
+
+/* ---------- charts ---------- */
+const tip = $("#tip");
+function nice(lo, hi, n){ const raw = (hi-lo)/n, p = 10 ** Math.floor(Math.log10(raw)), f = [1,2,5,10].find(f => f*p >= raw) * p;
+  const out = []; for (let v = Math.ceil(lo/f)*f; v <= hi + 1e-9; v += f) out.push(+v.toFixed(6)); return out; }
+function chart(el, o){
+  const W = 400, H = o.h || 150, m = {l:38, r:10, t:8, b:22};
+  const pts = o.series.flatMap(s => s.pts).filter(p => p[1] != null);
+  const bx = (o.band || []).filter(b => b[1] != null);
+  if (!pts.length) { el.innerHTML = `<p class="small">No usable passes on this track.</p>`; return; }
+  const xs = pts.map(p => p[0]).concat(o.vline != null ? [o.vline] : [], o.x0 != null ? [o.x0, o.x1] : []);
+  const ys = pts.map(p => p[1]).concat(bx.flatMap(b => [b[1], b[2]]), o.zero ? [0] : []);
+  let x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  if (x0 === x1) { x0 -= 1; x1 += 1; }
+  const pad = (y1-y0)*.12 || .5; y0 -= pad; y1 += pad;
+  const X = v => m.l + (v-x0)/(x1-x0)*(W-m.l-m.r), Y = v => H-m.b - (v-y0)/(y1-y0)*(H-m.t-m.b);
+  let g = "";
+  nice(y0, y1, 4).forEach(v => g += `<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${css(v===0&&o.zero?"--axis":"--grid")}"/>
+    <text x="${m.l-6}" y="${Y(v)+3.5}" text-anchor="end">${v}</text>`);
+  if (o.date) { const d = new Date(x0); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth()+1);
+    for (; +d <= x1; d.setUTCMonth(d.getUTCMonth()+2)) g += `<text x="${X(+d)}" y="${H-6}" text-anchor="middle">${d.toLocaleString("en",{month:"short",timeZone:"UTC"})}</text>`;
+  } else nice(x0, x1, 5).forEach(v => g += `<text x="${X(v)}" y="${H-6}" text-anchor="middle">${v}</text>`);
+  if (bx.length) g += `<path d="M${bx.map(b => `${X(b[0])},${Y(b[2])}`).join("L")}L${bx.slice().reverse().map(b => `${X(b[0])},${Y(b[1])}`).join("L")}Z" fill="rgba(195,194,183,.22)"/>`;
+  if (o.vline != null) g += `<line x1="${X(o.vline)}" x2="${X(o.vline)}" y1="${m.t}" y2="${H-m.b}" stroke="${css("--ink2")}" stroke-dasharray="3 3"/>`;
+  o.series.forEach(s => { const p = s.pts.filter(p => p[1] != null);
+    g += `<path d="M${p.map(p => `${X(p[0])},${Y(p[1])}`).join("L")}" fill="none" stroke="${s.color}" stroke-width="2" ${s.dash?'stroke-dasharray="4 3"':""} stroke-linejoin="round"/>`;
+    if (s.dots) p.forEach(q => g += `<circle cx="${X(q[0])}" cy="${Y(q[1])}" r="3.5" fill="${s.color}" stroke="${css("--surface")}" stroke-width="2"/>`); });
+  g += `<line class="xh" y1="${m.t}" y2="${H-m.b}" stroke="${css("--muted")}" visibility="hidden"/><rect x="${m.l}" y="${m.t}" width="${W-m.l-m.r}" height="${H-m.t-m.b}" fill="transparent"/>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.label||""}">${g}</svg>`;
+  const svg = el.firstChild, xh = svg.querySelector(".xh"), ux = [...new Set(pts.map(p => p[0]))].sort((a,b) => a-b);
+  svg.lastChild.onmousemove = e => { const r = svg.getBoundingClientRect(), vx = x0 + ((e.clientX-r.left)/r.width*W - m.l)/(W-m.l-m.r)*(x1-x0);
+    const x = ux.reduce((a,b) => Math.abs(b-vx) < Math.abs(a-vx) ? b : a);
+    xh.setAttribute("x1", X(x)); xh.setAttribute("x2", X(x)); xh.setAttribute("visibility", "visible");
+    tip.innerHTML = `<b>${o.date ? fmtD(x) : (x>0?"+":"")+x+" days"}</b><br>` + o.series.map(s => { const q = s.pts.find(p => p[0] === x && p[1] != null);
+      return q ? `<i style="background:${s.color}"></i>${s.name}: <b>${q[1].toFixed(o.dp ?? 1)} ${o.unit}</b><br>` : ""; }).join("");
+    tip.style.display = "block"; tip.style.left = Math.min(e.clientX+14, innerWidth-230)+"px"; tip.style.top = e.clientY+14+"px"; };
+  svg.lastChild.onmouseleave = () => { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); };
+}
+const legendRow = items => `<div class="legend">${items.map(([c,n,cls]) => `<span><i class="${cls||""}" style="border-color:${c}"></i>${n}</span>`).join("")}</div>`;
+
+/* ---------- panel views ---------- */
+const R = D.risk, pc = v => Math.round(v*100) + "%";
+const cityPasses = tr => byTrack(tr).filter(i => !(D.passes[i].exc_frac > .05) && D.passes[i].seg_cov >= .9);
+function winterText(){
+  const mean = a => a.reduce((x,y) => x+y, 0) / a.length, out = [];
+  Object.keys(TRACKS).forEach(tr => { const ps = cityPasses(tr).map(i => D.passes[i]), mo = p => +p.t.slice(5,7);
+    const w = ps.filter(p => mo(p) <= 2).map(p => p.city_hh), s = ps.filter(p => mo(p) >= 6 && mo(p) <= 8).map(p => p.city_hh);
+    if (w.length >= 2 && s.length >= 2) out.push(`${(mean(s)-mean(w)).toFixed(1)} dB on track ${TRACKS[tr].split(" ")[0]}`); });
+  return out.length ? `Above the pipes, the city reads darker in January–February than in June–August: by ${out.join(", ")}. Most of the step up falls between late February and mid-March.`
+    : "Citywide radar brightness moves by a decibel or more between passes.";
+}
+function overview(){
+  const mo = R.per_month[monthIdx()], w = R.weather[mo.month];
+  $("#panel").innerHTML = `
+  <h1>TerraGuard</h1>
+  <p class="lede">Where are Kitchener's water mains most likely to break, and what does NISAR's L-band radar actually see above them? Drag the slider to step through ${NP} radar passes from January to October 2026. Click any pipe or break.</p>
+  <div class="tiles">
+    <div class="tile"><b>${pc(R.capture["5"])}</b><span>of breaks fall in the 5% of pipe-months ranked riskiest</span></div>
+    <div class="tile"><b>${R.auc.toFixed(2)}</b><span>ranking skill (AUC) on 11 months the model never saw</span></div>
+    <div class="tile"><b>${NP}</b><span>calibrated NISAR passes on 3 tracks, 10 m, HH + HV</span></div>
+    <div class="tile"><b>None</b><span>measurable gain from adding radar to the ranking, so far</span></div>
+  </div>
+  <div class="callout"><b>${MONTH(mo.month)}:</b> ${mo.breaks} break${mo.breaks===1?"":"s"} reported, ${mo.in_top5} on pipes ranked in the top 5% beforehand. Coldest night ${w[1]} °C, ${w[2]} freeze-thaw days.</div>
+
+  <h2>How much of the network must be inspected to catch the breaks</h2>
+  ${[1,5,10,20].map(k => `<div class="bar"><span>Top ${k}% ranked</span><i style="width:${R.capture[k]*100}%"></i><em>${pc(R.capture[k])}</em></div>`).join("")}
+  <p class="small">Share of the ${R.positives} breaks reported from December 2025 to October 2026 that fall inside each slice. The model was trained on 2005–2025 pipe records, break history and weather only.</p>
+
+  <h2>What the radar sees across the city</h2>
+  <div class="ctitle">Daily mean air temperature, °C</div><div class="chart" id="c-temp"></div>
+  <div class="ctitle">Median HH backscatter over all pipe segments, dB</div><div class="chart" id="c-city"></div>
+  ${legendRow(Object.keys(TRACKS).map(t => [css(TCOL[t]), "Track " + TRACKS[t]]))}
+  <p class="small">Passes that cover under 90% of the pipes, or carry the sample-slip flag, are left out. Each track views the city from a different angle, so levels are compared within a track only.</p>
+  <div class="meas"><b>Measured</b>${winterText()}</div>
+  <div class="hyp"><b>Hypothesis</b>Frozen ground and snow in winter, then thaw, rain and leaf-on vegetation, drive these citywide swings. They are several times larger than the few tenths of a decibel a wet patch above a leaking pipe could add to a 10 m pixel.</div>
+
+  <h2>Does the radar reveal breaks or leaks? Five tests</h2>
+  <table>
+    <tr><th>Test</th><th>Result</th></tr>
+    <tr><td>NISAR backscatter, ground motion and soil moisture added to the risk model</td><td class="n">AUC +0.002<br>[−0.000, +0.005]</td></tr>
+    <tr><td>Break sites vs matched pipe sites, Kitchener</td><td class="n">AUC 0.48–0.52</td></tr>
+    <tr><td>Rural leaks vs pipe sites, Coryell, Texas, NISAR only</td><td class="n">AUC 0.50<br>[0.41, 0.58]</td></tr>
+    <tr><td>Same samples, Sentinel-1 C-band</td><td class="n">AUC 0.49<br>[0.40, 0.58]</td></tr>
+    <tr><td>Pre-registered before/after repair test, Coryell</td><td class="n">−0.03 dB<br>[−0.24, +0.19]</td></tr>
+  </table>
+  <p class="small" style="margin-top:8px">AUC 0.5 is a coin flip. Brackets are 95% intervals. A leak wets a few square metres above a pipe buried 1–2.5 m deep, often under asphalt; L-band backscatter responds to the top few centimetres of soil averaged over a 10 m pixel.</p>
+
+  <h2>What this means for a utility</h2>
+  <p>Pipe records and break history already tell crews where to look. Radar brightness at 10 m does not yet sharpen that list. The next NISAR inputs worth testing are multi-year ground motion along the mains and closure phase, which responds to soil-moisture change.</p>`;
+  const t = D.temp.t.map((d,i) => [+new Date(d), D.temp.c[i]]), ext = {x0:t[0][0], x1:t[t.length-1][0]};
+  chart($("#c-temp"), {series:[{name:"Air temperature", color:css("--ink2"), pts:t}], date:true, zero:true, unit:"°C", h:120, vline:+new Date(D.passes[passIdx()].t), ...ext});
+  chart($("#c-city"), {series:Object.keys(TRACKS).map(tr => ({name:"Track "+TRACKS[tr], color:css(TCOL[tr]), dots:true,
+      pts:cityPasses(tr).map(i => [+new Date(D.passes[i].t), D.passes[i].city_hh])})),
+    date:true, unit:"dB", dp:2, vline:+new Date(D.passes[passIdx()].t), ...ext});
+}
+function segment(i){
+  const M = D.mains, mi = monthIdx(), p = PCT[i*NM+mi], idx = byTrack(state.track), now = +new Date(D.passes[passIdx()].t);
+  const age = M.year[i] ? 2026 - M.year[i] : null, broke = D.risk.months.filter((m,k) => BROKE[i*NM+k]);
+  const ser = (A, key) => [{name:"This pipe", color:css("--s1"), dots:true, pts:idx.map(j => [+new Date(D.passes[j].t), A[i*NP+j] === -32768 ? null : A[i*NP+j]/100])},
+    {name:"City median", color:css("--muted"), dash:true, pts:idx.map(j => [+new Date(D.passes[j].t), D.passes[j][key]])}];
+  $("#panel").innerHTML = `<button class="back">← Overview</button>
+  <h1>Water main ${M.id[i]}<span class="tag">${p <= 20 ? "top " + p + "%" : "lower 80%"}</span></h1>
+  <p class="lede">Break risk for ${MONTH(D.risk.months[mi])}, ranked against every pipe-month in the 11-month hold-out.</p>
+  <dl class="kv">
+    <dt>Material</dt><dd>${M.material[i]}</dd><dt>Diameter</dt><dd>${M.size[i] ? M.size[i] + " mm" : "not recorded"}</dd>
+    <dt>Installed</dt><dd>${M.year[i] ? M.year[i] + " (" + age + " years)" : "not recorded"}</dd><dt>Length</dt><dd>${M.len[i]} m</dd>
+    <dt>Breaks on this pipe</dt><dd>${R.prior[i]} on record, ${R.b5y[i]} in the last 5 years</dd>
+    <dt>Breaks on neighbours</dt><dd>${R.nbr2y[i]} in the last 2 years</dd>
+    <dt>Broke in the hold-out</dt><dd>${broke.length ? broke.map(MONTH).join(", ") : "no"}</dd>
+  </dl>
+  <h2>Risk rank by month</h2>
+  <div class="strip">${D.risk.months.map((m,k) => `<i title="${MONTH(m)}: top ${PCT[i*NM+k]}%" style="background:var(${TSTYLE[tier(PCT[i*NM+k])][0]});${k===mi?"outline:2px solid #fff":""}"></i>`).join("")}</div>
+  <div class="striplab"><span>Dec 2025</span><span>Oct 2026</span></div>
+  <p class="small">These are the model's inputs, not a diagnosis. Old cast- and ductile-iron mains with recent breaks nearby rank highest, and winter months raise every pipe.</p>
+  <h2>NISAR above this pipe · track ${TRACKS[state.track]}</h2>
+  ${legendRow([[css("--s1"),"This pipe"],[css("--muted"),"City median"]])}
+  <div class="ctitle">HH backscatter, dB</div><div class="chart" id="c-hh"></div>
+  <div class="ctitle">HV backscatter, dB</div><div class="chart" id="c-hv"></div>
+  <div class="meas"><b>Measured</b>Radar brightness averaged along the pipe at 10 m. HH responds to surfaces and building walls, HV to vegetation and rough ground.</div>
+  <div class="hyp"><b>Hypothesis</b>If the pipe line follows the city median, the changes are weather and season. A lasting departure would point to something local, such as roadworks.</div>`;
+  chart($("#c-hh"), {series:ser(HH,"city_hh"), date:true, unit:"dB", vline:now});
+  chart($("#c-hv"), {series:ser(HV,"city_hv"), date:true, unit:"dB", vline:now});
+  halo.setLatLngs(D.mains.lines[i].map(l => l.map(c => [c[1], c[0]]))).bringToBack();
+}
+function brk(j){
+  const b = D.breaks[j], e = b.ev[state.track];
+  $("#panel").innerHTML = `<button class="back">← Overview</button>
+  <h1>Break on ${b.street || "unnamed street"}</h1>
+  <p class="lede">Reported ${fmtD(b.date)}. The date is when the break was reported; when the pipe started leaking is unknown.</p>
+  <dl class="kv">
+    <dt>Type</dt><dd>${b.type || "not recorded"}${b.nature ? " · " + b.nature.toLowerCase() : ""}</dd>
+    <dt>Pipe</dt><dd>${[b.material, b.size ? b.size + " mm" : null, b.year].filter(Boolean).join(" · ") || "not recorded"}</dd>
+  </dl>
+  <h2>Did the radar change at this spot? · track ${TRACKS[state.track]}</h2>
+  ${legendRow([[css("--s1"),"Break site"],[css("--muted"),"Median of 5 similar pipe sites"],["","Their range","band"]])}
+  <div class="ctitle">HH contrast against surroundings, change from each site's own typical value, dB</div>
+  <div class="chart" id="c-ev"></div>
+  <p class="small">Horizontal axis: days from the report. Each point is one NISAR pass. Site = 70 m disc; surroundings = ring from 100 to 300 m.</p>
+  <div class="meas"><b>Measured</b>The break site moves about as much as pipe sites 0.5–3 km away where nothing broke. Across ${D.breaks.length} breaks, sites and controls cannot be told apart (AUC 0.48–0.52).</div>
+  <div class="hyp"><b>Hypothesis</b>Water from a break wets a few square metres, mostly under asphalt, and repairs follow within days. Spread over a 10 m pixel and a 12-day revisit, that is below the radar's noise.</div>`;
+  if (!e) { $("#c-ev").innerHTML = `<p class="small">No usable passes within 120 days on this track. Try another track.</p>`; return; }
+  chart($("#c-ev"), {series:[{name:"Break site", color:css("--s1"), dots:true, pts:e.d.map((d,k) => [d, e.site[k]])},
+      {name:"Control median", color:css("--muted"), dash:true, pts:e.d.map((d,k) => [d, e.med[k]])}],
+    band:e.d.map((d,k) => [d, e.lo[k], e.hi[k]]), vline:0, zero:true, unit:"dB", dp:2, h:180, x0:-120, x1:120});
+}
+function render(){
+  if (state.view === "segment") segment(state.sel); else { halo.setLatLngs([]); state.view === "break" ? brk(state.sel) : overview(); }
+  const back = $(".back"); if (back) back.onclick = () => select("overview", null);
+}
+function select(view, sel){ state.view = view; state.sel = sel; $("#panel").scrollTop = 0; render(); }
+
+/* ---------- controls ---------- */
+let lastMonth = -1;
+function update(full){
+  const n = byTrack(state.track).length; $("#slider").max = n-1; $("#slider").value = state.k;
+  drawRadar();
+  if (full || monthIdx() !== lastMonth) { lastMonth = monthIdx(); stylePipes(); drawBreaks(); }
+  legend(); render();
+}
+$("#tracks").innerHTML = Object.keys(TRACKS).map(t => `<button data-t="${t}">${TRACKS[t]}</button>`).join("");
+const mark = () => { document.querySelectorAll("#tracks button").forEach(b => b.classList.toggle("on", b.dataset.t === state.track));
+  document.querySelectorAll("#modes button").forEach(b => b.classList.toggle("on", b.dataset.m === state.mode)); };
+$("#tracks").onclick = e => { if (!e.target.dataset.t) return; const t = +new Date(D.passes[passIdx()].t); state.track = e.target.dataset.t;
+  const idx = byTrack(state.track); state.k = idx.reduce((a,i,k) => Math.abs(+new Date(D.passes[i].t)-t) < Math.abs(+new Date(D.passes[idx[a]].t)-t) ? k : a, 0);
+  mark(); update(); };
+$("#modes").onclick = e => { if (!e.target.dataset.m) return; state.mode = e.target.dataset.m; mark(); update(); };
+$("#slider").oninput = e => { state.k = +e.target.value; update(); };
+$("#pipes").onchange = e => { e.target.checked ? pipeLayer.addTo(map) : pipeLayer.remove(); legend(); };
+$("#allbreaks").onchange = drawBreaks;
+let timer = null;
+$("#play").onclick = () => { if (timer) { clearInterval(timer); timer = null; $("#play").textContent = "▶ Play"; return; }
+  $("#play").textContent = "❚❚ Pause"; timer = setInterval(() => { state.k = (state.k+1) % byTrack(state.track).length; update(); }, 1100); };
+// deep links for the demo: #track=090A&k=5&mode=chg&seg=<row> or &brk=<row>
+const H = new URLSearchParams(location.hash.slice(1));
+if (TRACKS[H.get("track")]) state.track = H.get("track");
+if (H.get("k")) state.k = Math.min(+H.get("k"), byTrack(state.track).length-1);
+if (H.get("mode")) state.mode = H.get("mode");
+if (H.get("seg")) { state.view = "segment"; state.sel = +H.get("seg"); }
+if (H.get("brk")) { state.view = "break"; state.sel = +H.get("brk"); }
+mark(); update(true);
+</script>
+</body>
+</html>
