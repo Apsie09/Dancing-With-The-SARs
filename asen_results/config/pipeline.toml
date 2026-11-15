@@ -104,3 +104,22 @@ neighbour_radius_m = 200
 negative_sample_frac = 0.03       # history negatives subsampled (weighted back) for the baseline
 n_boot = 200
 seed = 42
+
+[coryell]
+# Rural leak-visibility test: Coryell City Water Supply District (Texas), data from ../data/coryell
+# (rebuild: python ../scripts/fetch_coryell_data.py --steps vectors).
+leaks = "../data/coryell/leak_survey.geojson"
+pipes = "../data/coryell/waterlines.geojson"
+district_bbox = [-97.95, 31.30, -97.35, 31.75]
+utm_crs = "EPSG:32614"
+nisar_from = "2025-10-17"
+controls_per_leak = 3
+control_min_m = 400          # close enough to share HDF5 chunks with the leak (cheaper streaming)
+control_max_m = 1500
+control_spacing_m = 200
+exclusion_m = 300            # no other leak within 300 m ...
+exclusion_days = 365         # ... within +/- 1 year
+n_stacks_per_direction = 1   # best ascending + best descending stack
+enl = 4.5                    # equivalent number of looks for the Lee filter (Kitchener GCOV: 4.3-4.6)
+weather_lat = 31.43
+weather_lon = -97.74

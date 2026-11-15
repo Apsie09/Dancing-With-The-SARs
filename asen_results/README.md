@@ -28,6 +28,9 @@ pixi run report                   # final feasibility report
 pixi run aux --workers 6          # Stage 7a: GUNW (ground movement) + SME2 (soil moisture) city crops, ~1.8 GB streamed
 pixi run segments                 # Stage 7b: sample NISAR layers along all 16k water-main segments
 pixi run risk                     # Stage 7c: segment x month break-risk model, baseline vs + NISAR
+pixi run risk-v2                  # Stage 7c v2: normalised NISAR, L1 + nested CV, monotonic baseline
+pixi run coryell --workers 6      # Coryell (TX) rural leak test: stream site windows (~6 GB), then --analyse
+pixi run coryell --confirm ...    # pre-registered confirmation on a held-out track (docs/CORYELL_CONFIRMATION_PREREG.md)
 ```
 
 What was done, why, and the results: [`docs/DATA_PIPELINE_REPORT.md`](docs/DATA_PIPELINE_REPORT.md).

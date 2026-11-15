@@ -83,7 +83,9 @@ def texture(db: np.ndarray, lin: np.ndarray, valid: np.ndarray, masks: dict, f: 
 def weather(cfg: Config, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
     """Hourly ERA5 soil/snow + daily precipitation/temperature for one Kitchener point (cached)."""
     f = cfg.section("features")
-    path = cfg.path("raw_dir") / WEATHER_CACHE
+    name = WEATHER_CACHE if (f["weather_lat"], f["weather_lon"]) == (43.45, -80.49) else \
+        f"open_meteo_{f['weather_lat']:.2f}_{f['weather_lon']:.2f}.parquet"  # one cache per location
+    path = cfg.path("raw_dir") / name
     if path.exists():
         w = pd.read_parquet(path)
         if w.index.min() <= start and w.index.max() >= end - pd.Timedelta(days=1):

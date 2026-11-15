@@ -24,6 +24,8 @@ signal-controls = { cmd = "python -m terraguard signal-controls", description = 
 aux = { cmd = "python -m terraguard aux", description = "Stage 7a: stream GUNW (ground movement) + SME2 (soil moisture) city crops (args: --workers, --dry-run)" }
 segments = { cmd = "python -m terraguard segments", description = "Stage 7b: sample GCOV/GUNW/SME2 along every water-main segment" }
 risk = { cmd = "python -m terraguard risk", description = "Stage 7c: segment x month break-risk models, baseline vs + NISAR" }
+risk-v2 = { cmd = "python -m terraguard risk-v2", description = "Stage 7c v2: normalised NISAR features, L1 + nested CV, monotonic baseline" }
+coryell = { cmd = "python -m terraguard coryell", description = "Coryell rural leak-visibility test (--dry-run, --workers W, --analyse)" }
 pipeline = { cmd = "python -m terraguard all", description = "Run stages 1-3 and the report, in order" }
 
 [dependencies]

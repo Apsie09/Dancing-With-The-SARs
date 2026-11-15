@@ -2,7 +2,7 @@
 import argparse
 import time
 
-from . import catalog, controls, nisar_aux, risk, segments, dataset, features, incidents, mains, matching, probe, report, sar, signal_check
+from . import catalog, controls, coryell, risk_v2, nisar_aux, risk, segments, dataset, features, incidents, mains, matching, probe, report, sar, signal_check
 from .config import Config
 
 STAGES = {"incidents": incidents.run, "catalog": catalog.run, "match": matching.run, "report": report.run}
@@ -10,10 +10,12 @@ STAGES = {"incidents": incidents.run, "catalog": catalog.run, "match": matching.
 
 def main() -> None:
     p = argparse.ArgumentParser(prog="terraguard")
-    p.add_argument("stage", choices=[*STAGES, "all", "probe", "sar", "patches", "features", "signal", "mains", "controls", "dataset", "signal-controls", "aux", "segments", "risk"])
+    p.add_argument("stage", choices=[*STAGES, "all", "probe", "sar", "patches", "features", "signal", "mains", "controls", "dataset", "signal-controls", "aux", "segments", "risk", "coryell", "risk-v2"])
     p.add_argument("--incidents", type=int, default=None, help="sar: number of top incidents (default from config)")
     p.add_argument("--all", action="store_true", help="sar: stream every granule with a usable match")
     p.add_argument("--workers", type=int, default=None, help="sar: parallel streaming processes")
+    p.add_argument("--confirm", action="store_true", help="coryell: held-out stack 163A_017 (pre-registered test)")
+    p.add_argument("--analyse", action="store_true", help="coryell: build patches/features and evaluate")
     p.add_argument("--dry-run", action="store_true", help="sar: print the plan and sizes, stream nothing")
     p.add_argument("--granule", default=None, help="probe: granule_ur to test (default: first validated one)")
     p.add_argument("--block-size-mb", type=float, default=1.0, help="probe: HTTP range block size")
@@ -26,6 +28,18 @@ def main() -> None:
     if a.stage == "patches":
         idx = sar.extract_patches(cfg)
         print(f"{len(idx)} patches written")
+        return
+    if a.stage == "coryell":
+        c = coryell.confirm_config(cfg) if a.confirm else cfg
+        if a.analyse:
+            coryell.analyse(c)
+            if a.confirm:
+                coryell.confirm_test(cfg)
+        else:
+            coryell.run(c, a.workers or 6, a.dry_run)
+        return
+    if a.stage == "risk-v2":
+        risk_v2.run(cfg)
         return
     if a.stage == "risk":
         risk.run(cfg)

@@ -1,6 +1,6 @@
 # TerraGuard: data pipeline, decisions and results
 
-_Status as of 2026-11-15. NASA Space Apps Challenge 2026, "Dancing with the SARs"._
+_Status as of 2026-11-15 (updated 11:00 EET). NASA Space Apps Challenge 2026, "Dancing with the SARs"._
 
 This document records what was built for the data task in
 [`dataset/Data_Engineering_Task.md`](../dataset/Data_Engineering_Task.md), why each decision was made, and what
@@ -16,11 +16,13 @@ the data showed. Every number below comes from the pipeline and can be regenerat
 | Can NISAR data be used without downloading full files? | **Yes.** City crops are streamed over HTTPS: about 13 GB of GCOV and 1.8 GB of GUNW/SME2 were transferred, instead of ~570 GB of full files. |
 | Is a leak visible as a backscatter change at the break site (GCOV, 10 m)? | **No.** Break sites can't be told apart from matched control sites: AUC 0.48-0.52, every CI includes 0.5. No localized change is detected down to ~0.1-0.2 dB. |
 | Can breaks be **predicted** per pipe segment and month? | **Yes.** The baseline (infrastructure, break history, season, weather) reaches **AUC 0.91** on 11 unseen months, and the riskiest 5% of segment-months contain 56% of breaks. |
-| Does NISAR (soil moisture, ground movement, backscatter) improve that prediction? | **Not measurably yet.** The change in AUC is between -0.02 and 0. Soil moisture is the only lead: average precision roughly doubles in one model, but the CI includes 0. There are only 11 months of NISAR data (96 break-months). |
+| Does NISAR (soil moisture, ground movement, backscatter) improve that prediction? | **No, not with the data so far.** v1: ΔAUC between -0.02 and 0. v2 (per-pass normalisation, L1 with nested CV, monotonic baseline): **L1 switches off every NISAR column in every fold**. The early soil-moisture hint was noise. There are only 11 months of NISAR data (96 break-months). |
+| Are large **rural** leaks visible (Coryell, Texas, NISAR L-band)? | **No (not confirmed).** An exploratory analysis on 2 tracks found +0.25 dB HH at leak sites while leaking (p = 0.0003). A **pre-registered** test on a held-out third track did not replicate it: -0.03 dB [-0.24, +0.19], p = 0.76. |
 
-**Bottom line:** the pipeline that joins the city's tabular data to NISAR is complete and reproducible. The infrastructure risk
-model is strong. NISAR's added value can't be shown with the ~1 year of data that exists so far. The setup is ready to
-re-test as more months arrive.
+**Bottom line:** the pipeline that joins tabular infrastructure data to NISAR is complete and reproducible. The infrastructure
+risk model is strong (AUC 0.90-0.91). In three settings (Kitchener urban, Coryell rural, plus the team's Sentinel-based
+cases) no leak signature could be detected, and NISAR features don't improve break prediction with the ~1 year of data
+that exists. Everything is set up to re-test as more months arrive.
 
 ---
 
@@ -168,6 +170,43 @@ The boosted-tree second stage gives the same picture. The full tables are in `da
 NISAR coverage of the evaluation rows: GCOV 82%, GUNW 99%, **SME2 35%**. Soil moisture is missing over the dense urban core and
 in frozen months, where the retrieval is not produced.
 
+### Break-risk v2: normalisation + regularization (`pixi run risk-v2`, `data/reports/risk_model_report_v2.md`)
+These changes were fixed before running:
+- per-pass radiometric normalisation of GCOV (each pass's city median dB removed),
+- signed log1p for skewed inputs,
+- an **L1** logistic second stage with the penalty chosen by **nested** spatially blocked CV (test folds never used for tuning),
+- **monotonic constraints** on the boosted baseline (older pipe, more past breaks, more frost → risk can't decrease).
+
+| | AUC | Average precision | Top-5% capture |
+|---|---|---|---|
+| Baseline v1 (boosting) | 0.907 | 0.011 | 56% |
+| Baseline v2 (boosting + monotonic) | 0.904 | 0.012 | 56% |
+
+- L1 + NISAR: the inner CV chose the strongest penalty in all 5 folds, and **no NISAR column survived** in any fold. The small
+  +0.002 AUC of variant B comes from how the baseline score is penalised, not from NISAR.
+- Boosting + normalised NISAR: ΔAUC -0.014 to -0.021 (overfitting).
+
+### Coryell, Texas: rural leak visibility (`pixi run coryell`, reports `data/reports/coryell_*.md`)
+Coryell is the most favourable setting available: Peter's data, Coryell City WSD, with 1,692 GPS-located repairs, 303 natural
+leaks in the NISAR window (median ~20 gpm, 90th percentile 100 gpm), and pipes under pasture rather than pavement. Calibrated
+GCOV windows were streamed around each leak and 3 controls per leak on the district's own pipes (0.4-1.5 km away, no other
+leak within 300 m / ±365 d). This transferred **6.0 GB instead of 338 GB**.
+
+- **Discovery** (stacks 041D_073 + 062A_017; 29k patches):
+  - single-feature site-vs-control AUCs are ≈ 0.5 for all leaks. The ≥ 100 gpm leaks reach 0.60-0.64, but already **before** the repair.
+  - A time-course plot (`coryell_event_study.png`) suggested sites are brighter while leaking and normal after repair.
+  - The per-leak HH "brightness drop" from leaking (-60..+14 d) to after (+30..+120 d) was **+0.25 dB [+0.11, +0.40], p = 0.0003**
+    (n = 201). The placebo on controls gave +0.00 dB. The drop did **not** scale with leak size (Spearman ≈ 0).
+  - The windows were chosen after seeing the plot, so this was treated as exploratory.
+- **Pre-registered confirmation** (`docs/CORYELL_CONFIRMATION_PREREG.md`, written before download; held-out stack 163A_017;
+  2.1 GB): **NOT CONFIRMED**. Leak drop **-0.03 dB [-0.24, +0.19], p = 0.76**, n = 37 leaks. The placebo was 0.00. The interval
+  excludes the +0.25 dB found in discovery.
+  - Only 37 of 122 leaks were testable:
+    - 50 lie in a strip this track's `mask` marks as invalid;
+    - ~30 were repaired in Sep-Oct 2026 and have no "after" passes yet;
+    - the last two passes carry the sample-slip exception.
+  - Re-running in early 2027 with the same rules would roughly double n.
+
 ### Physical sanity checks
 - GUNW local movement: ~1.5 mm median and ~5 mm p95 in summer at coherence ~0.7. In winter coherence is ~0.5 and the spread is
   2-3x larger (snow and frozen ground decorrelate the signal).
@@ -185,9 +224,8 @@ in frozen months, where the retrieval is not produced.
   magnitudes and on consistency within a segment.
 
 ## 7. Next steps
-1. **A pre-specified soil-moisture test:** a single feature (e.g. wetter than the city median) instead of 20 columns, which is the fairest
-   test of the only lead.
-2. **Re-run monthly** as NISAR and break data accumulate (`pixi run aux`, `segments`, `risk`).
+1. **Re-run the pre-registered Coryell confirmation** in early 2027, once the Sep-Oct 2026 leaks have "after" passes (same rules, more leaks).
+2. **Re-run monthly** as NISAR and break data accumulate (`pixi run aux`, `segments`, `risk-v2`).
 3. A **demo map** of predicted risk per pipe and month, with breaks overlaid (the challenge asks for an interactive app).
 4. Possibly form 10 m interferograms from GSLC crops (same grid as GCOV) for finer ground movement. Add NISAR STATIC layers
    (layover/shadow) for urban masking.
@@ -208,7 +246,10 @@ pixi run features
 pixi run mains && pixi run controls && pixi run dataset
 pixi run signal && pixi run signal-controls
 pixi run aux --workers 6           # stage 7a (~1.8 GB streamed)
-pixi run segments && pixi run risk
+pixi run segments && pixi run risk && pixi run risk-v2
+# Coryell (rural leaks; data via: python ../scripts/fetch_coryell_data.py --steps vectors)
+pixi run coryell --workers 6 && pixi run coryell --analyse                       # discovery (~6 GB streamed)
+pixi run coryell --confirm --workers 6 && pixi run coryell --confirm --analyse   # pre-registered confirmation (~2 GB)
 pixi run report
 pixi run -e dev test
 ```

@@ -179,14 +179,10 @@ def _metrics(y, p) -> dict:
             "capture_top5pct": y[top].sum() / max(y.sum(), 1), "base_rate": y.mean()}
 
 
-def run(cfg: Config) -> None:
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import StandardScaler
-
+def prepare(cfg: Config, rng: np.random.Generator):
+    """Segment table + history sample + full evaluation panel (shared by v1 and v2)."""
     r = cfg.section("risk")
     rng = np.random.default_rng(r["seed"])
-    print("Stage 7c - segment x month break-risk model")
     mains = gpd.read_parquet(cfg.path("processed_dir") / "kitchener_water_mains.parquet")
     inc = gpd.read_parquet(cfg.incidents_parquet)
     breaks = link_breaks(cfg, mains, inc)
@@ -225,6 +221,19 @@ def run(cfg: Config) -> None:
         d["material"] = d["material"].astype(pd.CategoricalDtype(sorted(seg["material"].unique())))
     print(f"  history rows: {len(hist)} ({int(hist['y'].sum())} break-months) | eval rows: {len(ev)} "
           f"({int(ev['y'].sum())} break-months, {len(eval_months)} months)")
+
+    return seg, hist, ev, eval_months
+
+
+def run(cfg: Config) -> None:
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    r = cfg.section("risk")
+    rng = np.random.default_rng(r["seed"])
+    print("Stage 7c - segment x month break-risk model")
+    seg, hist, ev, eval_months = prepare(cfg, rng)
 
     # ---- M0 baseline: trained on history, scored on eval months (temporal hold-out)
     m0 = _hgb(r["seed"]).fit(hist[BASE_FEATURES], hist["y"], sample_weight=hist["w"])
