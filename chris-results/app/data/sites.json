@@ -39,7 +39,8 @@
     "caveats": [
       "No confirmed leak: this is a screening demonstration.",
       "The corridor enrichment test is not significant (p = 0.89).",
-      "NISAR layers here are public 8-bit browse imagery, display-only."
+      "NISAR layers here are public 8-bit browse imagery, display-only.",
+      "The NISAR browse overlay has kilometre-scale geolocation uncertainty; never use it quantitatively."
     ]
   },
   {

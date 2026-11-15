@@ -112,6 +112,7 @@ CMAPS = {
     "leak": ("inferno", 0.0, 100.0, "Leak likelihood", "0-100"),
     "moisture": ("RdBu_r", -2.5, 2.5, "Moisture anomaly (robust z)", "z"),
     "persistence": ("viridis", 0.0, 1.0, "Dry-season persistence", "fraction"),
+    "nisar": ("gray", 0.0, 255.0, "NISAR HH browse (display only)", "DN"),
 }
 
 
@@ -146,6 +147,8 @@ def raster_to_png(tif: Path, out: Path, kind: str, max_px: int = 1400) -> dict |
         rgba[..., 3] = (np.clip((norm - 0.35) / 0.65, 0, 1) ** 0.9 * 220).astype(np.uint8)
     elif kind == "moisture":
         rgba[..., 3] = (np.clip(np.abs(norm - 0.5) * 2, 0, 1) ** 0.75 * 200).astype(np.uint8)
+    elif kind == "nisar":
+        rgba[..., 3] = (np.clip(norm * 1.1, 0, 1) * 170).astype(np.uint8)
     else:
         rgba[..., 3] = (np.clip(norm * 1.15, 0, 1) * 205).astype(np.uint8)
     rgba[~mask, 3] = 0
@@ -179,6 +182,14 @@ def overlay_layers(site_root: Path, out_dir: Path) -> list[dict]:
         meta = raster_to_png(tif, out_dir / f"overlay_{kind}.png", kind)
         if meta:
             layers.append(meta)
+    # Public NISAR browse is available for the Bulgarian AOI only. It is
+    # display-only: 8-bit quicklook, not calibrated gamma0, with km-scale
+    # geolocation error. Keep it out of every quantitative claim.
+    if site_root == ROOT:
+        nisar = raster_to_png(ROOT / "data" / "raw" / "nisar" / "nisar_hh_latest.tif",
+                              out_dir / "overlay_nisar.png", "nisar")
+        if nisar:
+            layers.append(nisar)
     return layers
 
 
@@ -502,6 +513,7 @@ SITE_DIRS = {
             "No confirmed leak: this is a screening demonstration.",
             "The corridor enrichment test is not significant (p = 0.89).",
             "NISAR layers here are public 8-bit browse imagery, display-only.",
+            "The NISAR browse overlay has kilometre-scale geolocation uncertainty; never use it quantitatively.",
         ],
     },
     "aguascalientes": {

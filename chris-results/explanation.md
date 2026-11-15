@@ -74,6 +74,7 @@ radar detection.
   percentile vs 200 translated placebo corridors).
 - Map: [`outputs/terraguard_map.html`](outputs/terraguard_map.html)
 - Static: [`outputs/terraguard_map.png`](outputs/terraguard_map.png)
+- App: the Bulgaria site also has a fourth **NISAR HH browse** overlay, clearly marked display-only.
 
 **Aguascalientes, Mexico**
 - 5 × 5 km AOI, EPSG:32613; utility water network `Tuberias.shp` (8,134 segments, 575 km).

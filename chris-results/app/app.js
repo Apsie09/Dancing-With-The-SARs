@@ -293,7 +293,7 @@ function siteSidebar(site, payload) {
       ${overlays.length ? `
         <h2 style="margin-top:14px">Evidence raster</h2>
         <div class="seg" id="overlay-seg">
-          ${overlays.map((o) => `<button data-overlay="${o.kind}" class="${o.kind === state.overlay ? 'active' : ''}">${o.kind === 'leak' ? 'Leak' : o.kind === 'moisture' ? 'Moisture' : 'Persistence'}</button>`).join('')}
+          ${overlays.map((o) => `<button data-overlay="${o.kind}" class="${o.kind === state.overlay ? 'active' : ''}">${o.kind === 'leak' ? 'Leak' : o.kind === 'moisture' ? 'Moisture' : o.kind === 'persistence' ? 'Persistence' : 'NISAR'}</button>`).join('')}
         </div>
         <div class="legend" id="legend"></div>
       ` : `
@@ -338,6 +338,7 @@ function siteSidebar(site, payload) {
       <div class="evidence-actions">
         ${meta.sources?.length ? `<button id="sources-btn">Sources</button>` : ''}
         ${site.kind === 'raster' ? `<a href="../${site.id === 'bulgaria' ? 'outputs' : `case_studies/${site.id}/outputs`}/validation.json" target="_blank" rel="noopener">validation.json</a>` : ''}
+        ${site.kind === 'raster' ? `<a href="../${site.id === 'bulgaria' ? 'outputs' : `case_studies/${site.id}/outputs`}/terraguard_map.html" target="_blank" rel="noopener">legacy evidence map</a>` : ''}
         ${site.id === 'coryell' ? '<a href="../data/coryell/README.md" target="_blank" rel="noopener">data note</a>' : ''}
       </div>
     </div>`;
@@ -1050,10 +1051,13 @@ function updateLegend() {
     ? 'linear-gradient(90deg,#1b0c2e,#6a1c66,#c43c4b,#fe9f6d,#fcfdbf)'
     : state.overlay === 'moisture'
       ? 'linear-gradient(90deg,#2166ac,#92c5de,#f7f7f7,#f4a582,#b2182b)'
-      : 'linear-gradient(90deg,#440154,#3b528b,#21918c,#5ec962,#fde725)';
+      : state.overlay === 'nisar'
+        ? 'linear-gradient(90deg,#000,#888,#fff)'
+        : 'linear-gradient(90deg,#440154,#3b528b,#21918c,#5ec962,#fde725)';
   const labels = state.overlay === 'leak' ? ['0', '50', '100']
     : state.overlay === 'moisture' ? ['−2.5 z', '0', '+2.5 z']
-      : ['0', '0.5', '1'];
+      : state.overlay === 'nisar' ? ['0', '128', '255']
+        : ['0', '0.5', '1'];
   el.innerHTML = `
     <div class="legend-title">${esc(layer.label)} <span style="opacity:.6">(${esc(layer.unit)})</span></div>
     <div class="legend-bar" style="background:${cmap}"></div>

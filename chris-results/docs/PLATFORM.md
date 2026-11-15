@@ -174,8 +174,9 @@ The platform is a continuation, not a replacement:
 - **Coryell licence:** the ArcGIS layers have no stated open licence. The raw vectors are
   git-ignored and fetched by script; the privacy-trimmed app export is bundled for the hackathon
   demonstration only. Ask the district before any further redistribution.
-- **NISAR:** no calibrated NISAR imagery is in this bundle. Bulgarian NISAR layers are 8-bit
-  browse, display-only; the app does not use them quantitatively.
+- **NISAR:** no calibrated NISAR imagery is in this bundle. Bulgaria has a fourth, display-only
+  NISAR HH browse overlay (8-bit, kilometre-scale geolocation uncertainty); the app never uses it
+  quantitatively.
 - **Basemaps:** Esri / OpenStreetMap tiles require internet; the data overlays are local.
 - **Scale:** 20 m pixels and ~100 m thermal cannot localise a metre-scale failure.
 
