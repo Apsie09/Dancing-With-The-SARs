@@ -1,0 +1,416 @@
+{
+ "seed": 20261115,
+ "built_utc": "2026-11-15T08:54:22Z",
+ "counts": {
+  "stratum_cause": {
+   "test_neg": {
+    "construction": 30,
+    "natural": 500,
+    "other": 10
+   },
+   "test_pos": {
+    "construction": 3,
+    "natural": 50,
+    "other": 1
+   },
+   "train_neg": {
+    "construction": 120,
+    "natural": 2050,
+    "other": 30
+   },
+   "train_pos": {
+    "construction": 12,
+    "natural": 205,
+    "other": 3
+   }
+  },
+  "zone": {
+   "test_neg": {
+    "Coryell City": 94,
+    "Crawford": 72,
+    "Levita": 5,
+    "Mound": 23,
+    "Pancake": 277,
+    "Riddle": 67,
+    "none": 2
+   },
+   "test_pos": {
+    "Coryell City": 8,
+    "Crawford": 11,
+    "Mound": 1,
+    "Pancake": 24,
+    "Riddle": 10
+   },
+   "train_neg": {
+    "Coryell City": 328,
+    "Crawford": 288,
+    "Levita": 29,
+    "Mound": 100,
+    "Pancake": 1110,
+    "Ranch Addition": 6,
+    "Riddle": 325,
+    "none": 14
+   },
+   "train_pos": {
+    "Coryell City": 32,
+    "Crawford": 45,
+    "Levita": 2,
+    "Mound": 4,
+    "Pancake": 96,
+    "Riddle": 40,
+    "none": 1
+   }
+  },
+  "quarter": {
+   "test_neg": {
+    "2025Q4": 10,
+    "2026Q1": 90,
+    "2026Q2": 110,
+    "2026Q3": 250,
+    "2026Q4": 80
+   },
+   "test_pos": {
+    "2025Q4": 1,
+    "2026Q1": 9,
+    "2026Q2": 11,
+    "2026Q3": 25,
+    "2026Q4": 8
+   },
+   "train_neg": {
+    "2025Q4": 60,
+    "2026Q1": 350,
+    "2026Q2": 450,
+    "2026Q3": 1000,
+    "2026Q4": 340
+   },
+   "train_pos": {
+    "2025Q4": 6,
+    "2026Q1": 35,
+    "2026Q2": 45,
+    "2026Q3": 100,
+    "2026Q4": 34
+   }
+  },
+  "geo_cell": {
+   "test_neg": {
+    "CC": 50,
+    "CE": 220,
+    "CW": 100,
+    "NC": 50,
+    "NW": 60,
+    "SC": 10,
+    "SE": 50
+   },
+   "test_pos": {
+    "CC": 5,
+    "CE": 22,
+    "CW": 10,
+    "NC": 5,
+    "NW": 6,
+    "SC": 1,
+    "SE": 5
+   },
+   "train_neg": {
+    "CC": 210,
+    "CE": 890,
+    "CW": 420,
+    "NC": 210,
+    "NE": 10,
+    "NW": 220,
+    "SC": 50,
+    "SE": 190
+   },
+   "train_pos": {
+    "CC": 21,
+    "CE": 89,
+    "CW": 42,
+    "NC": 21,
+    "NE": 1,
+    "NW": 22,
+    "SC": 5,
+    "SE": 19
+   }
+  }
+ },
+ "excluded": [
+  {
+   "objectid": 1497,
+   "repair_utc": "2025-10-17T01:22:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1498,
+   "repair_utc": "2025-10-17T19:54:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1499,
+   "repair_utc": "2025-10-20T16:23:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1500,
+   "repair_utc": "2025-10-21T13:33:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1501,
+   "repair_utc": "2025-10-21T20:21:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1502,
+   "repair_utc": "2025-10-21T20:33:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1515,
+   "repair_utc": "2025-10-21T20:41:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1503,
+   "repair_utc": "2025-10-21T21:04:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1504,
+   "repair_utc": "2025-10-21T21:16:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1505,
+   "repair_utc": "2025-10-27T14:33:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1506,
+   "repair_utc": "2025-10-27T17:07:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1507,
+   "repair_utc": "2025-10-29T19:04:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1512,
+   "repair_utc": "2025-10-30T18:22:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1513,
+   "repair_utc": "2025-10-30T19:35:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1508,
+   "repair_utc": "2025-11-02T00:18:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1509,
+   "repair_utc": "2025-11-03T16:16:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1510,
+   "repair_utc": "2025-11-04T18:26:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1511,
+   "repair_utc": "2025-11-04T20:38:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1514,
+   "repair_utc": "2025-11-04T21:55:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1516,
+   "repair_utc": "2025-11-13T16:55:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1517,
+   "repair_utc": "2025-12-01T16:04:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1518,
+   "repair_utc": "2025-12-09T15:21:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1519,
+   "repair_utc": "2025-12-10T15:50:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1520,
+   "repair_utc": "2025-12-12T21:43:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1521,
+   "repair_utc": "2025-12-19T18:16:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1522,
+   "repair_utc": "2025-12-24T18:16:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1523,
+   "repair_utc": "2025-12-30T23:39:00Z",
+   "reason": "before the first P05023 pass (2025-12-31)"
+  },
+  {
+   "objectid": 1643,
+   "repair_utc": "2026-08-07T18:59:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 15.74
+  },
+  {
+   "objectid": 1644,
+   "repair_utc": "2026-08-10T14:30:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 18.55
+  },
+  {
+   "objectid": 1645,
+   "repair_utc": "2026-08-10T16:00:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 18.61
+  },
+  {
+   "objectid": 1646,
+   "repair_utc": "2026-08-10T16:32:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 18.63
+  },
+  {
+   "objectid": 1647,
+   "repair_utc": "2026-08-10T16:54:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 18.65
+  },
+  {
+   "objectid": 1648,
+   "repair_utc": "2026-08-10T20:23:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 18.79
+  },
+  {
+   "objectid": 1649,
+   "repair_utc": "2026-08-11T19:04:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 19.74
+  },
+  {
+   "objectid": 1650,
+   "repair_utc": "2026-08-13T01:50:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 21.02
+  },
+  {
+   "objectid": 1651,
+   "repair_utc": "2026-08-13T17:16:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 21.66
+  },
+  {
+   "objectid": 1652,
+   "repair_utc": "2026-08-13T17:43:00Z",
+   "reason": "data gap 2026-07-23 to 08-16 (last pass > 12 days before repair)",
+   "days": 21.68
+  },
+  {
+   "objectid": 1811,
+   "repair_utc": "2026-10-27T19:53:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 12.77
+  },
+  {
+   "objectid": 1812,
+   "repair_utc": "2026-10-28T14:22:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 13.54
+  },
+  {
+   "objectid": 1813,
+   "repair_utc": "2026-10-28T14:38:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 13.56
+  },
+  {
+   "objectid": 1814,
+   "repair_utc": "2026-10-28T15:28:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 13.59
+  },
+  {
+   "objectid": 1815,
+   "repair_utc": "2026-10-28T19:07:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 13.74
+  },
+  {
+   "objectid": 1816,
+   "repair_utc": "2026-10-29T17:47:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 14.69
+  },
+  {
+   "objectid": 1817,
+   "repair_utc": "2026-11-02T18:21:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 18.71
+  },
+  {
+   "objectid": 1818,
+   "repair_utc": "2026-11-02T21:17:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 18.83
+  },
+  {
+   "objectid": 1819,
+   "repair_utc": "2026-11-04T15:41:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 20.6
+  },
+  {
+   "objectid": 1820,
+   "repair_utc": "2026-11-04T17:17:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 20.67
+  },
+  {
+   "objectid": 1821,
+   "repair_utc": "2026-11-11T23:18:00Z",
+   "reason": "after the last P05023 pass + 12 days (2026-10-27)",
+   "days": 27.92
+  }
+ ],
+ "neg_rejections": {
+  "< 300 m from a leak within 60 days": 601,
+  "chip overlaps a sample on the same t0": 502,
+  "chip overlaps an other-split sample on a shared pass": 514,
+  "outside raster": 22
+ },
+ "split_score": 0.6186398363529245,
+ "groups": {
+  "n": 202,
+  "size_hist": {
+   "1": 157,
+   "2": 34,
+   "6": 2,
+   "3": 5,
+   "5": 3,
+   "7": 1
+  }
+ }
+}
