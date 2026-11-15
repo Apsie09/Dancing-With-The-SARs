@@ -1,0 +1,33 @@
+{
+  "name": "Coryell City water network \u00b7 Texas, USA",
+  "grid_epsg": 32614,
+  "res": 20.0,
+  "start": "2025-01-01",
+  "end": "2026-11-15",
+  "s1_orbit_state": "ascending",
+  "s1_relative_orbit": 34,
+  "aoi": {
+    "west": -97.58405167047064,
+    "south": 31.440848305818232,
+    "east": -97.4773901281618,
+    "north": 31.529835673582884,
+    "center_lon": -97.53072089931622,
+    "center_lat": 31.485341989700558
+  },
+  "pipeline_geojson": "data/vectors/water_main.geojson",
+  "gas_geojson": null,
+  "labels_csv": "data/vectors/labels.csv",
+  "dry_months": [
+    6,
+    7,
+    8,
+    9
+  ],
+  "dry_years": [
+    2025,
+    2026
+  ],
+  "train_end": "2026-01-01",
+  "val_end": "2026-06-01",
+  "root": "case_studies/coryell"
+}

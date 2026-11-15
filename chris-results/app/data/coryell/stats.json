@@ -1,0 +1,29 @@
+{
+  "network": 184,
+  "events": 72,
+  "hotspots": 12,
+  "period": [
+    "2025-06-27",
+    "2026-09-30"
+  ],
+  "by_year": {
+    "2025": 19,
+    "2026": 53
+  },
+  "metrics": {
+    "vv_r2": 0.4257698624877264,
+    "vv_mae": 1.3205447912509078,
+    "ndmi_r2": 0.5047071231345338,
+    "ndmi_mae": 0.1127929509053316,
+    "label_auc": 0.5482914878489622,
+    "label_percentile": 59.05095983347468,
+    "n_labels": 72,
+    "corridor_p": 0.024390243902439025,
+    "corridor_p95": 0.24390243902439024,
+    "corridor_ratio": 0.23027092218399048,
+    "s1_dates": 55,
+    "dry_season_dates": 20,
+    "pixels": 249859,
+    "nisar_layer": false
+  }
+}

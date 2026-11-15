@@ -508,10 +508,19 @@ def _tile_name(lat: float, lon: float, degrees: int) -> str:
     return f"{ns}{abs(lat0):02d}{ew}{abs(lon0):03d}"
 
 
+def _dem_tile_name(lat: float, lon: float) -> str:
+    """Copernicus DEM 30 m COG tile names use N31_00_W098_00, not N31W098."""
+    lat0 = int(np.floor(lat))
+    lon0 = int(np.floor(lon))
+    ns = "N" if lat0 >= 0 else "S"
+    ew = "E" if lon0 >= 0 else "W"
+    return f"{ns}{abs(lat0):02d}_00_{ew}{abs(lon0):03d}_00"
+
+
 def acquire_static() -> None:
     # WorldCover 3x3 degree tiles and Copernicus DEM 1x1 degree tiles.
     wc = _tile_name(AOI["south"], AOI["west"], 3)
-    dem = _tile_name(AOI["south"], AOI["west"], 1)
+    dem = _dem_tile_name(AOI["south"], AOI["west"])
     _crop_public(
         f"https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_{wc}_Map.tif",
         STATIC / "worldcover_aoi.tif",

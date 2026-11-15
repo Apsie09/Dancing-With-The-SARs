@@ -1,0 +1,92 @@
+{
+  "id": "bulgaria",
+  "name": "Elin Pelin",
+  "subtitle": "Buried water main \u00b7 Bulgaria",
+  "country": "Bulgaria",
+  "center": [
+    23.6075,
+    42.6375
+  ],
+  "zoom": 13.1,
+  "kind": "raster",
+  "layers": [
+    {
+      "file": "overlay_leak.png",
+      "bounds": [
+        23.572653711718853,
+        42.60850092231343,
+        23.6425167634247,
+        42.666535275022596
+      ],
+      "label": "Leak likelihood",
+      "unit": "0-100",
+      "kind": "leak",
+      "vmin": 0.9655265212059021,
+      "vmax": 12.562911987304688
+    },
+    {
+      "file": "overlay_moisture.png",
+      "bounds": [
+        23.572653711718853,
+        42.60850092231343,
+        23.6425167634247,
+        42.666535275022596
+      ],
+      "label": "Moisture anomaly (robust z)",
+      "unit": "z",
+      "kind": "moisture",
+      "vmin": -2.5,
+      "vmax": 2.5
+    },
+    {
+      "file": "overlay_persistence.png",
+      "bounds": [
+        23.572653711718853,
+        42.60850092231343,
+        23.6425167634247,
+        42.666535275022596
+      ],
+      "label": "Dry-season persistence",
+      "unit": "fraction",
+      "kind": "persistence",
+      "vmin": 0.0,
+      "vmax": 1.0
+    },
+    {
+      "file": "overlay_nisar.png",
+      "bounds": [
+        23.572653711718853,
+        42.60850092231343,
+        23.6425167634247,
+        42.666535275022596
+      ],
+      "label": "NISAR HH browse (display only)",
+      "unit": "DN",
+      "kind": "nisar",
+      "vmin": 0.0,
+      "vmax": 255.0
+    }
+  ],
+  "network_file": "network.geojson",
+  "events_file": null,
+  "hotspots_file": "hotspots.geojson",
+  "stats_file": "stats.json",
+  "timeline": {
+    "field": "date",
+    "min": null,
+    "max": null
+  },
+  "sources": [
+    "Sentinel-1 RTC (Planetary Computer)",
+    "Sentinel-2 L2A NDMI",
+    "Landsat C2 L2 LST",
+    "ERA5 via Open-Meteo",
+    "ESA WorldCover / Copernicus DEM / SoilGrids"
+  ],
+  "caveats": [
+    "No confirmed leak: this is a screening demonstration.",
+    "The corridor enrichment test is not significant (p = 0.89).",
+    "NISAR layers here are public 8-bit browse imagery, display-only.",
+    "The NISAR browse overlay has kilometre-scale geolocation uncertainty; never use it quantitatively."
+  ]
+}

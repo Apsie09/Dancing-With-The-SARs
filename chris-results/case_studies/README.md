@@ -1,11 +1,12 @@
 # TerraGuard ground-truth case studies
 
-Two independent tests of the **same pipeline**, each in its own folder, using real water-utility
+Three independent tests of the **same pipeline**, each in its own folder, using real water-utility
 labels rather than the unlabelled Bulgarian demo. Run with a single environment variable; the code
 is identical, only `case.json` changes.
 
-> These case folders are local experiments. They are excluded through `.git/info/exclude` and have
-> **not** been committed.
+> In the original repository these folders are local experiments. **This `chris-results` bundle
+> includes their prepared vectors, small layers and generated outputs** so the platform can be
+> opened without rerunning acquisition. The raw satellite stacks are still excluded.
 
 ## Case 1 — Aguascalientes, Mexico
 
@@ -123,7 +124,8 @@ The case folders contain:
 
 ```
 case_studies/
-  prepare.py                 # build both cases from the source repos
+  prepare.py                 # build Aguascalientes and Calgary from source repos
+  prepare_coryell.py         # subset the Coryell district data into a 10 x 10 km case
   aguascalientes/
     case.json                # AOI, grid, dates, orbit, network, labels, season
     data/vectors/            # water_main.geojson, labels.csv
@@ -131,15 +133,53 @@ case_studies/
     outputs/                 # map, GeoTIFFs, hotspots, validation.json
   calgary/
     ...
+  coryell/
+    case.json                # fixed 10 x 10 km AOI, 55 S1 dates, 72 summer labels
+    data/vectors/            # clipped water_main.geojson, labels.csv
+    data/{raw,static,met,interim}/
+    outputs/                 # same map, GeoTIFFs, hotspots, validation.json
   README.md
 ```
 
 `prepare.py` expects the cloned source repo at `/tmp/opencode/cases/aguas` and the Calgary breaks
 CSV at `/tmp/opencode/cases/calgary/breaks.csv`; the case outputs are already generated here.
+`prepare_coryell.py` expects `data/coryell/` from `scripts/fetch_coryell.py`.
 
-Maps: `case_studies/aguascalientes/outputs/terraguard_map.html` and
-`case_studies/calgary/outputs/terraguard_map.html`. Static previews are the matching
+Maps: `case_studies/aguascalientes/outputs/terraguard_map.html`,
+`case_studies/calgary/outputs/terraguard_map.html` and
+`case_studies/coryell/outputs/terraguard_map.html`. Static previews are the matching
 `terraguard_map.png` files.
+
+## Case 3 — Coryell City WSD, Texas
+
+Coryell is a **normal Sentinel-1 case**, built with the same `case.json` contract and the same
+pipeline modules as the other two. It is a fixed 10 × 10 km rural AOI chosen from the densest
+2025–26 summer repair cell.
+
+| Item | Value |
+|---|---|
+| Source | Coryell City WSD public ArcGIS layers (no stated licence) |
+| Network | 184 clipped pipe segments in the AOI, EPSG:32614 |
+| Labels | 72 summer repairs (June–September 2025–2026) |
+| Period | 2025-01-01 → 2026-11-15 |
+| Sentinel-1 | ascending 34, **55 dates** (2025-01-07 → 2026-11-05) |
+| Sentinel-2 / Landsat | 76 / 47 dates |
+| VV model | MAE 1.32 dB / R² **0.426** |
+| NDMI model | MAE 0.113 / R² **0.505** |
+| Label ranking | AUC **0.548**, median percentile 59.1 |
+| Corridor test | mean p **0.024**, p95 **0.244** |
+
+The mean corridor result is nominally small, but the p95 test is not, and the label AUC is still
+weak. No NISAR imagery is used. Licence: **none stated**; see `data/coryell/README.md`.
+
+Run it with the same commands as the other cases:
+
+```bash
+CASE=case_studies/coryell/case.json
+TERRAGUARD_CASE=$CASE pixi run python -m pipeline.acquire --workers 16
+TERRAGUARD_CASE=$CASE pixi run python -m pipeline.model
+TERRAGUARD_CASE=$CASE pixi run python -m pipeline.make_map
+```
 
 ## Caveats
 
@@ -150,3 +190,5 @@ Maps: `case_studies/aguascalientes/outputs/terraguard_map.html` and
   optical and weather, so the feature set is slightly smaller than the Bulgarian run.
 - The label AUC is a ranking metric over repair locations; it is not precision/recall against
   confirmed visible leaks, and it does not prove the absence of a leak at any other pixel.
+- Coryell’s mean corridor p = 0.024 is nominal; its p95 is 0.244 and its label AUC is 0.548.
+  Do not describe that as leak detection.

@@ -1,0 +1,28 @@
+{
+  "network": 8134,
+  "events": 50,
+  "hotspots": 12,
+  "period": [
+    "2022-01-06",
+    "2022-12-29"
+  ],
+  "by_year": {
+    "2022": 50
+  },
+  "metrics": {
+    "vv_r2": 0.43636475958721777,
+    "vv_mae": 2.102240423913676,
+    "ndmi_r2": 0.2935439345885982,
+    "ndmi_mae": 0.07624650803458141,
+    "label_auc": 0.5262396591953618,
+    "label_percentile": 56.19741214735205,
+    "n_labels": 50,
+    "corridor_p": 1.0,
+    "corridor_p95": 1.0,
+    "corridor_ratio": -0.6847250461578369,
+    "s1_dates": 28,
+    "dry_season_dates": 17,
+    "pixels": 64274,
+    "nisar_layer": false
+  }
+}
