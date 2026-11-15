@@ -1,8 +1,8 @@
 # Coryell City WSD — bundled vector data
 
 This folder documents the public ArcGIS vectors used by the Coryell site in the TerraGuard
-Evidence Explorer. The raw files are **fetched, privacy-trimmed and git-ignored**; the
-privacy-safe export consumed by the app lives in `app/data/coryell/`.
+Evidence Explorer. The raw files are **fetched and git-ignored**; the privacy-trimmed export consumed by the
+app lives in `app/data/coryell/`.
 
 ```bash
 python scripts/fetch_coryell.py        # writes the raw files here
