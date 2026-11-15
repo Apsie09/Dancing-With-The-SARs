@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1260" height="560" viewBox="-30 -10 1260 560" role="img" aria-label="System diagram. The leak repair log and pipe network feed the feature builder, which feeds the gradient-boosted risk model. NISAR downlinks to the ASF archive, and the radar processor reads the district from it. Risk ranks and radar passes both go to the AquaGuard map, used by field crews.">
+    <style>
+  .nm { font: 600 14px "Space Grotesk", "Segoe UI", Arial, sans-serif; fill: #0f1d26; text-anchor: middle; }
+  .sb { font: 11px "JetBrains Mono", Menlo, Consolas, monospace; fill: #566770; text-anchor: middle; }
+  .sec { font: 500 11px "JetBrains Mono", Menlo, Consolas, monospace; letter-spacing: .12em; fill: #566770; }
+  .al { font: 500 11px "JetBrains Mono", Menlo, Consolas, monospace; text-anchor: middle; paint-order: stroke; stroke: #ffffff; stroke-width: 4px; }
+  .a { stroke-width: 2; fill: none; }
+  .a.w { stroke: #0a83ab; } .a.r { stroke: #c06804; } .a.i { stroke: #566770; }
+</style>
+<rect x="-30" y="-10" width="1260" height="560" fill="#ffffff"/>
+    <defs>
+      <marker id="aw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#0a83ab"/></marker>
+      <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#c06804"/></marker>
+      <marker id="ai" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#566770"/></marker>
+      <g id="db"><path d="M-34 -28v56a34 10 0 0 0 68 0v-56" fill="#0a83ab"/><ellipse cy="-28" rx="34" ry="10" fill="#8acde5"/><path d="M-34 -6a34 10 0 0 0 68 0M-34 14a34 10 0 0 0 68 0" fill="none" stroke="#e2f2f8" stroke-width="2"/></g>
+      <g id="srv"><rect x="-32" y="-46" width="64" height="92" rx="6"/><g fill="#ffffff" opacity=".85"><rect x="-22" y="-34" width="44" height="6" rx="2"/><rect x="-22" y="-20" width="44" height="6" rx="2"/><rect x="-22" y="-6" width="44" height="6" rx="2"/><circle cx="16" cy="30" r="4"/></g></g>
+    </defs>
+
+    <text x="30" y="40" class="sec">DATA SOURCES</text>
+
+    <!-- utility records -->
+    <use xlink:href="#db" x="90" y="110"/>
+    <text x="90" y="174" class="nm">Leak repair log</text><text x="90" y="190" class="sb">1,691 repairs since 2019</text>
+    <use xlink:href="#db" x="90" y="270"/>
+    <text x="90" y="334" class="nm">Pipe network</text><text x="90" y="350" class="sb">918 lines · 624 km</text>
+
+    <!-- radar sources -->
+    <g transform="translate(90 422) rotate(-12)">
+      <rect x="-40" y="-8" width="30" height="16" fill="#c06804" opacity=".6"/><rect x="10" y="-8" width="30" height="16" fill="#c06804" opacity=".6"/>
+      <rect x="-11" y="-14" width="22" height="28" rx="3" fill="#c06804"/>
+      <path d="M0 14 v8 M-10 28 a10 6 0 0 0 20 0" stroke="#c06804" stroke-width="2.5" fill="none"/>
+    </g>
+    <text x="90" y="488" class="nm">NISAR</text><text x="90" y="504" class="sb">L-band · HH, HV · 10 m</text>
+    <path transform="translate(195 400)" d="M24 44c-18 0-26-12-22-24 4-11 17-15 25-11 6-15 29-19 41-6 13-5 30 4 28 19 13 2 18 22 0 22z" fill="#fcf0e1" stroke="#c06804" stroke-width="2"/>
+    <text x="245" y="488" class="nm">ASF DAAC</text><text x="245" y="504" class="sb">NASA archive</text>
+    <line x1="140" y1="424" x2="192" y2="424" class="a r" marker-end="url(#ar)"/>
+    <text x="166" y="408" class="al" fill="#c06804">downlink</text>
+
+    <!-- AquaGuard boundary -->
+    <rect x="360" y="60" width="685" height="465" rx="18" fill="none" stroke="#d6dfe3" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <path transform="translate(384 84)" d="M0 -10C0 -10 -7 -1.5 -7 3a7 7 0 0 0 14 0C7 -1.5 0 -10 0 -10Z" fill="#0a83ab"/>
+    <text x="398" y="89" class="sec" style="fill:#0a83ab">AQUAGUARD</text>
+
+    <!-- feature builder -->
+    <use xlink:href="#srv" x="440" y="185" fill="#0a83ab"/>
+    <text x="440" y="256" class="nm">Feature builder</text><text x="440" y="272" class="sb">pipe × month table</text>
+    <line x1="126" y1="116" x2="400" y2="172" class="a w" marker-end="url(#aw)"/>
+    <line x1="126" y1="264" x2="400" y2="198" class="a w" marker-end="url(#aw)"/>
+
+    <!-- radar processor -->
+    <use xlink:href="#srv" x="440" y="420" fill="#c06804"/>
+    <text x="440" y="488" class="nm">Radar processor</text><text x="440" y="504" class="sb">stream, mask, chips</text>
+    <line x1="298" y1="424" x2="400" y2="424" class="a r" marker-end="url(#ar)"/>
+    <text x="350" y="408" class="al" fill="#c06804">district only</text>
+
+    <!-- model -->
+    <circle cx="620" cy="185" r="48" fill="#0a83ab"/>
+    <circle cx="620" cy="185" r="56" fill="none" stroke="#0a83ab" stroke-opacity=".3" stroke-width="5"/>
+    <g transform="translate(420 -355)">
+      <g stroke="#ffffff" stroke-width="2.2" fill="none" stroke-linecap="round"><path d="M200 516 L186 536 M200 516 L214 536 M186 536 L179 558 M186 536 L193 558 M214 536 L207 558 M214 536 L221 558"/></g>
+      <g fill="#ffffff"><circle cx="200" cy="516" r="4.5"/><circle cx="186" cy="536" r="3.5"/><circle cx="214" cy="536" r="3.5"/><rect x="175.5" y="556" width="7" height="7" rx="1.5"/><rect x="189.5" y="556" width="7" height="7" rx="1.5"/><rect x="203.5" y="556" width="7" height="7" rx="1.5"/><rect x="217.5" y="556" width="7" height="7" rx="1.5"/></g>
+    </g>
+    <text x="620" y="268" class="nm">Risk model</text><text x="620" y="284" class="sb">gradient-boosted trees</text>
+    <line x1="476" y1="185" x2="558" y2="185" class="a w" marker-end="url(#aw)"/>
+    <text x="517" y="174" class="al" fill="#0a83ab">255k rows</text>
+
+    <!-- map -->
+    <rect x="825" y="240" width="190" height="122" rx="8" fill="#0f1d26"/>
+    <rect x="833" y="248" width="174" height="106" rx="3" fill="#e2f2f8"/>
+    <g transform="translate(435 -236)">
+      <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M408 570 L450 548 L494 556 L562 514" stroke="#cbd4d9" stroke-width="3"/>
+        <path d="M450 548 L440 506 L420 492" stroke="#cbd4d9" stroke-width="3"/>
+        <path d="M440 506 L520 494 L560 488" stroke="#cbd4d9" stroke-width="3"/>
+        <path d="M520 494 L528 552" stroke="#8acde5" stroke-width="4"/>
+        <path d="M440 506 L520 494" stroke="#1595c4" stroke-width="5"/>
+        <path d="M450 548 L494 556" stroke="#07506e" stroke-width="7"/>
+      </g>
+      <g fill="#ffffff" stroke="#0f1d26" stroke-width="1.4"><circle cx="472" cy="552" r="4"/><circle cx="484" cy="500" r="4"/></g>
+      <path d="M470 598 h30 l6 22 h-42z" fill="#0f1d26" opacity=".85"/><rect x="452" y="620" width="66" height="5" rx="2" fill="#0f1d26" opacity=".85"/>
+    </g>
+    <text x="920" y="412" class="nm">AquaGuard map</text><text x="920" y="428" class="sb">risk by pipe + NISAR passes</text>
+    <path d="M676 185 H760 V270 H818" class="a w" marker-end="url(#aw)"/>
+    <text x="768" y="226" class="al" fill="#0a83ab" style="text-anchor:start">risk ranks</text>
+    <path d="M476 420 H760 V330 H818" class="a r" marker-end="url(#ar)"/>
+    <text x="618" y="410" class="al" fill="#c06804">passes + chips</text>
+
+    <!-- users -->
+    <line x1="1022" y1="300" x2="1084" y2="300" class="a i" marker-end="url(#ai)"/>
+    <circle cx="1120" cy="282" r="13" fill="#566770"/>
+    <path d="M1094 326c0-18 12-28 26-28s26 10 26 28z" fill="#566770"/>
+    <text x="1120" y="352" class="nm">Field crews</text><text x="1120" y="368" class="sb">top-ranked pipes first</text>
+  </svg>
