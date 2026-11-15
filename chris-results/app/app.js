@@ -44,7 +44,7 @@ const state = {
 
 /* ------------------------------------------------------------------ boot */
 async function boot() {
-  state.sites = await fetch(DATA + 'sites.json').then((r) => r.json());
+  state.sites = await fetch(DATA + 'sites.json', { cache: 'no-cache' }).then((r) => r.json());
   buildNav();
   bindChrome();
   window.addEventListener('hashchange', route);
@@ -55,7 +55,7 @@ function buildNav() {
   const nav = $('#site-nav');
   nav.innerHTML = `
     <button data-route="overview">Overview</button>
-    ${state.sites.map((s) => `<button data-route="site/${s.id}">${esc(s.name)}<span class="tag">${esc(s.status)}</span></button>`).join('')}
+    ${state.sites.map((s) => `<button data-route="site/${s.id}">${esc(s.name)}</button>`).join('')}
     <button data-route="compare">Compare</button>
     <button data-route="method">Method</button>`;
   nav.addEventListener('click', (e) => {
@@ -121,7 +121,7 @@ function overviewSidebar() {
       <div class="eyebrow">NASA Space Apps 2026 · Dancing with the SARs</div>
       <h1>Four water networks.<br>One evidence-first workflow.</h1>
       <p>Separate what is <strong>observed</strong>, what is <strong>modelled</strong>, and what the data
-         cannot yet support. Radar context meets weather normalisation and repair history.</p>
+         cannot yet support. Radar context meets weather normalisation and real repair records.</p>
       <div class="stats">
         <div><b>${state.sites.length}</b>study areas</div>
         <div><b>${totalLabels.toLocaleString()}</b>field records</div>
@@ -135,9 +135,9 @@ function overviewSidebar() {
 }
 
 function siteCard(s) {
-  const flag = s.labels > 100 ? 'history' : s.labels > 0 ? 'labels' : 'demo';
-  const flagText = s.labels > 100 ? 'repair history' : s.labels > 0 ? `${s.labels} labels` : 'unlabelled';
-  const auc = s.metrics.label_auc ?? s.metrics.risk_auc;
+  const flag = s.labels > 0 ? 'labels' : 'demo';
+  const flagText = s.labels > 0 ? `${s.labels} labels` : 'unlabelled';
+  const auc = s.metrics.label_auc;
   return `
     <button class="site-card" data-site="${s.id}">
       <div class="row">
@@ -148,7 +148,7 @@ function siteCard(s) {
       <div class="desc">${esc(s.headline)}</div>
       <div class="mini">
         <span><b>${s.dates || '—'}</b> S1 dates</span>
-        <span><b>${auc == null ? '—' : fmt(auc, 3)}</b> ${s.metrics.label_auc != null ? 'label AUC' : s.metrics.risk_auc != null ? 'risk AUC' : 'AUC'}</span>
+        <span><b>${auc == null ? '—' : fmt(auc, 3)}</b> ${s.metrics.label_auc != null ? 'label AUC' : 'AUC'}</span>
         <span><b>${s.metrics.vv_r2 == null ? '—' : fmt(s.metrics.vv_r2, 2)}</b> VV R²</span>
       </div>
     </button>`;
@@ -226,10 +226,10 @@ async function openSite(id) {
 async function loadSite(id) {
   if (state.cache.has(id)) return state.cache.get(id);
   const base = `${DATA}${id}/`;
-  const meta = await fetch(base + 'meta.json').then((r) => r.json());
+  const meta = await fetch(base + 'meta.json', { cache: 'no-cache' }).then((r) => r.json());
   const get = async (name) => {
     if (!name) return null;
-    const r = await fetch(base + name);
+    const r = await fetch(base + name, { cache: 'no-cache' });
     return r.ok ? r.json() : null;
   };
   const [network, events, hotspots, zones, stats] = await Promise.all([
@@ -244,20 +244,12 @@ async function loadSite(id) {
 function siteSidebar(site, payload) {
   const { meta, stats } = payload;
   const m = site.metrics;
-  const isCoryell = site.id === 'coryell';
-  const cards = isCoryell
-    ? [
-        ['Risk AUC', fmt(m.risk_auc, 3), 'temporal holdout'],
-        ['Avg precision', fmt(m.risk_ap, 3), `base ${pct(m.base_rate)}`],
-        ['Top-10% capture', pct(m.risk_top10, 0), 'of 2025–26 repairs'],
-        ['Repair records', (stats?.records || site.labels).toLocaleString(), '2019–2026'],
-      ]
-    : [
-        ['VV R²', fmt(m.vv_r2, 2), `MAE ${fmt(m.vv_mae, 2)} dB`],
-        ['NDMI R²', fmt(m.ndmi_r2, 2), `MAE ${fmt(m.ndmi_mae, 3)}`],
-        [m.label_auc != null ? 'Label AUC' : 'Corridor p95', m.label_auc != null ? fmt(m.label_auc, 3) : fmt(m.corridor_p95 ?? m.corridor_p, 2), m.label_auc != null ? `${m.n_labels} labels` : 'placebo test'],
-        ['S1 dates', m.s1_dates ?? '—', `${m.dry_season_dates ?? '—'} dry-season`],
-      ];
+  const cards = [
+    ['VV R²', fmt(m.vv_r2, 2), `MAE ${fmt(m.vv_mae, 2)} dB`],
+    ['NDMI R²', fmt(m.ndmi_r2, 2), `MAE ${fmt(m.ndmi_mae, 3)}`],
+    [m.label_auc != null ? 'Label AUC' : 'Corridor p95', m.label_auc != null ? fmt(m.label_auc, 3) : fmt(m.corridor_p95 ?? m.corridor_p, 2), m.label_auc != null ? `${m.n_labels} labels` : 'placebo test'],
+    ['S1 dates', m.s1_dates ?? '—', `${m.dry_season_dates ?? '—'} dry-season`],
+  ];
 
   const overlays = (meta.layers || []);
   const years = stats?.by_year ? Object.keys(stats.by_year).sort() : [];
@@ -270,7 +262,7 @@ function siteSidebar(site, payload) {
       <p class="strong">${esc(site.headline)}</p>
       <div class="status-row">
         <span class="chip ${site.labels > 100 ? 'green' : site.labels > 0 ? 'amber' : ''}">${esc(site.status)}</span>
-        <span class="chip">${site.kind === 'raster' ? 'Sentinel-1 grid' : 'Repair history'}</span>
+        <span class="chip">Sentinel-1 grid</span>
         ${site.id === 'coryell' ? '<span class="chip red">licence: none stated</span>' : ''}
       </div>
       <div class="metric-grid">
@@ -285,8 +277,8 @@ function siteSidebar(site, payload) {
 
     <div class="side-section">
       <h2>Layers</h2>
-      ${meta.network_file ? layerRow('network', 'Pipe network', site.id === 'coryell' ? 'risk colour' : 'mapped main', '#7ee0b0', state.show.network) : ''}
-      ${meta.events_file ? layerRow('events', site.id === 'coryell' ? 'Repair records' : 'Ground-truth labels', `${site.labels}`, '#ffd166', state.show.events) : ''}
+      ${meta.network_file ? layerRow('network', 'Pipe network', 'mapped main', '#7ee0b0', state.show.network) : ''}
+      ${meta.events_file ? layerRow('events', 'Ground-truth labels', `${site.labels}`, '#ffd166', state.show.events) : ''}
       ${meta.hotspots_file ? layerRow('hotspots', 'Candidate hotspots', 'ranked', '#ff5c8a', state.show.hotspots) : ''}
       ${meta.zones_file ? layerRow('zones', 'Pressure zones', '7', '#4cc9f0', state.show.zones) : ''}
 
@@ -435,7 +427,7 @@ function buildSiteMap(payload) {
     $('#map .loading')?.classList.add('hide');
     addOverlay(map, meta, state.overlay);
     if (zones && state.show.zones) addZones(map, zones);
-    if (network) addNetwork(map, network, state.site.id);
+    if (network) addNetwork(map, network);
     if (events) addEvents(map, events, state.site.id);
     if (hotspots) addHotspots(map, hotspots);
     addSelectionLayer(map);
@@ -453,7 +445,6 @@ function buildSiteMap(payload) {
 }
 
 function siteMapNote(site) {
-  if (site.id === 'coryell') return '<b>Repair-history test.</b> Colour shows the modelled risk percentile from pre-2025 conditions. No NISAR chips are bundled.';
   if (site.id === 'bulgaria') return '<b>Screening demo.</b> Raster = weather-normalised evidence. Points = ranked candidates, not confirmed leaks.';
   return '<b>Validation case.</b> Colour raster = leak-likelihood score; yellow points = repair/break records.';
 }
@@ -471,7 +462,7 @@ function addOverlay(map, meta, kind) {
   });
   map.addLayer({
     id: 'overlay', type: 'raster', source: 'overlay',
-    paint: { 'raster-opacity': 0.80, 'raster-fade-duration': 0 },
+    paint: { 'raster-opacity': 0.72, 'raster-fade-duration': 0 },
   });
 }
 
@@ -486,24 +477,12 @@ function setOverlay(kind) {
   updateLegend();
 }
 
-function addNetwork(map, fc, siteId) {
+function addNetwork(map, fc) {
   map.addSource('network', { type: 'geojson', data: fc, generateId: true });
-  if (siteId === 'coryell') {
-    map.addLayer({
-      id: 'network-line', type: 'line', source: 'network',
-      paint: {
-        'line-color': ['interpolate', ['linear'], ['coalesce', ['get', 'risk'], 0],
-          0, '#2b5d4b', 40, '#7a8f4a', 65, '#d9a441', 85, '#ff6b4a', 100, '#ff2d55'],
-        'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1.1, 13, 2.4],
-        'line-opacity': 0.9,
-      },
-    });
-  } else {
-    map.addLayer({
-      id: 'network-line', type: 'line', source: 'network',
-      paint: { 'line-color': '#7ee0b0', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 13, 2.2], 'line-opacity': 0.62 },
-    });
-  }
+  map.addLayer({
+    id: 'network-line', type: 'line', source: 'network',
+    paint: { 'line-color': '#7ee0b0', 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 13, 2.2], 'line-opacity': 0.62 },
+  });
   map.addLayer({
     id: 'network-hit', type: 'line', source: 'network',
     paint: { 'line-color': '#000', 'line-width': 9, 'line-opacity': 0 },
@@ -512,11 +491,10 @@ function addNetwork(map, fc, siteId) {
 
 function addEvents(map, fc, siteId) {
   map.addSource('events', { type: 'geojson', data: fc });
-  const color = siteId === 'coryell' ? '#4cc9f0' : '#ffd166';
   map.addLayer({
     id: 'events-circle', type: 'circle', source: 'events',
     paint: {
-      'circle-color': color,
+      'circle-color': '#ffd166',
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 2.2, 13, 4.4, 16, 7],
       'circle-stroke-color': '#06100c',
       'circle-stroke-width': 1.1,
@@ -642,9 +620,7 @@ function bindMapInteractions(map) {
       } else if (layer === 'hotspots-circle') {
         showTip(e, `<b>Candidate ${esc(fmt(p.score, 1))}/100</b><br>moisture z ${esc(fmt(p.moisture, 2))}`);
       } else {
-        showTip(e, state.site?.id === 'coryell'
-          ? `<b>Pipe ${esc(p.size_label || '')}</b> · risk ${esc(fmt(p.risk, 1))}`
-          : '<b>Mapped water main</b>');
+        showTip(e, '<b>Mapped water main</b>');
       }
     });
     map.on('mouseleave', layer, () => { map.getCanvas().style.cursor = ''; hideTip(); });
@@ -698,6 +674,7 @@ function renderDefaultEvidence() {
   const s = state.site;
   const m = s.metrics;
   const isCoryell = s.id === 'coryell';
+  const corridor = m.corridor_p == null ? '—' : `${fmt(m.corridor_p, 2)}${m.corridor_p95 != null ? ` · p95 ${fmt(m.corridor_p95, 2)}` : ''}`;
   $('#evidence').innerHTML = `
     <div class="side-section">
       <div class="evidence-head">
@@ -709,34 +686,23 @@ function renderDefaultEvidence() {
       <p>Click a point, pipe or candidate hotspot on the map. The panel keeps the three evidence
          types separate so a modelled score is never presented as an observation.</p>
       <div class="kv">
-        <span class="k"><span class="tag obs">observed</span></span><span class="v">${isCoryell ? `${s.labels.toLocaleString()} repair records, 918 pipes` : `${m.n_labels || 0} ground-truth labels; mapped network`}</span>
-        <span class="k"><span class="tag mod">modelled</span></span><span class="v">${isCoryell ? 'Repair-risk percentile from pre-2025 conditions' : `Expected-condition residuals; leak score; ${m.vv_r2 != null ? `VV R² ${fmt(m.vv_r2, 2)}` : ''}`}</span>
+        <span class="k"><span class="tag obs">observed</span></span><span class="v">${m.n_labels || s.labels || 0} ground-truth labels; mapped network</span>
+        <span class="k"><span class="tag mod">modelled</span></span><span class="v">Expected-condition residuals; leak score${m.vv_r2 != null ? `; VV R² ${fmt(m.vv_r2, 2)}` : ''}</span>
         <span class="k"><span class="tag inf">inferred</span></span><span class="v">A place to investigate, never a confirmed leak</span>
       </div>
       <h2 style="margin-top:16px">Validation</h2>
-      ${isCoryell ? `
-        <div class="kv">
-          <span class="k">Temporal test</span><span class="v">${esc(state.data?.stats?.risk_validation?.test?.period || '')}</span>
-          <span class="k">Risk AUC</span><span class="v">${fmt(m.risk_auc, 3)} · AP ${fmt(m.risk_ap, 3)}</span>
-          <span class="k">Top-10% capture</span><span class="v">${pct(m.risk_top10)} of repairs</span>
-          <span class="k">Base rate</span><span class="v">${pct(m.base_rate)} of pipes</span>
-          <span class="k">Baseline AUC</span><span class="v">${fmt(state.data?.stats?.risk_validation?.baseline_test?.auc, 3)}</span>
-        </div>
-        <div class="caveat">This is a repair-history model, not a radar detection result. It ranks pipes by prior repairs,
-          neighbours and attributes; it does not observe an active leak.</div>
-      ` : `
-        <div class="kv">
-          <span class="k">VV model</span><span class="v">R² ${fmt(m.vv_r2, 2)} · MAE ${fmt(m.vv_mae, 2)} dB</span>
-          <span class="k">NDMI model</span><span class="v">R² ${fmt(m.ndmi_r2, 2)} · MAE ${fmt(m.ndmi_mae, 3)}</span>
-          ${m.label_auc != null ? `<span class="k">Label ranking</span><span class="v">AUC ${fmt(m.label_auc, 3)} · median percentile ${fmt(m.label_percentile, 1)}</span>` : ''}
-          <span class="k">Corridor test</span><span class="v">p = ${fmt(m.corridor_p, 2)}${m.corridor_p95 != null ? ` · p95 = ${fmt(m.corridor_p95, 2)}` : ''}</span>
-        </div>
-        <div class="caveat">${m.label_auc != null ? 'Label AUC close to 0.5 means the final score is only weakly associated with repair locations. Treat this as a screening demo, not a detector.' : 'No confirmed leak labels. The corridor enrichment test is not significant; the map is a hypothesis generator.'}</div>
-      `}
+      <div class="kv">
+        <span class="k">VV model</span><span class="v">R² ${fmt(m.vv_r2, 2)} · MAE ${fmt(m.vv_mae, 2)} dB</span>
+        <span class="k">NDMI model</span><span class="v">R² ${fmt(m.ndmi_r2, 2)} · MAE ${fmt(m.ndmi_mae, 3)}</span>
+        ${m.label_auc != null ? `<span class="k">Label ranking</span><span class="v">AUC ${fmt(m.label_auc, 3)} · median percentile ${fmt(m.label_percentile, 1)}</span>` : ''}
+        <span class="k">Corridor test</span><span class="v">p = ${corridor}</span>
+      </div>
+      <div class="caveat">${m.label_auc != null
+        ? `Label AUC is close to random. ${isCoryell ? 'Coryell’s mean corridor p is nominally small, but the p95 test is 0.24; treat it as exploratory, not detection.' : 'Treat this as a screening demonstration, not a detector.'}`
+        : 'No confirmed leak labels. The corridor enrichment test is not significant; the map is a hypothesis generator.'}</div>
       <div class="evidence-actions">
         <button id="jump-results">Open results</button>
         <button id="jump-method">How it works</button>
-        ${isCoryell ? '<a href="./data/coryell/risk.csv" download>Pipe risk CSV</a>' : ''}
       </div>
     </div>`;
   $('#jump-results')?.addEventListener('click', () => { location.hash = 'compare'; });
@@ -803,27 +769,11 @@ function hotspotEvidence(p) {
     </div>`;
 }
 
-function networkEvidence(p) {
-  if (state.site?.id !== 'coryell') {
-    return `<p>This is the mapped water main used as the proximity prior. The bundled case does not include
+function networkEvidence() {
+  return `<p>This is the mapped water main used as the proximity prior. The case does not include
       per-segment attributes, so only the geometry and its distance context are available.</p>
-      <div class="caveat"><span class="tag obs">observed</span> Network geometry from OSM or the utility.
+      <div class="caveat"><span class="tag obs">observed</span> Network geometry from the utility.
       <span class="tag mod">modelled</span> Proximity weighting in the leak score.</div>`;
-  }
-  return `
-    <div class="kv">
-      <span class="k"><span class="tag obs">observed</span>size</span><span class="v">${esc(p.size_label || '—')}</span>
-      <span class="k">material</span><span class="v">${esc(p.material || '—')}</span>
-      <span class="k"><span class="tag mod">modelled</span>risk</span><span class="v">${fmt(p.risk, 1)} / 100 percentile</span>
-      <span class="k">prior repairs</span><span class="v">${fmt(p.prior_leaks, 0)}</span>
-      <span class="k">last 2 years</span><span class="v">${fmt(p.prior_leaks_2y, 0)}</span>
-      <span class="k">neighbours 500 m</span><span class="v">${fmt(p.nbr_leaks_2y_500m, 0)} in 2 years</span>
-    </div>
-    <div class="caveat" style="margin-top:12px">
-      <span class="tag mod">modelled</span> Percentile from a gradient-boosted model trained on
-      2023–2024 repairs using pre-2023 conditions, applied to pre-2025 features. It ranks
-      pipes for inspection; it is not a leak probability.
-    </div>`;
 }
 
 /* ------------------------------------------------------------------ compare */
@@ -838,22 +788,19 @@ function renderCompare() {
   const sites = state.sites;
   const row = (s) => {
     const m = s.metrics;
-    const auc = m.label_auc ?? m.risk_auc;
-    const aucLabel = m.label_auc != null ? 'label AUC' : m.risk_auc != null ? 'risk AUC' : '—';
-    const verdict = m.label_auc != null
-      ? (m.label_auc > 0.6 ? ['ok', 'useful'] : ['warn', 'weak'])
-      : m.risk_auc != null
-        ? (m.risk_auc > 0.7 ? ['ok', 'strong ranking'] : ['warn', 'moderate'])
-        : ['bad', 'unlabelled'];
+    const auc = m.label_auc;
+    const verdict = auc == null
+      ? ['bad', 'unlabelled']
+      : auc > 0.6 ? ['ok', 'useful'] : auc > 0.5 ? ['warn', 'weak'] : ['bad', 'not better'];
     const v = verdict;
     return `<tr>
       <td><strong>${esc(s.name)}</strong><br><span style="color:var(--muted);font-size:11px">${esc(s.subtitle)}</span></td>
-      <td>${s.kind === 'raster' ? 'Sentinel-1 expected condition' : 'Repair-history risk'}</td>
+      <td>Sentinel-1 expected condition</td>
       <td class="num">${s.labels ? s.labels.toLocaleString() : '—'}</td>
       <td class="num">${s.dates || '—'}</td>
       <td class="num">${fmt(m.vv_r2, 2)}</td>
       <td class="num">${fmt(m.ndmi_r2, 2)}</td>
-      <td class="num">${auc == null ? '—' : `${fmt(auc, 3)} <span style="color:var(--muted);font-size:10px">${aucLabel}</span>`}</td>
+      <td class="num">${auc == null ? '—' : `${fmt(auc, 3)} <span style="color:var(--muted);font-size:10px">label AUC</span>`}</td>
       <td class="num">${m.corridor_p95 == null ? '—' : fmt(m.corridor_p95, 2)}</td>
       <td><span class="pill ${v[0]}">${v[1]}</span></td>
     </tr>`;
@@ -870,14 +817,14 @@ function renderCompare() {
       <div class="doc-inner">
         <div class="eyebrow">Cross-site comparison</div>
         <h1>What is actually validated?</h1>
-        <p class="lead">Four studies, three different kinds of evidence. The table separates model skill
-          (predicting a surface state) from label ranking (does the final score find repairs?) and from
-          repair-history risk (does history predict future repairs?).</p>
+        <p class="lead">Four studies, one pipeline. The table separates model skill (predicting a surface
+          state) from label ranking (does the final score find repairs?). Every case uses the same
+          20 m grid, the same weather-normalised expected-condition model and the same validation code.</p>
 
         <div class="cards3">
           <div class="card"><h3>Surface models are skilful</h3><div class="big">0.25–0.65</div><p>VV and NDMI R² across the three Sentinel-1 cases. Weather, soil and season explain most of the variance.</p></div>
-          <div class="card"><h3>The leak score is weak</h3><div class="big">≈ 0.52</div><p>Label AUC in Aguascalientes and Calgary is close to random. The honest result is a screening tool, not a detector.</p></div>
-          <div class="card"><h3>Repair history is predictive</h3><div class="big">0.79</div><p>Coryell pipes ranked by pre-2025 conditions capture 28% of 2025–26 repairs in the top 10%. That is infrastructure risk, not radar.</p></div>
+          <div class="card"><h3>The leak score is weak</h3><div class="big">≈ 0.53</div><p>Label AUC is 0.526, 0.524 and 0.548 in the three labelled cities. The honest result is a screening tool, not a detector.</p></div>
+          <div class="card"><h3>One corridor test is nominally small</h3><div class="big">0.024</div><p>Coryell’s mean corridor placebo p is 0.024, but the p95 test is 0.24 and its label AUC is 0.548. One nominal result in four sites is not a validated detector.</p></div>
         </div>
 
         <h2>The comparison</h2>
@@ -904,25 +851,23 @@ function renderCompare() {
 
         <h2>What the final score adds</h2>
         <p>For the Sentinel-1 cases the final score combines moisture residual, persistence, thermal cooling and
-          pipe proximity. Against historical repair coordinates its AUC is <strong>0.526</strong> (Aguascalientes)
-          and <strong>0.524</strong> (Calgary). Both confidence intervals include 0.5. The corridor placebo tests
-          are also non-significant. Do not present this as leak detection.</p>
-        <p>For Coryell the target is different: a pipe with a repair next year, not a leak at a pixel. The
-          temporal test trains on 2023–24 repairs from pre-2023 conditions and evaluates 2025–26 repairs. It is a
-          stronger result, but it is <strong>infrastructure risk</strong> — age, material, repair history and
-          neighbourhood clustering — not a radar observation.</p>
+          pipe proximity. Against historical repair coordinates its AUC is <strong>0.526</strong> (Aguascalientes),
+          <strong>0.524</strong> (Calgary) and <strong>0.548</strong> (Coryell). All are weak positives, and the
+          corridor p95 tests are non-significant (1.00, 0.95 and 0.24). Coryell’s mean corridor p is 0.024, but a
+          single nominal mean result does not overturn the label ranking. Do not present this as leak detection.</p>
 
         <h2>Why keep all four?</h2>
-        <p>They answer different questions with different data. Bulgaria is the method demonstration with no labels.
-          Aguascalientes and Calgary test the surface-anomaly score against real repairs. Coryell tests whether
-          long repair history can prioritise pipes. A single platform makes the distinction visible instead of
-          collapsing everything into one “leak probability”.</p>
+        <p>They are the same method in different environments: a dry Bulgarian corridor with no labels, a dense
+          Mexican urban network, a Canadian trunk network, and a rural Texas district. Running Coryell through the
+          identical pipeline shows that the result is not an artefact of one city — and that the weak label signal
+          repeats. A single platform makes that comparison visible instead of collapsing everything into one
+          “leak probability”.</p>
 
         <h2>Read the evidence files</h2>
-        <p><a href="./data/coryell/risk.csv" target="_blank" rel="noopener">Coryell pipe risk CSV</a> · <a href="../outputs/validation.json" target="_blank" rel="noopener">Bulgaria validation</a> ·
+        <p><a href="../outputs/validation.json" target="_blank" rel="noopener">Bulgaria validation</a> ·
            <a href="../case_studies/aguascalientes/outputs/validation.json" target="_blank" rel="noopener">Aguascalientes validation</a> ·
            <a href="../case_studies/calgary/outputs/validation.json" target="_blank" rel="noopener">Calgary validation</a> ·
-           <a href="./data/coryell/stats.json" target="_blank" rel="noopener">Coryell stats</a></p>
+           <a href="../case_studies/coryell/outputs/validation.json" target="_blank" rel="noopener">Coryell validation</a></p>
       </div>
     </div>`;
 }
@@ -947,7 +892,7 @@ function renderMethod() {
         <h1>One workflow, four evidence checks</h1>
         <p class="lead">TerraGuard asks a narrower question than “where is the leak?”: where does the surface
           stay wetter (or cooler) than weather, soil, land cover and season predict — and does that anomaly
-          line up with a pipe, a repair history, or a radar change?</p>
+          line up with a pipe, a repair record, or a radar change?</p>
 
         <h2>1. The pipeline</h2>
         <pre class="code">Sentinel-1 RTC ─┐
@@ -982,7 +927,7 @@ soil / terrain ─┘                                            ▼
           <li><strong>Radiometric.</strong> dB, valid-mask and exception-mask filtering, same track/polarisation comparison group, fixed display stretch. No per-image histogram equalisation.</li>
           <li><strong>Input scaling.</strong> None for trees; <code>StandardScaler</code> only for the logistic comparisons, fitted inside each training fold.</li>
           <li><strong>Weather normalisation.</strong> <code>expected = f(weather, soil, terrain, land cover, season)</code>; residual <code>r = observed − expected</code>. This is the core step: weather is the normaliser, not another hopeful covariate.</li>
-          <li><strong>Residual scaling.</strong> Robust z-score <code>(r − median) / (1.4826 · MAD)</code>, fitted on training dates only and per land-cover class.</li>
+          <li><strong>Residual scaling.</strong> Robust z-score <code>(r − median) / (1.4826 · MAD)</code>, fitted on training dates only and per land-cover class. The leak raster is display-stretched to the site median–p99; the absolute score stays in the evidence panel.</li>
           <li><strong>Cross-site.</strong> Local contrast (pipe minus a 100–300 m annulus), within-city percentile, matched controls, translated placebo corridors.</li>
         </ol>
         <div class="caveat red">Never standardise a pixel against its own time series: that removes the persistent anomaly a leak produces.
@@ -993,22 +938,22 @@ soil / terrain ─┘                                            ▼
           <div class="card"><h3>Elin Pelin</h3><p><strong>Method demo.</strong> Weather-normalised VV/NDMI, thermal cooling, persistence, a 3.3 km OSM main, and a 200-corridor placebo test. No labels.</p></div>
           <div class="card"><h3>Aguascalientes</h3><p><strong>Urban label test.</strong> 50 dry-season repairs on 8,134 segments; 28 S1 dates. Final score AUC 0.526.</p></div>
           <div class="card"><h3>Calgary</h3><p><strong>Trunk-network test.</strong> 48 breaks on 5,879 segments; 50 dates across 2025–26. Final score AUC 0.524.</p></div>
-          <div class="card"><h3>Coryell</h3><p><strong>Repair-history test.</strong> 1,690 repairs on 918 pipes over seven years. Temporal risk AUC 0.787, top-10% capture 28%.</p></div>
+          <div class="card"><h3>Coryell</h3><p><strong>Rural label test.</strong> 72 summer repairs on 184 segments; 55 S1 dates. VV R² 0.43, NDMI R² 0.50, label AUC 0.548; mean corridor p 0.024, p95 0.24.</p></div>
         </div>
 
         <h2>5. What is new in this platform</h2>
         <ul>
           <li><strong>One contract.</strong> Every site exports the same meta, network, events and overlay schema, so a new area is a data task, not a UI rewrite.</li>
           <li><strong>One map.</strong> MapLibre replaces the per-case Leaflet pages; raster overlays, pipes, repairs and candidates share a view.</li>
-          <li><strong>Coryell.</strong> Seven years of field repairs with a temporal holdout — the first long-history validation in the bundle.</li>
+          <li><strong>Coryell.</strong> The fourth case is now a normal pipeline run: 72 summer repairs, 55 Sentinel-1 dates, the same 20 m expected-condition model and the same placebo/label tests.</li>
           <li><strong>Evidence separation.</strong> Observed, modelled and inferred are labelled separately; no composite “leak probability”.</li>
-          <li><strong>Honest comparison.</strong> Model skill, label ranking and repair-history risk are reported as different things.</li>
+          <li><strong>Honest comparison.</strong> Model skill and label ranking are reported separately; no score is presented as a leak probability.</li>
         </ul>
 
         <h2>6. Limits</h2>
         <ul>
           <li>The Sentinel-1 cases have <strong>no confirmed leak</strong>: repairs are bursts, not persistent leakage, and dates are report dates.</li>
-          <li>Label AUC ≈ 0.52–0.53 is close to random. The corridor placebo tests are not significant.</li>
+          <li>Label AUC ≈ 0.52–0.55 is close to random. The corridor p95 tests are not significant; Coryell’s mean p is nominally 0.024 but its p95 is 0.24.</li>
           <li>20 m pixels and ~100 m thermal cannot localise a metre-scale pipe failure.</li>
           <li>Urban land cover, irrigation, snow, roads and construction produce the same surface signatures.</li>
           <li>Coryell has <strong>no stated open licence</strong>; the layers are bundled for the hackathon only.</li>
@@ -1020,6 +965,10 @@ soil / terrain ─┘                                            ▼
         <pre class="code">cd chris-results
 pixi install                       # or use the parent .pixi environment
 python scripts/fetch_coryell.py    # public ArcGIS vectors, no login
+CASE=case_studies/coryell/case.json
+TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+TERRAGUARD_CASE=$CASE python -m pipeline.model
+TERRAGUARD_CASE=$CASE python -m pipeline.make_map
 python scripts/build_platform_data.py
 ./run_dashboard.sh                 # http://127.0.0.1:8766/app/</pre>
         <p>Full method notes: <a href="../docs/RESULTS.md">docs/RESULTS.md</a> ·
@@ -1054,12 +1003,16 @@ function updateLegend() {
       : state.overlay === 'nisar'
         ? 'linear-gradient(90deg,#000,#888,#fff)'
         : 'linear-gradient(90deg,#440154,#3b528b,#21918c,#5ec962,#fde725)';
-  const labels = state.overlay === 'leak' ? ['0', '50', '100']
-    : state.overlay === 'moisture' ? ['−2.5 z', '0', '+2.5 z']
-      : state.overlay === 'nisar' ? ['0', '128', '255']
-        : ['0', '0.5', '1'];
+  const vmin = layer.vmin != null ? Number(layer.vmin) : state.overlay === 'leak' ? 0 : state.overlay === 'moisture' ? -2.5 : state.overlay === 'nisar' ? 0 : 0;
+  const vmax = layer.vmax != null ? Number(layer.vmax) : state.overlay === 'leak' ? 100 : state.overlay === 'moisture' ? 2.5 : state.overlay === 'nisar' ? 255 : 1;
+  const mid = (vmin + vmax) / 2;
+  const nf = (v) => Number.isInteger(v) ? String(v) : v.toFixed(2);
+  const labels = [nf(vmin), nf(mid), nf(vmax)];
+  const title = state.overlay === 'leak'
+    ? `${layer.label} · display ${nf(vmin)}–${nf(vmax)} of 0–100`
+    : `${layer.label} (${layer.unit})`;
   el.innerHTML = `
-    <div class="legend-title">${esc(layer.label)} <span style="opacity:.6">(${esc(layer.unit)})</span></div>
+    <div class="legend-title">${esc(title)}</div>
     <div class="legend-bar" style="background:${cmap}"></div>
     <div class="legend-labels">${labels.map((l) => `<span>${l}</span>`).join('')}</div>`;
 }

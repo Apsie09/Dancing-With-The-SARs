@@ -135,35 +135,41 @@
     "subtitle": "Rural water district \u00b7 Texas, USA",
     "country": "United States",
     "center": [
-      -97.66,
-      31.5
+      -97.5307,
+      31.4853
     ],
-    "zoom": 9.4,
-    "kind": "vector",
-    "labels": 1690,
-    "dates": 0,
+    "zoom": 13.2,
+    "kind": "raster",
+    "labels": 72,
+    "dates": 55,
     "sensors": [
-      "Repair records",
-      "Pipe network",
-      "Pressure zones"
+      "Sentinel-1",
+      "Sentinel-2",
+      "Landsat",
+      "ERA5"
     ],
-    "status": "1,690 usable repairs \u00b7 918 pipes",
-    "headline": "Seven years of point-level repairs over a rural network: a temporal repair-risk test.",
+    "status": "72 repairs",
+    "headline": "A 10 \u00d7 10 km rural network, 55 Sentinel-1 dates and 72 summer repairs, run through the same weather-normalised pipeline.",
     "metrics": {
-      "vv_r2": null,
-      "ndmi_r2": null,
-      "label_auc": null,
-      "corridor_p": null,
-      "risk_auc": 0.7865410451617348,
-      "risk_ap": 0.5108418649959929,
-      "risk_top10": 0.28078817733990147,
-      "base_rate": 0.22113289760348584
+      "vv_r2": 0.4257698624877264,
+      "vv_mae": 1.3205447912509078,
+      "ndmi_r2": 0.5047071231345338,
+      "ndmi_mae": 0.1127929509053316,
+      "label_auc": 0.5482914878489622,
+      "label_percentile": 59.05095983347468,
+      "n_labels": 72,
+      "corridor_p": 0.024390243902439025,
+      "corridor_p95": 0.24390243902439024,
+      "corridor_ratio": 0.23027092218399048,
+      "s1_dates": 55,
+      "dry_season_dates": 20,
+      "pixels": 249859,
+      "nisar_layer": false
     },
     "caveats": [
-      "Coryell is a repair-history test, not a radar detection test.",
-      "The source layers have no stated open licence; bundled for this hackathon only.",
-      "Repair coordinates are where the crew logged the point, accuracy a few to tens of metres.",
-      "NISAR chips are not bundled because they need an Earthdata login."
+      "Label ranking AUC 0.548: weak positive. Mean corridor p = 0.024, but p95 = 0.24; not a validated detector.",
+      "Repair dates are report dates, not leak-start dates.",
+      "The source layers have no stated open licence; bundled for the hackathon only."
     ]
   }
 ]

@@ -151,15 +151,7 @@ def main() -> int:
                 err(f"coryell events expose personal fields: {sorted(bad)}")
             else:
                 ok("coryell events: no personal fields")
-            risk = base / "risk.csv"
-            if risk.exists():
-                header = risk.read_text(encoding="utf-8").splitlines()[0]
-                if "risk" not in header or "pipe_id" not in header:
-                    err("coryell/risk.csv: missing risk/pipe_id columns")
-                else:
-                    ok(f"coryell/risk.csv: {len(risk.read_text().splitlines()) - 1} rows")
-            else:
-                err("coryell/risk.csv missing")
+
 
     print()
     if errors_before:

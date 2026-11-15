@@ -6,13 +6,13 @@ Outputs a single static contract under ``app/data/``:
     <site>/meta.json               layers, bounds, timeline, sources
     <site>/network.geojson         pipes (simplified, WGS84)
     <site>/events.geojson          labels / repairs / candidate hotspots
-    <site>/hotspots.geojson        ranked candidates (raster cases)
-    <site>/zones.geojson           pressure zones (Coryell)
+    <site>/hotspots.geojson        ranked candidates
     <site>/overlay_*.png           leak / moisture / persistence rasters
     <site>/stats.json              small charts for the site panel
 
-Everything is generated from files already in this bundle, plus the public
-Coryell ArcGIS vectors fetched by ``scripts/fetch_coryell.py``.
+Everything is generated from the four case outputs already in this bundle.
+Coryell is a normal Sentinel-1 case; its source vectors are fetched and
+prepared by ``scripts/fetch_coryell.py`` and ``case_studies/prepare_coryell.py``.
 
 Usage (from chris-results/):
     python scripts/build_platform_data.py
@@ -20,7 +20,6 @@ Usage (from chris-results/):
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 
 import geopandas as gpd
@@ -30,8 +29,6 @@ import rasterio
 from PIL import Image
 from pyproj import Transformer
 from shapely.geometry import mapping
-from sklearn.ensemble import HistGradientBoostingClassifier
-from sklearn.metrics import average_precision_score, roc_auc_score
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "app"
@@ -137,6 +134,14 @@ def raster_to_png(tif: Path, out: Path, kind: str, max_px: int = 1400) -> dict |
     import matplotlib.pyplot as plt
 
     cmap_name, vmin, vmax, label, unit = CMAPS[kind]
+    if kind == "leak" and np.isfinite(arr).any():
+        # The absolute 0-100 score has very different distributions per site.
+        # Stretch the display to the site's median..p99 so the top evidence is
+        # visible; the evidence panel still reports the absolute score.
+        vmin = float(np.nanpercentile(arr, 50))
+        vmax = float(np.nanpercentile(arr, 99))
+        if not np.isfinite(vmax) or vmax <= vmin:
+            vmin, vmax = 0.0, 100.0
     cmap = plt.get_cmap(cmap_name)
     norm = np.clip((arr - vmin) / (vmax - vmin), 0, 1)
     norm = np.nan_to_num(norm, nan=0.0)
@@ -144,7 +149,7 @@ def raster_to_png(tif: Path, out: Path, kind: str, max_px: int = 1400) -> dict |
     mask = np.isfinite(arr)
     if kind == "leak":
         # Fade the low end so the basemap remains readable.
-        rgba[..., 3] = (np.clip((norm - 0.35) / 0.65, 0, 1) ** 0.9 * 220).astype(np.uint8)
+        rgba[..., 3] = (np.clip((norm - 0.05) / 0.95, 0, 1) ** 0.8 * 220).astype(np.uint8)
     elif kind == "moisture":
         rgba[..., 3] = (np.clip(np.abs(norm - 0.5) * 2, 0, 1) ** 0.75 * 200).astype(np.uint8)
     elif kind == "nisar":
@@ -167,6 +172,8 @@ def raster_to_png(tif: Path, out: Path, kind: str, max_px: int = 1400) -> dict |
         "label": label,
         "unit": unit,
         "kind": kind,
+        "vmin": float(vmin),
+        "vmax": float(vmax),
     }
 
 
@@ -219,280 +226,6 @@ def metrics_from_validation(v: dict) -> dict:
         "nisar_layer": bool(v.get("nisar_layer_present")),
     }
     return out
-
-
-# --------------------------------------------------------------------------- Coryell
-
-
-def _parse_size(text) -> float:
-    if text is None:
-        return np.nan
-    s = str(text).replace('"', "").strip()
-    try:
-        return float(s)
-    except ValueError:
-        return np.nan
-
-
-def _parse_loss(text) -> float:
-    if text is None:
-        return np.nan
-    s = str(text).lower().replace(",", "")
-    import re
-
-    m = re.search(r"(\d+(?:\.\d+)?)", s)
-    if not m:
-        return np.nan
-    return float(m.group(1))
-
-
-def load_coryell():
-    leaks = gpd.read_file(ROOT / "data" / "coryell" / "leak_survey.geojson").to_crs(32614)
-    leaks = leaks[leaks["ObjectId"] != 1611].copy()
-    leaks["dt"] = pd.to_datetime(leaks["datetime"], unit="ms", utc=True, errors="coerce")
-    leaks = leaks[leaks["dt"].notna()].copy()
-    leaks["date"] = leaks["dt"].dt.strftime("%Y-%m-%d")
-    leaks["size_in"] = leaks["line_size"].map(_parse_size)
-    leaks["loss_gpm"] = leaks["approximate_water_loss_gpm"].map(_parse_loss)
-    leaks["cause"] = leaks["cause_of_leak"].fillna("Unknown")
-    leaks["zone"] = leaks["what_pressure_plane_did_the_lea"].fillna("Unknown")
-    leaks["repair"] = leaks["type_of_repair"].fillna("Unknown")
-    leaks = leaks.sort_values("dt").reset_index(drop=True)
-    return leaks
-
-
-def assign_pipes(leaks: gpd.GeoDataFrame, pipes: gpd.GeoDataFrame) -> pd.DataFrame:
-    """Nearest pipe within 60 m; returns leak row -> pipe id."""
-    joined = gpd.sjoin_nearest(
-        leaks[["ObjectId", "geometry"]],
-        pipes[["pipe_id", "geometry"]],
-        how="left", max_distance=60, distance_col="snap_m",
-    ).drop_duplicates("ObjectId")
-    return joined[["ObjectId", "pipe_id", "snap_m"]]
-
-
-def coryell_risk(leaks: gpd.GeoDataFrame, pipes: gpd.GeoDataFrame) -> tuple[pd.DataFrame, dict, dict]:
-    """Temporal validation: pre-2023 conditions -> 2023-24 target, scored on 2025-26."""
-    from scipy.spatial import cKDTree
-
-    pipes = pipes.copy()
-    pipes["pipe_id"] = np.arange(len(pipes))
-    pipes["length_m"] = pipes.geometry.length
-    pipes["diameter"] = pd.to_numeric(pipes["Diameter"], errors="coerce")
-    pipes["diameter"] = pipes["diameter"].fillna(pipes["diameter"].median())
-    pipes["year"] = pd.to_numeric(pipes["Year"], errors="coerce")
-    pipes["year_missing"] = pipes["year"].isna().astype(int)
-    pipes["material_pvc"] = (pipes["Material"].fillna("").str.upper() == "PVC").astype(int)
-    mid = pipes.geometry.interpolate(0.5, normalized=True)
-    pipes["mx"], pipes["my"] = mid.x, mid.y
-    blk = 2000.0
-    pipes["block"] = ((pipes["mx"] // blk).astype(int).astype(str) + "_" +
-                      (pipes["my"] // blk).astype(int).astype(str))
-
-    link = assign_pipes(leaks, pipes)
-    linked = leaks.merge(link, on="ObjectId", how="left")
-    linked = linked[linked["pipe_id"].notna()].copy()
-    linked["pipe_id"] = linked["pipe_id"].astype(int)
-
-    # Leak points in metric coordinates for neighbourhood counts.
-    lx = np.c_[leaks.geometry.x, leaks.geometry.y]
-    tree = cKDTree(lx)
-    lt = leaks["dt"].astype("int64").to_numpy()
-
-    def features(cutoff: str) -> pd.DataFrame:
-        c = pd.Timestamp(cutoff, tz="UTC")
-        before = linked[linked["dt"] < c]
-        prior = before.groupby("pipe_id").size().rename("prior_leaks")
-        last = before.groupby("pipe_id")["dt"].max()
-        recent = before[before["dt"] >= c - pd.Timedelta(days=730)].groupby("pipe_id").size().rename("prior_leaks_2y")
-        out = pipes[["pipe_id", "length_m", "diameter", "year", "year_missing",
-                     "material_pvc", "mx", "my", "block"]].copy()
-        out = out.merge(prior, on="pipe_id", how="left").merge(
-            recent, on="pipe_id", how="left")
-        out[["prior_leaks", "prior_leaks_2y"]] = out[["prior_leaks", "prior_leaks_2y"]].fillna(0)
-        last_ns = last.reindex(out["pipe_id"]).astype("int64").to_numpy()
-        out["months_since_last"] = (c.value - last_ns) / (30 * 86400 * 1e9)
-        out["months_since_last"] = pd.Series(out["months_since_last"]).fillna(999)
-        # Neighbourhood: leaks within 500 m of the pipe midpoint before cutoff.
-        c_ns = c.value
-        c2_ns = (c - pd.Timedelta(days=730)).value
-        counts, counts2 = [], []
-        for x, y in zip(out["mx"], out["my"]):
-            idx = tree.query_ball_point((x, y), 500)
-            if idx:
-                t = lt[idx]
-                counts.append(int((t < c_ns).sum()))
-                counts2.append(int(((t < c_ns) & (t >= c2_ns)).sum()))
-            else:
-                counts.append(0)
-                counts2.append(0)
-        out["nbr_leaks_500m"] = counts
-        out["nbr_leaks_2y_500m"] = counts2
-        return out
-
-    def target(cutoff: str, end: str) -> pd.Series:
-        c = pd.Timestamp(cutoff, tz="UTC")
-        e = pd.Timestamp(end, tz="UTC")
-        sel = linked[(linked["dt"] >= c) & (linked["dt"] < e)]
-        return pipes["pipe_id"].isin(sel["pipe_id"]).astype(int)
-
-    feats_tr = features("2023-01-01")
-    feats_te = features("2025-01-01")
-    y_tr = target("2023-01-01", "2025-01-01").to_numpy()
-    y_te = target("2025-01-01", "2026-11-12").to_numpy()
-    cols = ["length_m", "diameter", "year", "year_missing", "material_pvc",
-            "prior_leaks", "prior_leaks_2y", "months_since_last",
-            "nbr_leaks_500m", "nbr_leaks_2y_500m"]
-
-    # Drop pipes installed after the evaluation period.
-    ok_tr = ~(feats_tr["year"] > 2022)
-    ok_te = ~(feats_te["year"] > 2024)
-    Xtr, ytr = feats_tr.loc[ok_tr, cols].to_numpy(), y_tr[ok_tr.to_numpy()]
-    Xte, yte = feats_te.loc[ok_te, cols].to_numpy(), y_te[ok_te.to_numpy()]
-
-    model = HistGradientBoostingClassifier(
-        learning_rate=0.05, max_iter=250, max_depth=3, min_samples_leaf=25,
-        l2_regularization=1.0, random_state=42,
-    )
-    model.fit(Xtr, ytr)
-    p_te = model.predict_proba(Xte)[:, 1]
-
-    # Transparent baseline: recency-weighted prior repairs.
-    base_tr = feats_tr.loc[ok_tr, ["prior_leaks", "prior_leaks_2y", "nbr_leaks_2y_500m"]].to_numpy()
-    base_te = feats_te.loc[ok_te, ["prior_leaks", "prior_leaks_2y", "nbr_leaks_2y_500m"]].to_numpy()
-    bmodel = HistGradientBoostingClassifier(
-        learning_rate=0.05, max_iter=120, max_depth=2, min_samples_leaf=40,
-        l2_regularization=1.0, random_state=7,
-    )
-    bmodel.fit(base_tr, ytr)
-    p_base = bmodel.predict_proba(base_te)[:, 1]
-
-    def m(y, p):
-        top = p >= np.quantile(p, 0.9)
-        return {
-            "auc": float(roc_auc_score(y, p)),
-            "ap": float(average_precision_score(y, p)),
-            "top10_capture": float(y[top].sum() / max(y.sum(), 1)),
-            "base_rate": float(np.mean(y)),
-            "n": int(len(y)),
-            "positives": int(np.sum(y)),
-        }
-
-    metrics = {
-        "link_rate": float(linked["ObjectId"].nunique() / len(leaks)),
-        "snap_m_median": float(link["snap_m"].median()),
-        "train": {"period": "2023-01-01..2024-12-31", **m(ytr, model.predict_proba(Xtr)[:, 1])},
-        "test": {"period": "2025-01-01..2026-11-11", **m(yte, p_te)},
-        "baseline_test": {"period": "2025-01-01..2026-11-11", **m(yte, p_base)},
-    }
-
-    # Score every pipe with pre-2025 conditions (the model learned on 2023-24).
-    all_feats = feats_te.copy()
-    all_feats["risk_raw"] = model.predict_proba(all_feats[cols].to_numpy())[:, 1]
-    all_feats["risk"] = (all_feats["risk_raw"].rank(pct=True) * 100).round(1)
-    all_feats["risk_percentile"] = (all_feats["risk_raw"].rank(pct=True) * 100).round(1)
-    # Pipes installed after the evaluation period are not at risk yet.
-    new = all_feats["year"] > 2024
-    all_feats.loc[new, ["risk", "risk_percentile"]] = np.nan
-    risk = all_feats[["pipe_id", "risk", "risk_percentile", "prior_leaks",
-                      "prior_leaks_2y", "months_since_last", "nbr_leaks_500m",
-                      "nbr_leaks_2y_500m"]]
-    return risk, metrics, {"cols": cols, "model": "HistGradientBoostingClassifier"}
-
-
-def coryell_site() -> dict:
-    leaks = load_coryell()
-    pipes = gpd.read_file(ROOT / "data" / "coryell" / "waterlines.geojson").to_crs(32614)
-    zones = gpd.read_file(ROOT / "data" / "coryell" / "pressure_zones.geojson").to_crs(4326)
-    risk, valid, model_meta = coryell_risk(leaks, pipes)
-
-    pipes = pipes.reset_index(drop=True)
-    pipes["pipe_id"] = np.arange(len(pipes))
-    pipes = pipes.merge(risk, on="pipe_id", how="left")
-    pipes = pipes.to_crs(4326)
-    pipes["size_label"] = pipes["Size"].fillna("")
-    pipes["material"] = pipes["Material"].fillna("Unknown")
-
-    out = DATA / "coryell"
-    out.mkdir(parents=True, exist_ok=True)
-    n_pipes = write_geojson(
-        pipes, out / "network.geojson",
-        ["pipe_id", "size_label", "material", "risk", "risk_percentile",
-         "prior_leaks", "prior_leaks_2y", "nbr_leaks_2y_500m"],
-    )
-    pipes[["pipe_id", "size_label", "material", "risk", "risk_percentile",
-           "prior_leaks", "prior_leaks_2y", "months_since_last",
-           "nbr_leaks_2y_500m"]].sort_values("risk", ascending=False).to_csv(
-        out / "risk.csv", index=False)
-    write_geojson(zones, out / "zones.geojson", ["Name", "SquareMiles"])
-
-    # Leak points for the map: privacy-safe fields only.
-    ev = leaks.copy()
-    ev["lon"] = ev.geometry.x
-    ev["lat"] = ev.geometry.y
-    ev = ev.to_crs(4326)
-    ev["lon"], ev["lat"] = ev.geometry.x, ev.geometry.y
-    ev["date"] = ev["dt"].dt.strftime("%Y-%m-%d")
-    ev["year"] = ev["dt"].dt.year
-    ev = ev.rename(columns={"ObjectId": "id", "line_size": "size", "loss_gpm": "loss"})
-    ev["cause"] = ev["cause"].fillna("Unknown").astype(str).str.replace("_", " ", regex=False).str.strip()
-    ev["repair"] = ev["repair"].fillna("Unknown").astype(str).str.replace("_", " ", regex=False).str.strip()
-    ev["zone"] = ev["zone"].fillna("Unknown").astype(str).str.replace("_", " ", regex=False).str.strip()
-    n_events = write_geojson(
-        ev, out / "events.geojson",
-        ["id", "date", "year", "size", "loss", "cause", "repair", "zone", "lon", "lat"],
-    )
-
-    # Simple series for the panel.
-    by_year = ev.groupby("year").size().to_dict()
-    by_cause = ev["cause"].value_counts().to_dict()
-    by_size = (ev["size"].fillna("unknown").value_counts().head(8).to_dict())
-    by_month = ev.assign(month=ev["dt"].dt.strftime("%Y-%m")).groupby("month").size().to_dict()
-    stats = {
-        "records": int(len(ev)),
-        "pipes": int(n_pipes),
-        "zones": int(len(zones)),
-        "period": [str(ev["date"].min()), str(ev["date"].max())],
-        "nisar_window_records": int((ev["dt"] >= pd.Timestamp("2025-10-17", tz="UTC")).sum()),
-        "by_year": {str(k): int(v) for k, v in by_year.items()},
-        "by_cause": {str(k): int(v) for k, v in by_cause.items()},
-        "by_size": {str(k): int(v) for k, v in by_size.items()},
-        "by_month": dict(sorted(by_month.items())),
-        "risk_validation": valid,
-        "model": model_meta,
-    }
-    (out / "stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
-
-    return {
-        "id": "coryell",
-        "name": "Coryell City WSD",
-        "subtitle": "Rural water district · Texas, USA",
-        "country": "United States",
-        "center": [-97.66, 31.50],
-        "zoom": 9.4,
-        "kind": "vector",
-        "labels": int(len(ev)),
-        "dates": 0,
-        "sensors": ["Repair records", "Pipe network", "Pressure zones"],
-        "status": "1,690 usable repairs · 918 pipes",
-        "headline": "Seven years of point-level repairs over a rural network: a temporal repair-risk test.",
-        "metrics": {
-            "risk_auc": valid["test"]["auc"],
-            "risk_ap": valid["test"]["ap"],
-            "risk_top10": valid["test"]["top10_capture"],
-            "base_rate": valid["test"]["base_rate"],
-            "vv_r2": None,
-            "ndmi_r2": None,
-            "label_auc": None,
-            "corridor_p": None,
-        },
-        "caveats": [
-            "Coryell is a repair-history test, not a radar detection test.",
-            "The source layers have no stated open licence; bundled for this hackathon only.",
-            "Repair coordinates are where the crew logged the point, accuracy a few to tens of metres.",
-            "NISAR chips are not bundled because they need an Earthdata login.",
-        ],
-    }
 
 
 # --------------------------------------------------------------------------- site builders
@@ -550,6 +283,24 @@ SITE_DIRS = {
             "Label ranking AUC 0.524: weak positive, not significant.",
             "The Sentinel-1 RTC archive here starts April 2025.",
             "No NISAR imagery in this case.",
+        ],
+    },
+    "coryell": {
+        "root": CASE / "coryell",
+        "name": "Coryell City WSD",
+        "subtitle": "Rural water district · Texas, USA",
+        "country": "United States",
+        "center": [-97.5307, 31.4853],
+        "zoom": 13.2,
+        "network": CASE / "coryell" / "data" / "vectors" / "water_main.geojson",
+        "labels": CASE / "coryell" / "data" / "vectors" / "labels.csv",
+        "hotspots": CASE / "coryell" / "outputs" / "hotspots.csv",
+        "status": "72 repairs",
+        "headline": "A 10 × 10 km rural network, 55 Sentinel-1 dates and 72 summer repairs, run through the same weather-normalised pipeline.",
+        "caveats": [
+            "Label ranking AUC 0.548: weak positive. Mean corridor p = 0.024, but p95 = 0.24; not a validated detector.",
+            "Repair dates are report dates, not leak-start dates.",
+            "The source layers have no stated open licence; bundled for the hackathon only.",
         ],
     },
 }
@@ -662,41 +413,6 @@ def build_raster_site(site_id: str, cfg: dict) -> dict:
     }
 
 
-def build_coryell_site() -> dict:
-    site = coryell_site()
-    out = DATA / "coryell"
-    stats = read_json(out / "stats.json", {})
-    site["metrics"] = {
-        "vv_r2": None,
-        "ndmi_r2": None,
-        "label_auc": None,
-        "corridor_p": None,
-        **site["metrics"],
-    }
-    meta = {
-        "id": "coryell",
-        "name": site["name"],
-        "subtitle": site["subtitle"],
-        "country": site["country"],
-        "center": site["center"],
-        "zoom": site["zoom"],
-        "kind": "vector",
-        "network_file": "network.geojson",
-        "events_file": "events.geojson",
-        "zones_file": "zones.geojson",
-        "stats_file": "stats.json",
-        "timeline": {"field": "date", "min": stats["period"][0], "max": stats["period"][1]},
-        "sources": [
-            "Coryell City WSD leak survey (ArcGIS, no stated licence)",
-            "CCWSD waterline network (ArcGIS)",
-            "CCWSD pressure planes (ArcGIS)",
-        ],
-        "caveats": site["caveats"],
-    }
-    (out / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
-    return site
-
-
 def main() -> None:
     APP.mkdir(parents=True, exist_ok=True)
     DATA.mkdir(parents=True, exist_ok=True)
@@ -704,8 +420,6 @@ def main() -> None:
     for sid, cfg in SITE_DIRS.items():
         print(f"building {sid} ...")
         sites.append(build_raster_site(sid, cfg))
-    print("building coryell ...")
-    sites.append(build_coryell_site())
     (DATA / "sites.json").write_text(json.dumps(sites, indent=2), encoding="utf-8")
     print(f"wrote {DATA / 'sites.json'} ({len(sites)} sites)")
 

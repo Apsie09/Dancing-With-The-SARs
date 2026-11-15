@@ -1,12 +1,17 @@
 # Coryell City WSD — bundled vector data
 
-This folder documents the public ArcGIS vectors used by the Coryell site in the TerraGuard
-Evidence Explorer. The raw files are **fetched and git-ignored**; the privacy-trimmed export consumed by the
-app lives in `app/data/coryell/`.
+This folder documents the public ArcGIS source vectors for the Coryell case in the TerraGuard
+Evidence Explorer. The raw files are **fetched and git-ignored**. `prepare_coryell.py` subsets
+them into a fixed 10 × 10 km case, which the shared pipeline then processes like the other cases.
 
 ```bash
-python scripts/fetch_coryell.py        # writes the raw files here
-python scripts/build_platform_data.py  # trims personal fields and builds app/data/coryell
+python scripts/fetch_coryell.py         # writes the raw files here
+python case_studies/prepare_coryell.py  # 10 x 10 km case + 72 summer labels
+CASE=case_studies/coryell/case.json
+TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+TERRAGUARD_CASE=$CASE python -m pipeline.model
+TERRAGUARD_CASE=$CASE python -m pipeline.make_map
+python scripts/build_platform_data.py   # exports app/data/coryell
 ```
 
 | File (fetched, git-ignored) | Records | Contents |
@@ -28,17 +33,21 @@ python scripts/build_platform_data.py  # trims personal fields and builds app/da
 ## Privacy
 
 - `Creator` and `Editor` staff account names are **not** exported into the app.
-- Crew notes (`notes`), global IDs and raw free-text water-loss values are removed from the app
-  events; the platform keeps only parsed pipe size, parsed loss number, cause, repair type and zone.
+- Crew notes (`notes`), global IDs and raw free-text water-loss values are removed from the case
+  labels and the app events; the app keeps only ID, date, cause, pipe size and coordinates.
 - The full `leak_survey.geojson` is the unmodified public export and still contains those fields;
   do not display it directly.
 
 ## Known issues
 
-- ObjectId 1611 is a test entry near Galveston, ~340 km from the district; the platform drops it.
-- ObjectId 564 has no date; the platform drops it, leaving **1,690 usable repairs**.
+- ObjectId 1611 is a test entry near Galveston, ~340 km from the district; the case drops it.
+- ObjectId 564 has no date; the case drops it.
+- The district export has 1,690 usable repairs; the case uses the **72 summer repairs inside the
+  10 × 10 km AOI** (June–September 2025–2026).
 - Coordinates are where the crew logged the repair; accuracy is not stated, assume a few to tens
   of metres.
+- The case AOI is UTM 14N x = 634,555–644,555 m, y = 3,479,328–3,489,328 m
+  (lon −97.584…−97.477, lat 31.441…31.530).
 - Pressure-zone names in the leak records do not all appear in the polygon layer (e.g. Jonesboro
   Pancake, Turnersville).
 - Repair dates are report dates, not leak-start dates.

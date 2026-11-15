@@ -37,7 +37,7 @@ acquire = "python -m pipeline.acquire"
 model = "python -m pipeline.model"
 map = "python -m pipeline.make_map"
 serve = "python -m http.server 8766 --directory ."
-app-data = "python scripts/fetch_coryell.py && python scripts/build_platform_data.py"
+app-data = "python scripts/fetch_coryell.py && python case_studies/prepare_coryell.py && python scripts/build_platform_data.py"
 app-check = "python scripts/check_platform.py"
 app = { depends-on = ["app-data", "app-check"] }
 all = { depends-on = ["pipelines", "acquire", "model", "map"] }

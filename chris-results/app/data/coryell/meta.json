@@ -4,29 +4,74 @@
   "subtitle": "Rural water district \u00b7 Texas, USA",
   "country": "United States",
   "center": [
-    -97.66,
-    31.5
+    -97.5307,
+    31.4853
   ],
-  "zoom": 9.4,
-  "kind": "vector",
+  "zoom": 13.2,
+  "kind": "raster",
+  "layers": [
+    {
+      "file": "overlay_leak.png",
+      "bounds": [
+        -97.58547770219776,
+        31.43955157874776,
+        -97.4758662316622,
+        31.53116972422787
+      ],
+      "label": "Leak likelihood",
+      "unit": "0-100",
+      "kind": "leak",
+      "vmin": 5.968762397766113,
+      "vmax": 35.0
+    },
+    {
+      "file": "overlay_moisture.png",
+      "bounds": [
+        -97.58547770219776,
+        31.43955157874776,
+        -97.4758662316622,
+        31.53116972422787
+      ],
+      "label": "Moisture anomaly (robust z)",
+      "unit": "z",
+      "kind": "moisture",
+      "vmin": -2.5,
+      "vmax": 2.5
+    },
+    {
+      "file": "overlay_persistence.png",
+      "bounds": [
+        -97.58547770219776,
+        31.43955157874776,
+        -97.4758662316622,
+        31.53116972422787
+      ],
+      "label": "Dry-season persistence",
+      "unit": "fraction",
+      "kind": "persistence",
+      "vmin": 0.0,
+      "vmax": 1.0
+    }
+  ],
   "network_file": "network.geojson",
   "events_file": "events.geojson",
-  "zones_file": "zones.geojson",
+  "hotspots_file": "hotspots.geojson",
   "stats_file": "stats.json",
   "timeline": {
     "field": "date",
-    "min": "2019-09-30",
-    "max": "2026-11-11"
+    "min": "2025-06-27",
+    "max": "2026-09-30"
   },
   "sources": [
-    "Coryell City WSD leak survey (ArcGIS, no stated licence)",
-    "CCWSD waterline network (ArcGIS)",
-    "CCWSD pressure planes (ArcGIS)"
+    "Sentinel-1 RTC (Planetary Computer)",
+    "Sentinel-2 L2A NDMI",
+    "Landsat C2 L2 LST",
+    "ERA5 via Open-Meteo",
+    "ESA WorldCover / Copernicus DEM / SoilGrids"
   ],
   "caveats": [
-    "Coryell is a repair-history test, not a radar detection test.",
-    "The source layers have no stated open licence; bundled for this hackathon only.",
-    "Repair coordinates are where the crew logged the point, accuracy a few to tens of metres.",
-    "NISAR chips are not bundled because they need an Earthdata login."
+    "Label ranking AUC 0.548: weak positive. Mean corridor p = 0.024, but p95 = 0.24; not a validated detector.",
+    "Repair dates are report dates, not leak-start dates.",
+    "The source layers have no stated open licence; bundled for the hackathon only."
   ]
 }

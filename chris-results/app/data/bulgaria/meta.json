@@ -20,7 +20,9 @@
       ],
       "label": "Leak likelihood",
       "unit": "0-100",
-      "kind": "leak"
+      "kind": "leak",
+      "vmin": 0.9655265212059021,
+      "vmax": 12.562911987304688
     },
     {
       "file": "overlay_moisture.png",
@@ -32,7 +34,9 @@
       ],
       "label": "Moisture anomaly (robust z)",
       "unit": "z",
-      "kind": "moisture"
+      "kind": "moisture",
+      "vmin": -2.5,
+      "vmax": 2.5
     },
     {
       "file": "overlay_persistence.png",
@@ -44,7 +48,9 @@
       ],
       "label": "Dry-season persistence",
       "unit": "fraction",
-      "kind": "persistence"
+      "kind": "persistence",
+      "vmin": 0.0,
+      "vmax": 1.0
     },
     {
       "file": "overlay_nisar.png",
@@ -56,7 +62,9 @@
       ],
       "label": "NISAR HH browse (display only)",
       "unit": "DN",
-      "kind": "nisar"
+      "kind": "nisar",
+      "vmin": 0.0,
+      "vmax": 255.0
     }
   ],
   "network_file": "network.geojson",

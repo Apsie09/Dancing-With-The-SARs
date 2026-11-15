@@ -17,8 +17,8 @@ platform replaces that as the main entry point:
 |---|---|
 | `terraguard_dashboard.html` with case tabs | `app/` — one MapLibre explorer with four sites, compare and method views |
 | each case map built by `pipeline/make_map.py` | one export contract (`app/data/`) consumed by one app |
-| no Coryell case | Coryell added: 1,690 repairs, 918 pipes, seven-year repair history |
-| no cross-site risk comparison | compare view separates model skill, label ranking and repair-history risk |
+| no Coryell case | Coryell added as a normal fourth Sentinel-1 case: 72 summer repairs, 55 dates, same model and validation |
+| no cross-site comparison | compare view separates model skill from label ranking across all four sites |
 | no evidence vocabulary | observed / modelled / inferred labels on every panel |
 | hardcoded per-case HTML | site registry + `meta.json`; a new site is a data task |
 
@@ -33,24 +33,22 @@ The old dashboard and per-case Leaflet maps are kept as a **legacy appendix**; t
 | Elin Pelin, Bulgaria | Sentinel-1/2 + Landsat, weather-normalised | none | corridor p95 = 0.89 | method demo; no confirmed leak |
 | Aguascalientes, Mexico | Sentinel-1, weather-normalised | 50 repairs | label AUC 0.526 | weak, not significant |
 | Calgary, Canada | Sentinel-1, weather-normalised | 48 breaks | label AUC 0.524 | weak, not significant |
-| Coryell, Texas | repair history + pipe network | 1,690 repairs | temporal risk AUC 0.787 | useful ranking of infrastructure risk, not radar detection |
+| Coryell, Texas | Sentinel-1/2 + Landsat, weather-normalised | 72 summer repairs | label AUC 0.548 | weak positive; mean corridor p 0.024, p95 0.24 |
 
 ### Coryell details
 
-- **Scope:** 1,690 usable point repairs (2 records dropped: one outlier near Galveston and one
-  without a date), 2019-09-30 to 2026-11-11; 918 pipe features; 7 pressure zones.
-- **Model:** `HistGradientBoostingClassifier`, features only from before each cutoff:
-  length, diameter, install year (mostly missing), PVC indicator, prior repairs, prior repairs
-  in the last two years, months since last repair, repairs within 500 m of the pipe midpoint.
-- **Train:** features before 2023-01-01 → target any repair in 2023–2024.
-- **Test:** features before 2025-01-01 → target any repair in 2025-01-01..2026-11-11.
-- **Results:** AUC **0.787**, average precision **0.511**, top-10 % capture **28.1 %** of repairs,
-  base rate **22.1 %** of pipes. The transparent recurrence baseline has AUC **0.719** and top-10 %
-  capture **29.1 %**, so the model improves global ranking but not top-decile capture; treat the
-  ranking as modest.
-- **Map score:** model trained on 2023–24, applied to pre-2025 features; displayed as a percentile.
-- **Why it is different:** this is *infrastructure risk*, not a radar observation. The target is
-  "a repair was recorded on this pipe in the next two years", not "a leak is visible now".
+- **Scope:** a fixed 10 × 10 km rural AOI in UTM 14N (EPSG:32614), 184 clipped pipe segments,
+  72 summer repairs (June–September 2025–2026), 7 pressure zones in the source district.
+- **Sensors:** Sentinel-1 RTC ascending relative orbit 34, **55 dates** (2025-01-07 to 2026-11-05);
+  76 Sentinel-2 dates; 47 Landsat LST dates; ERA5 weather.
+- **Pipeline:** exactly the same modules and parameters as the other cases, selected by
+  `TERRAGUARD_CASE=case_studies/coryell/case.json`.
+- **Model skill:** VV MAE 1.32 dB / R² **0.426**; NDMI MAE 0.113 / R² **0.505**.
+- **Label ranking:** AUC **0.548**, median percentile 59.1 on 72 repairs.
+- **Corridor test:** mean placebo p **0.024**, p95 placebo p **0.244**. The mean is nominally
+  small; the p95 test is not, so this is not a validated detector.
+- **No NISAR:** the case has no calibrated NISAR imagery. It is a Sentinel-1/2 case like
+  Aguascalientes and Calgary.
 
 ---
 
@@ -67,11 +65,12 @@ chris-results/
 │       ├── bulgaria/       meta.json, network, hotspots, overlay_*.png, stats
 │       ├── aguascalientes/  same contract
 │       ├── calgary/         same contract
-│       └── coryell/         meta.json, network, events, zones, stats, risk.csv
+│       └── coryell/         meta.json, network, events, rasters, stats
 ├── scripts/
 │   ├── fetch_coryell.py          public ArcGIS vectors (no login)
 │   ├── build_platform_data.py    one exporter for all sites
 │   └── check_platform.py         contract + privacy + metric checks
+├── case_studies/coryell/         case.json, clipped network, labels, pipeline outputs
 ├── data/coryell/                 data note; raw vectors fetched and git-ignored
 ├── docs/PLATFORM.md              this document
 └── run_dashboard.sh              serves the bundle and prints /app/
@@ -84,7 +83,7 @@ Every site directory contains:
 | File | Required | Contents |
 |---|---|---|
 | `meta.json` | yes | id, name, centre, zoom, kind (`raster`/`vector`), layer list, timelines, sources, caveats |
-| `network.geojson` | vector sites | pipes; Coryell adds size, material, risk, repair history |
+| `network.geojson` | yes | mapped pipes / water main |
 | `events.geojson` | labelled sites | repairs/breaks; privacy-safe fields only |
 | `hotspots.geojson` | raster sites | ranked candidates with score and evidence components |
 | `zones.geojson` | optional | pressure zones |
@@ -108,13 +107,18 @@ loads only the selected site.
 ```bash
 cd chris-results
 
-# 1. Coryell vectors (public ArcGIS, no login; no stated licence)
+# 1. Coryell source vectors and case subset (public ArcGIS, no login)
 python scripts/fetch_coryell.py
+python case_studies/prepare_coryell.py
 
-# 2. Render rasters + normalise vectors + compute Coryell validation
+# 2. Run the same pipeline as the other cases
+CASE=case_studies/coryell/case.json
+TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+TERRAGUARD_CASE=$CASE python -m pipeline.model
+TERRAGUARD_CASE=$CASE python -m pipeline.make_map
+
+# 3. Export every case to the app contract
 python scripts/build_platform_data.py
-
-# 3. Contract, privacy and metric checks
 python scripts/check_platform.py
 
 # 4. Serve
@@ -125,10 +129,11 @@ python scripts/check_platform.py
 
 - reads the Bulgaria and case outputs already in the bundle;
 - renders the three evidence rasters to bounded RGBA PNGs (no browser-side GeoTIFF decoding);
+- stretches only the leak raster for display to the site median–p99 so the top evidence is visible;
+  the absolute 0–100 score remains in the evidence panel, hotspots and validation files;
 - simplifies networks in their local UTM CRS before reprojecting to WGS84;
-- strips personal fields from Coryell events (Creator, Editor, notes, globalid, raw loss text);
-- computes the Coryell temporal validation and writes `risk.csv`;
-- writes one registry and one meta file per site.
+- strips personal fields from Coryell labels (Creator, Editor, notes, globalid, raw loss text);
+- writes one registry and one meta file per site from each case's `validation.json`.
 
 Raw satellite stacks remain excluded and regenerable with the original pipeline tasks.
 
@@ -139,15 +144,14 @@ Raw satellite stacks remain excluded and regenerable with the original pipeline 
 The platform is a continuation, not a replacement:
 
 - **From the NISAR/Kitchener work:** the discipline of matched controls, temporal holdouts,
-  quality masks and per-segment aggregation motivated the Coryell temporal test and the
-  evidence vocabulary. The Kitchener processed data was not available in this bundle, so the
-  app does not claim to reproduce its risk model.
+  quality masks and per-segment aggregation motivated the evidence vocabulary. The Kitchener
+  processed data was not available in this bundle, so the app does not reproduce its risk model.
 - **From the Coryell NISAR viewer:** the MapLibre interaction patterns, time filtering and
   before/after idea. NISAR chips are not bundled because they need an Earthdata login.
 - **From the original TerraGuard pipeline:** the weather-normalised expected-condition method,
   per-land-cover robust residuals, persistence, thermal cooling and corridor placebo tests.
 - **New here:** the unified contract, the four-site app, the evidence panel, the comparison view,
-  Coryell's seven-year temporal validation, and the reproducibility checks.
+  the fourth Coryell case run through the same pipeline, and the reproducibility checks.
 
 ---
 
@@ -157,7 +161,7 @@ The platform is a continuation, not a replacement:
   with zero console errors during development.
 - Overlay switching (leak / moisture / persistence) checked on Bulgaria; the same mechanism is used
   on every raster site.
-- Time filtering and the NISAR-era filter checked on Coryell (322 records on/after 2025-10-17).
+- Time filtering and the NISAR-era filter checked on Coryell.
 - Evidence panel checked for repairs and pipe risk; point clicks take priority over the transparent
   pipe hit layer.
 - Mobile layout rules are present (sidebar and evidence drawers); they were not separately captured
@@ -171,8 +175,9 @@ The platform is a continuation, not a replacement:
 ## 7. Limits
 
 - **No confirmed leak anywhere.** Repairs are bursts; dates are report dates.
-- **Label AUC ≈ 0.52–0.53** in the two Sentinel-1 labelled cases; confidence intervals include 0.5.
-- **Coryell is not radar.** Its AUC is infrastructure risk; it does not validate a surface anomaly.
+- **Label AUC ≈ 0.52–0.55** in the three Sentinel-1 labelled cases; confidence intervals include 0.5.
+- **Coryell is a weak positive.** Mean corridor p is 0.024, but p95 is 0.24 and label AUC is 0.548;
+  it does not validate a surface detector.
 - **Coryell licence:** the ArcGIS layers have no stated open licence. The raw vectors are
   git-ignored and fetched by script; the privacy-trimmed app export is bundled for the hackathon
   demonstration only. Ask the district before any further redistribution.

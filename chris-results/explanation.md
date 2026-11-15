@@ -54,16 +54,16 @@ The challenge-facing design is in [`docs/SOLUTION.md`](docs/SOLUTION.md).
 | Bulgaria | Elin Pelin rural water main | — | 194 | 0.611 | 0.471 | — | 0.89 (p95) | unlabelled demo; negative corridor test |
 | Aguascalientes | 5×5 km urban utility network | 50 repairs | 28 | 0.436 | 0.294 | AUC **0.526** | 1.00 | weak positive, not significant |
 | Calgary | 10×10 km trunk water network | 48 breaks | 50 | 0.650 | 0.249 | AUC **0.524** | 0.95 (p95) | weak positive, not significant |
-| Coryell | rural water district, Texas | 1,690 repairs | — | — | — | risk AUC **0.787** | — | repair-history ranking, not radar |
+| Coryell | 10×10 km rural network, Texas | 72 summer repairs | 55 | 0.426 | 0.505 | AUC **0.548** | 0.24 (p95) | weak positive; mean corridor p 0.024 |
 
-**The honest headline:** the expected-condition models are skilful (VV R² 0.44–0.65, NDMI R²
-0.25–0.47), but the final leak score is only weakly associated with historical repair/break
-locations (AUC ≈ 0.52–0.53, close to random). The pipeline is a triage tool, not a detector.
+**The honest headline:** the expected-condition models are skilful (VV R² 0.43–0.65, NDMI R²
+0.25–0.50), but the final leak score is only weakly associated with historical repair/break
+locations (AUC ≈ 0.52–0.55, close to random). The pipeline is a triage tool, not a detector.
 This is consistent with the published literature and with the unlabelled Bulgarian result.
 
-The Coryell result is different in kind: it ranks **pipes** by repair history and attributes, with a
-temporal holdout. It is the strongest ranking in the bundle, but it is infrastructure risk, not a
-radar detection.
+Coryell is now the **fourth case in the same pipeline**, not a separate repair-history model. It
+repeats the weak-positive result and is the only case with a nominally small mean corridor p —
+but its p95 test is 0.24, so the evidence is not strong enough to call it detection.
 
 ### Case details
 
@@ -93,15 +93,16 @@ radar detection.
 - Map: [`case_studies/calgary/outputs/terraguard_map.html`](case_studies/calgary/outputs/terraguard_map.html)
 
 **Coryell City WSD, Texas**
-- Rural district around Gatesville; 918 pipe features, 7 pressure zones, EPSG:32614.
-- 1,690 usable repair records (2019-09-30 to 2026-11-11); 322 in the NISAR era.
-- **No NISAR chips** are bundled (they need an Earthdata login). The result is a temporal
-  repair-risk test, not a radar test.
-- Train: pre-2023 conditions → repairs in 2023–2024. Test: pre-2025 conditions → repairs in
-  2025–2026.
-- Risk AUC **0.787**, average precision 0.511, top-10 % capture **28.1 %**, base rate 22.1 %.
-  The recurrence baseline has AUC 0.719 and top-10 % capture 29.1 %, so the model improves global
-  ranking but not top-decile capture; treat the ranking as modest.
+- Fixed 10 × 10 km rural AOI, EPSG:32614; 184 clipped water-main segments; 7 pressure zones in
+  the source district.
+- 72 summer repairs (June–September 2025–2026) on 184 segments; Sentinel-1 RTC ascending 34,
+  **55 dates** (2025-01-07 to 2026-11-05); 76 Sentinel-2 dates; 47 Landsat LST dates.
+- Same pipeline and parameters as the other cases via
+  `TERRAGUARD_CASE=case_studies/coryell/case.json`.
+- VV MAE 1.32 dB / R² **0.426**; NDMI MAE 0.113 / R² **0.505**.
+- Label AUC **0.548**, median percentile 59.1; corridor mean p **0.024**, p95 **0.244**.
+- **No NISAR imagery** in this case; it is a Sentinel-1/2 case like Aguascalientes and Calgary.
+- Map: [`case_studies/coryell/outputs/terraguard_map.html`](case_studies/coryell/outputs/terraguard_map.html)
 - Data note and licence: [`data/coryell/README.md`](data/coryell/README.md).
 
 Full case notes: [`case_studies/README.md`](case_studies/README.md); platform contract:
@@ -114,7 +115,7 @@ Full case notes: [`case_studies/README.md`](case_studies/README.md); platform co
 | Path | Contents |
 |---|---|
 | `app/` | **Main entry:** unified MapLibre evidence explorer (overview, four sites, compare, method) |
-| `app/data/` | Site registry, GeoJSON layers, raster overlays, metrics, Coryell risk CSV |
+| `app/data/` | Site registry, GeoJSON layers, raster overlays, metrics |
 | `docs/PLATFORM.md` | Platform architecture, data contract, rebuild and validation process |
 | `terraguard_dashboard.html` | Legacy tabbed dashboard (kept for reference) |
 | `run_dashboard.sh` | Local HTTP server helper (prints the `/app/` URL) |
@@ -127,7 +128,7 @@ Full case notes: [`case_studies/README.md`](case_studies/README.md); platform co
 | `research/` | Literature review, data audit, static-data audit, NISAR audit |
 | `data/` | Small static/vector/met layers, NISAR browse; Coryell source vectors are fetched and git-ignored |
 | `outputs/` | Bulgaria map, GeoTIFFs, hotspots, validation, scores, dashboard screenshots |
-| `case_studies/` | Two labelled Sentinel-1 cases: `case.json`, network, labels, small layers, outputs |
+| `case_studies/` | Three labelled Sentinel-1 cases: `case.json`, network, labels, small layers, outputs |
 | `pixi.toml` / `pixi.lock` | Pinned conda-forge environment |
 | `README.md` | Original project README |
 | `LICENSE` | MIT |
@@ -160,9 +161,14 @@ of local files.
 ### Rebuild the platform data (no login)
 
 ```bash
-python scripts/fetch_coryell.py        # public ArcGIS vectors
-python scripts/build_platform_data.py  # normalise + render + validate Coryell
-python scripts/check_platform.py       # contract and privacy checks
+python scripts/fetch_coryell.py             # public ArcGIS vectors
+python case_studies/prepare_coryell.py      # 10 x 10 km case subset
+CASE=case_studies/coryell/case.json
+TERRAGUARD_CASE=$CASE python -m pipeline.acquire --workers 16
+TERRAGUARD_CASE=$CASE python -m pipeline.model
+TERRAGUARD_CASE=$CASE python -m pipeline.make_map
+python scripts/build_platform_data.py       # export all four cases
+python scripts/check_platform.py            # contract and privacy checks
 ```
 
 Coryell vectors have **no stated open licence**; see `data/coryell/README.md`.
@@ -199,9 +205,9 @@ TERRAGUARD_CASE=$CASE pixi run python -m pipeline.model
 TERRAGUARD_CASE=$CASE pixi run python -m pipeline.make_map
 ```
 
-Replace with `case_studies/calgary/case.json` for Calgary. The prepared networks, labels, small
-static layers and already-generated outputs are included; only the raw satellite stacks are
-missing and will be re-downloaded by `acquire`.
+Replace with `case_studies/calgary/case.json` or `case_studies/coryell/case.json`. The prepared
+networks, labels, small static layers and already-generated outputs are included; only the raw
+satellite stacks are missing and will be re-downloaded by `acquire`.
 
 ---
 
@@ -252,9 +258,11 @@ imagery, display-only, not calibrated gamma0.
   covariates start in 2022.
 - The case maps use the same pipeline but a slightly smaller feature set (no SoilGrids/terrain/roads
   in the case folders).
-- **Coryell is not a radar result.** Its AUC measures repair-history risk, not a surface anomaly.
-- **Coryell has no stated open licence.** The vectors are bundled for the hackathon only; see
-  `data/coryell/README.md`. Do not redistribute without asking the district.
+- **Coryell is a weak positive, not detection.** Mean corridor p is 0.024, but p95 is 0.24 and
+  label AUC is 0.548.
+- **Coryell has no stated open licence.** The raw vectors are fetched and git-ignored; the
+  privacy-trimmed app export is bundled for the hackathon only. See `data/coryell/README.md`.
+  Do not redistribute without asking the district.
 - **No calibrated NISAR imagery is bundled.** Bulgarian NISAR layers are 8-bit browse, display-only;
   Coryell NISAR chips need an Earthdata login.
 - The app loads MapLibre and Esri/OSM/CARTO basemap tiles from the internet; raster overlays and
@@ -269,12 +277,12 @@ imagery, display-only, not calibrated gamma0.
 | `app/data/sites.json` | Site registry and headline metrics |
 | `app/data/<site>/meta.json` | Layers, bounds, timeline, sources, caveats |
 | `app/data/<site>/stats.json` | Counts, by-year series, validation details |
-| `app/data/coryell/risk.csv` | Per-pipe risk percentile and repair history |
 | `outputs/validation.json` | Bulgaria S1 counts, model metrics, corridor placebo test |
 | `outputs/model_metrics.json` | VV/NDMI metrics |
 | `outputs/hotspots.csv` / `.json` | Ranked candidates with evidence |
 | `outputs/*.tif` | Soil-moisture anomaly, leak likelihood, persistence, thermal, confidence |
 | `case_studies/*/outputs/validation.json` | Case model metrics + label AUC + placebo test |
+| `case_studies/coryell/` | Fourth case: `case.json`, network, labels, outputs, same pipeline |
 | `case_studies/*/outputs/hotspots.csv` | Case hotspots |
 | `case_studies/*/outputs/terraguard_map.html` | Legacy case interactive map |
 
