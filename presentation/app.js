@@ -118,6 +118,14 @@ function go(n, opts = {}) {
     stopMapPlay();
   }
 
+  if (index === 6) {
+    initPasses().then(() => {
+      if (index === 6) animatePasses();
+    }).catch(() => {});
+  }
+  if (index === 7) initViewer().catch(() => {});
+  else stopBlink();
+
   if (!opts.fromHistory) {
     history.pushState({ slide: index }, '', `#/${index}`);
   }
@@ -262,79 +270,6 @@ window.addEventListener('hashchange', () => {
   const n = readHash();
   if (n !== index) go(n, { fromHistory: true });
 });
-
-/* --------------------------------------------------------------- cases -- */
-const CASES = {
-  bulgaria: {
-    kicker: 'BULGARIA · DEMONSTRATION',
-    title: 'Elin Pelin, Sofia Province',
-    body: 'A 5.5 × 6.3 km farmland AOI crossed by a 3.3 km transmission main. No confirmed leak. The corridor is not statistically enriched in dry-season moisture anomalies, so the output is a ranked inspection list, not a detection.',
-    stats: [['0.611', 'VV R²'], ['0.471', 'NDMI R²'], ['0.89', 'p95 placebo']],
-    evidence: [
-      ['01 · EXPECTATION', '0.611 / 0.471', 'VV and NDMI R² on held-out dates'],
-      ['02 · CORRIDOR TEST', 'p95 = 0.89', 'Not enriched vs 200 placebo corridors'],
-      ['03 · VERDICT', 'Screening only', 'No confirmed leak; a ranked inspection list'],
-    ],
-    link: '../outputs/aquaguard_map.html',
-  },
-  aguascalientes: {
-    kicker: 'MEXICO · 50 REPAIR LABELS',
-    title: 'Aguascalientes urban network',
-    body: 'A 5 × 5 km utility grid with dense urban land cover. The expected-condition model is weaker here — VV R² 0.436, NDMI 0.294 — and the label AUC is 0.526. A hard test that still lands just above random.',
-    stats: [['0.436', 'VV R²'], ['0.294', 'NDMI R²'], ['0.526', 'label AUC']],
-    evidence: [
-      ['01 · EXPECTATION', '0.436 / 0.294', 'Weaker under dense urban cover'],
-      ['02 · LABEL RANKING', 'AUC 0.526', '50 repairs, barely above random'],
-      ['03 · VERDICT', 'Weak positive', 'Not significant; a deliberately hard test'],
-    ],
-    link: '../case_studies/aguascalientes/outputs/terraguard_map.html',
-  },
-  calgary: {
-    kicker: 'CANADA · 48 BREAK LABELS',
-    title: 'Calgary trunk network',
-    body: 'A 10 × 10 km network with 48 break labels and the strongest expected-condition model (VV R² 0.650). The final leak score still ranks historical breaks near random: AUC 0.524.',
-    stats: [['0.650', 'VV R²'], ['0.249', 'NDMI R²'], ['0.524', 'label AUC']],
-    evidence: [
-      ['01 · EXPECTATION', '0.650 / 0.249', 'Strong VV model across 50 dates'],
-      ['02 · LABEL RANKING', 'AUC 0.524', '48 breaks, close to random'],
-      ['03 · VERDICT', 'Weak positive', 'Good surface model, weak detector'],
-    ],
-    link: '../case_studies/calgary/outputs/terraguard_map.html',
-  },
-  coryell: {
-    kicker: 'TEXAS · 72 SUMMER REPAIRS',
-    title: 'Coryell City WSD',
-    body: 'A rural district with 72 summer repair labels and 55 Sentinel-1 dates. AUC 0.548. The mean corridor p is a nominally small 0.024, but the p95 test is 0.24 — still not evidence of detection.',
-    stats: [['0.426', 'VV R²'], ['0.505', 'NDMI R²'], ['0.548', 'label AUC']],
-    evidence: [
-      ['01 · EXPECTATION', '0.426 / 0.505', 'NDMI carries more skill than VV here'],
-      ['02 · CORRIDOR TEST', 'mean p 0.024', 'Nominally small mean, but p95 stays 0.24'],
-      ['03 · VERDICT', 'Not detection', 'Weak positive; needs field validation'],
-    ],
-    link: '../chris-results/case_studies/coryell/outputs/aquaguard_map.html',
-  },
-};
-
-function selectCase(key) {
-  const c = CASES[key];
-  if (!c) return;
-  $$('.case-card').forEach((card) => {
-    const on = card.dataset.case === key;
-    card.classList.toggle('active', on);
-    card.setAttribute('aria-pressed', on ? 'true' : 'false');
-  });
-  $('#case-kicker').textContent = c.kicker;
-  $('#case-title').textContent = c.title;
-  $('#case-body').textContent = c.body;
-  $('#case-detail-stats').innerHTML = c.stats
-    .map(([v, k]) => `<div><b>${esc(v)}</b><span>${esc(k)}</span></div>`).join('');
-  $('#case-evidence').innerHTML = (c.evidence || [])
-    .map(([kicker, value, note]) => `<div><span class="mono">${esc(kicker)}</span><b>${esc(value)}</b><p>${esc(note)}</p></div>`).join('');
-  $('#case-link').href = c.link;
-}
-
-$$('.case-card').forEach((card) => card.addEventListener('click', () => selectCase(card.dataset.case)));
-selectCase('bulgaria');
 
 /* ------------------------------------------------------------------------
    Live map
@@ -787,6 +722,269 @@ function mapPadding() {
   if (w < 760) return 22;
   if (w < 1100) return { top: 34, right: 30, bottom: 34, left: 340 };
   return { top: 46, right: 46, bottom: 46, left: 410 };
+}
+
+
+
+/* ------------------------------------------------------------------------
+   NISAR passes and the before/after viewer
+   ------------------------------------------------------------------------ */
+const DAY_MS = 86400000;
+const NISAR = { promise: null, data: null };
+let passesPromise = null;
+let viewerPromise = null;
+let passesReady = false;
+let viewerReady = false;
+const PASS_STATE = { window: 6, cause: 'natural', selected: -1, acqs: [], counts: [] };
+let blinkTimer = 0;
+let blinkOn = false;
+
+function loadNisar() {
+  if (NISAR.promise) return NISAR.promise;
+  NISAR.promise = (async () => {
+    const [leakRaw, acqRaw, chips] = await Promise.all([
+      fetchJSON(dataUrl('leak_survey.geojson')),
+      fetchJSON(dataUrl('nisar/acquisitions_041D073.json')),
+      fetchJSON(dataUrl('nisar/leak_chips.json')),
+    ]);
+    const data = {
+      leaks: prepareLeaks(leakRaw).features,
+      acqs: acqRaw.acquisitions || [],
+      chips,
+    };
+    NISAR.data = data;
+    return data;
+  })();
+  return NISAR.promise;
+}
+
+function passCount(acq, win, cause) {
+  const data = NISAR.data;
+  if (!data) return 0;
+  const tp = Number.isFinite(acq.t) ? acq.t : Date.parse(acq.start_utc);
+  return data.leaks.reduce((n, f) => {
+    const p = f.properties;
+    if (p.t < 0) return n;
+    if (cause === 'natural' && p.cbin !== 0) return n;
+    const d = (p.t - tp) / DAY_MS;
+    return d >= 0 && d < win + 1 ? n + 1 : n;
+  }, 0);
+}
+
+function initPasses() {
+  if (passesPromise) return passesPromise;
+  passesPromise = (async () => {
+    try {
+      const data = await loadNisar();
+      PASS_STATE.acqs = data.acqs;
+      passesReady = true;
+      wirePassControls();
+      renderPasses();
+      animatePasses();
+    } catch (err) {
+      $('#pass-fallback')?.removeAttribute('hidden');
+      throw err;
+    }
+  })();
+  return passesPromise;
+}
+
+function wirePassControls() {
+  $('#pass-window')?.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-window]');
+    if (!b) return;
+    PASS_STATE.window = Number(b.dataset.window);
+    $$('#pass-window button').forEach((x) => x.classList.toggle('on', x === b));
+    renderPasses();
+    animatePasses();
+  });
+  $('#pass-cause')?.addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-cause]');
+    if (!b) return;
+    PASS_STATE.cause = b.dataset.cause;
+    $$('#pass-cause button').forEach((x) => x.classList.toggle('on', x === b));
+    renderPasses();
+    animatePasses();
+  });
+  $('#pass-chart')?.addEventListener('click', (e) => {
+    const b = e.target.closest('.pass-bar');
+    if (b) setPass(Number(b.dataset.i));
+  });
+}
+
+function renderPasses() {
+  if (!passesReady) return;
+  const acqs = PASS_STATE.acqs;
+  PASS_STATE.counts = acqs.map((a) => passCount(a, PASS_STATE.window, PASS_STATE.cause));
+  const max = Math.max(1, ...PASS_STATE.counts);
+  if (PASS_STATE.selected < 0 || PASS_STATE.selected >= acqs.length) {
+    let best = 0;
+    PASS_STATE.counts.forEach((n, i) => { if (n > PASS_STATE.counts[best]) best = i; });
+    PASS_STATE.selected = best;
+  }
+  const chart = $('#pass-chart');
+  chart.innerHTML = acqs.map((a, i) => {
+    const n = PASS_STATE.counts[i];
+    const h = Math.max(n > 0 ? 4 : 1.5, (n / max) * 100);
+    return `<button class="pass-bar${i === PASS_STATE.selected ? ' on' : ''}" type="button" data-i="${i}" style="--v:${h.toFixed(1)}" title="${esc(a.date)} · ${n} repair${n === 1 ? '' : 's'}" aria-label="${esc(a.date)}: ${n} repairs"><span class="pb-cnt">${n || ''}</span><span class="pb-fill"></span></button>`;
+  }).join('');
+
+  // Month labels, one per month.
+  let lastMonth = '';
+  $('#pass-axis').innerHTML = acqs.map((a) => {
+    const month = a.date.slice(5, 7);
+    const names = { '01': 'JAN', '02': 'FEB', '03': 'MAR', '04': 'APR', '05': 'MAY', '06': 'JUN', '07': 'JUL', '08': 'AUG', '09': 'SEP', '10': 'OCT', '11': 'NOV', '12': 'DEC' };
+    const label = month !== lastMonth ? names[month] : '';
+    lastMonth = month;
+    return `<span>${label}</span>`;
+  }).join('');
+
+  // Mark the 2026-07-27 → 08-10 gap after the 2026-07-23 pass.
+  const gapIdx = acqs.findIndex((a) => a.date === '2026-07-23');
+  const gap = $('#pass-gap-note');
+  if (gap && gapIdx >= 0) gap.style.left = `${((gapIdx + 1) / acqs.length) * 100}%`;
+
+  $('#pass-caption').textContent = `${PASS_STATE.cause === 'natural' ? 'Natural leaks' : 'All causes'} · 0–${PASS_STATE.window} days`;
+  $('#pass-total').textContent = fmt(PASS_STATE.counts.reduce((a, b) => a + b, 0));
+  setPass(PASS_STATE.selected);
+}
+
+function setPass(i) {
+  const acqs = PASS_STATE.acqs;
+  if (!acqs.length) return;
+  PASS_STATE.selected = Math.max(0, Math.min(acqs.length - 1, i));
+  $$('.pass-bar', $('#pass-chart')).forEach((b) => b.classList.toggle('on', Number(b.dataset.i) === PASS_STATE.selected));
+  const n = PASS_STATE.counts[PASS_STATE.selected] || 0;
+  const a = acqs[PASS_STATE.selected];
+  $('#pass-detail-num').textContent = n;
+  $('#pass-detail-date').textContent = a.date;
+  $('#pass-detail-text').textContent = `${PASS_STATE.cause === 'natural' ? 'natural ' : ''}repairs logged 0–${PASS_STATE.window} days after the pass`;
+  $('#pass-detail-side').textContent = `PASS ${pad2(PASS_STATE.selected + 1)} / ${acqs.length}`;
+}
+
+function animatePasses() {
+  const chart = $('#pass-chart');
+  if (!chart) return;
+  chart.classList.remove('animate');
+  void chart.offsetWidth;
+  requestAnimationFrame(() => chart.classList.add('animate'));
+}
+
+function chipUrl(chip) {
+  return new URL(`../data/coryell/nisar/chips/${chip}.png`, import.meta.url).href;
+}
+
+function signedDb(v, digits = 1) {
+  if (v == null || !Number.isFinite(v)) return '—';
+  const sign = v > 0 ? '+' : v < 0 ? '−' : '±';
+  return `${sign}${Math.abs(v).toFixed(digits)}`;
+}
+
+function fmtDays(days) {
+  if (days == null || !Number.isFinite(days)) return '—';
+  const sign = days > 0 ? '+' : days < 0 ? '−' : '±';
+  return `${sign}${Math.abs(days).toFixed(1)} d`;
+}
+
+function initViewer() {
+  if (viewerPromise) return viewerPromise;
+  viewerPromise = (async () => {
+    try {
+      const data = await loadNisar();
+      const leaks = data.chips?.leaks || [];
+      let leak = leaks.find((l) => l.id === 1750);
+      if (!leak) leak = leaks.find((l) => l.roles?.before && l.roles?.after);
+      if (!leak) leak = leaks.find((l) => l.roles?.after);
+      if (!leak) throw new Error('No leak chips in the manifest');
+
+      const before = leak.roles.before;
+      const after = leak.roles.after;
+      if (!before || !after) throw new Error('This leak has no before/after pair');
+
+      const beforeImg = $('#cmp-before-img');
+      const afterImg = $('#cmp-after-img');
+      beforeImg.src = chipUrl(before.chip);
+      afterImg.src = chipUrl(after.chip);
+
+      $('#viewer-kicker').textContent = `NISAR GCOV · P05023 · ${leak.site || 'SITE'}`;
+      const size = leak.size ? `${leak.size}″ pipe` : 'pipe size unknown';
+      const gpm = leak.gpm != null ? `${fmt(leak.gpm)} gpm` : 'loss unknown';
+      $('#viewer-title').textContent = `ObjectId ${leak.id} · ${size} · ${gpm}`;
+      $('#viewer-dates').textContent = `before ${before.date} (${fmtDays(before.days)}) → after ${after.date} (${fmtDays(after.days)})`;
+
+      const ch = leak.change?.after_minus_before || {};
+      const stats = [
+        [signedDb(ch.hh_in), 'HH inside 30 m (dB)'],
+        [signedDb(ch.hv_in), 'HV inside 30 m (dB)'],
+        [signedDb(ch.hh_contrast), 'HH contrast (dB)'],
+        [signedDb(ch.hv_contrast), 'HV contrast (dB)'],
+      ];
+      $('#viewer-stats').innerHTML = stats.map(([v, k]) => `<div><b>${v}</b><span>${k}</span></div>`).join('');
+
+      const roles = [
+        ['baseline', 'Baseline'],
+        ['before', 'Before'],
+        ['after', 'After'],
+      ].filter(([k]) => leak.roles[k]);
+      $('#viewer-strip').innerHTML = roles.map(([key, label]) => {
+        const r = leak.roles[key];
+        return `<div class="viewer-thumb"><img src="${chipUrl(r.chip)}" alt="" loading="lazy"><span class="mono">${label}</span><b>${r.date}</b><em>${fmtDays(r.days)}</em></div>`;
+      }).join('');
+
+      wireViewer();
+      setCompare(50);
+      $('#viewer-fallback')?.setAttribute('hidden', '');
+      viewerReady = true;
+    } catch (err) {
+      $('#viewer-fallback')?.removeAttribute('hidden');
+      throw err;
+    }
+  })();
+  return viewerPromise;
+}
+
+function setCompare(pos) {
+  const p = Math.max(0, Math.min(100, pos));
+  const cmp = $('#compare');
+  if (cmp) cmp.style.setProperty('--pos', `${p}%`);
+  const range = $('#cmp-range');
+  if (range && document.activeElement !== range) range.value = String(Math.round(p));
+  const readout = $('#cmp-readout');
+  if (readout) readout.textContent = `${Math.round(p)}%`;
+}
+
+function wireViewer() {
+  const range = $('#cmp-range');
+  const blink = $('#cmp-blink');
+  if (!range || !blink || range.dataset.wired) return;
+  range.dataset.wired = '1';
+  range.addEventListener('input', (e) => {
+    stopBlink();
+    setCompare(Number(e.target.value));
+  });
+  blink.addEventListener('click', () => {
+    if (blinkOn) { stopBlink(); return; }
+    blinkOn = true;
+    blink.classList.add('on');
+    blink.textContent = 'Stop';
+    let left = true;
+    setCompare(100);
+    blinkTimer = window.setInterval(() => {
+      left = !left;
+      setCompare(left ? 100 : 0);
+    }, 950);
+  });
+}
+
+function stopBlink() {
+  if (!blinkOn) return;
+  blinkOn = false;
+  clearInterval(blinkTimer);
+  const blink = $('#cmp-blink');
+  if (blink) {
+    blink.classList.remove('on');
+    blink.textContent = 'Blink';
+  }
 }
 
 /* ------------------------------------------------------------------ boot -- */
