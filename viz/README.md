@@ -74,7 +74,7 @@ layers and the MapLibre library.
   the NISAR passes tab it follows the selected pass. Click a piece for its
   rank, leak history and a 12-month strip. Leak popups in that period show
   where the leaking pipe stood in the ranking. The ranking uses past leaks and
-  pipe attributes only, no radar: trained on Oct 2020 to Oct 2025, it reaches
+  pipe attributes only: trained on Oct 2020 to Oct 2025, it reaches
   AUC 0.79 on the 12 held-out months, and the top 5% of pipe-months hold 32%
   of the leaks (report: `asen_results/data/reports/coryell_risk.md`). The
   diameter-coloured pipe layer is switched off while the risk layer loads;

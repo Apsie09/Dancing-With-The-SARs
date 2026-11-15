@@ -1,6 +1,6 @@
 // Leak-risk ranking per pipe piece and month (data/coryell/risk/, built by
 // `pixi run coryell-risk` in asen_results/). The ranking uses leak history and
-// pipe attributes only, no radar; ranks are percentiles over the hold-out
+// pipe attributes only; ranks are percentiles over the hold-out
 // (Nov 2025 to Oct 2026), so 1 means the riskiest 1% of pipe-months.
 // Tiers are a cyan ramp, wide enough to show around the leak dots, whose own
 // colour schemes are warm.
@@ -47,7 +47,7 @@ export async function initRisk({ map, setOverlayVisibleById }) {
       <select>${months.map((x) => `<option value="${x}">${monthLabel(x)}</option>`).join('')}</select>
     </label>
     <p class="ov-info risk-now"></p>
-    <p class="ov-info">Past leaks and pipe attributes, no radar. AUC ${m.auc.toFixed(2)} on 12 held-out months.</p>`;
+    <p class="ov-info">Past leaks and pipe attributes. AUC ${m.auc.toFixed(2)} on 12 held-out months.</p>`;
   if (body) body.insertBefore(box, body.firstChild);
   const select = box.querySelector('select');
 
@@ -99,7 +99,7 @@ export async function initRisk({ map, setOverlayVisibleById }) {
         <dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
         <div class="risk-strip">${strip}</div>
         <div class="risk-strip-lab"><span>${monthLabel(months[0])}</span><span>${monthLabel(months[months.length - 1])}</span></div>
-        <div class="pp-foot">Piece ${p.piece} of water line ${p.pipe_id} · rank among all pipe-months, no radar used</div></div>`;
+        <div class="pp-foot">Piece ${p.piece} of water line ${p.pipe_id} · rank among all pipe-months</div></div>`;
     },
   };
 }
