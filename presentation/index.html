@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AquaGuard · Presentation Dashboard</title>
+<meta name="description" content="An interactive presentation dashboard for AquaGuard: radar-backed screening of buried water networks, built for NASA Space Apps 2026.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%230b1016'/%3E%3Ccircle cx='16' cy='16' r='9' fill='none' stroke='%234cc9f0' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23ff9f1c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+</head>
+<body>
+<div id="app">
+  <div class="bg" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow glow-a"></div>
+    <div class="bg-glow glow-b"></div>
+    <div class="bg-vignette"></div>
+  </div>
+
+  <header class="topbar">
+    <a class="brand" href="#/0" aria-label="AquaGuard, back to start">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="26" height="26"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-opacity=".25" stroke-width="1"/><circle cx="16" cy="16" r="8.5" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="16" r="3" fill="#ff9f1c"/><path d="M16 2v5M16 25v5M2 16h5M25 16h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-opacity=".6"/></svg>
+      </span>
+      <span class="brand-word">Aqua<b>Guard</b></span>
+      <span class="brand-sub">presentation dashboard</span>
+    </a>
+    <div class="chapter-tag">
+      <span id="chapter-num" class="mono">00</span>
+      <span id="chapter-name">Introduction</span>
+    </div>
+    <div class="top-actions">
+      <button class="icon-label" id="notes-btn" type="button" title="Speaker notes (N)">
+        <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M5 3h10a1 1 0 0 1 1 1v12l-3-2-3 2-3-2-3 2V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span>Notes</span>
+      </button>
+      <button class="icon-label" id="fs-btn" type="button" title="Fullscreen (F)">
+        <svg viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M7 3H3v4M13 3h4v4M7 17H3v-4M13 17h4v-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span id="fs-label">Fullscreen</span>
+      </button>
+      <div class="counter mono"><b id="cur-num">1</b><span>/</span><span id="total-num">12</span></div>
+    </div>
+  </header>
+
+  <main id="deck" aria-live="polite">
+    <div class="rail" id="rail" aria-label="Slides"></div>
+
+    <!-- ============================================================ 0 · COVER -->
+    <section class="slide cover active" data-chapter="Introduction" data-title="AquaGuard" data-notes="Welcome. AquaGuard is our answer to the 2026 Space Apps challenge, Dancing with the SARs. The question we set ourselves: can radar see a water leak that is buried under a metre of soil and pavement? Not directly — but it can see the wet ground the leak creates. This deck walks from the physics to the honest validation result. Use the arrow keys, scroll, or the controls at the bottom.">
+      <div class="slide-inner cover-grid">
+        <div class="cover-copy">
+          <div class="eyebrow reveal">NASA Space Apps 2026&nbsp;·&nbsp;Dancing with the SARs</div>
+          <h1 class="cover-title reveal">Aqua<span>Guard</span></h1>
+          <p class="lede reveal">A radar-backed screening dashboard for the water pipes we cannot see.</p>
+          <p class="body reveal">We teach a model what the ground <em>should</em> look like from weather, soil and season — then ask where it stays wet when it should be dry.</p>
+          <div class="cta-row reveal">
+            <button class="btn primary" type="button" data-next>
+              Start the story
+              <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <a class="btn ghost" href="../viz/" target="_blank" rel="noopener">Open live map <span aria-hidden="true">↗</span></a>
+          </div>
+          <ul class="chip-row reveal">
+            <li><b>4</b> study areas</li>
+            <li><b>5</b> sensors</li>
+            <li><b>1,691</b> repairs mapped</li>
+          </ul>
+        </div>
+
+        <div class="cover-visual reveal" aria-hidden="true">
+          <div class="scope">
+            <div class="scope-grid"></div>
+            <div class="scope-ring r1"></div>
+            <div class="scope-ring r2"></div>
+            <div class="scope-ring r3"></div>
+            <div class="scope-ring r4"></div>
+            <div class="scope-cross x"></div>
+            <div class="scope-cross y"></div>
+            <div class="scope-sweep"></div>
+            <div class="scope-core"><span>20 m</span></div>
+            <span class="blip b1"></span>
+            <span class="blip b2"></span>
+            <span class="blip b3"></span>
+            <span class="blip b4"></span>
+            <div class="orbit"><span class="sat"></span></div>
+            <div class="scope-label l1">NISAR · L-band</div>
+            <div class="scope-label l2">soil moisture</div>
+            <div class="scope-label l3">persistent anomaly</div>
+            <div class="scope-label l4">pipe corridor</div>
+          </div>
+          <div class="scope-caption mono">SURFACE CHANGE&nbsp;·&nbsp;NOT THE PIPE ITSELF</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== 1 · PROBLEM -->
+    <section class="slide" data-chapter="The problem" data-title="The invisible failure" data-notes="Water networks fail underground, out of sight. Globally, 20 to 30 percent of utility water can be non-revenue; industry screening studies report that around 59 percent of confirmed leaks never reach the surface. That is the gap. A buried pipe is transparent to radar, but the moisture halo around a leak is not. The Coryell district alone logged 1,691 repairs between 2019 and 2026.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">01&nbsp;·&nbsp;The problem</div>
+            <h2 class="reveal">The pipe is invisible.<br><span class="accent">The water isn't.</span></h2>
+          </div>
+          <p class="slide-lede reveal">Buried mains fail quietly. By the time water reaches the surface, a crew is already digging — and the leak has been running for weeks.</p>
+        </div>
+
+        <div class="problem-grid">
+          <div class="stat-stack">
+            <article class="stat-card card reveal">
+              <div class="stat-big"><span data-count="30">0</span><small>%</small></div>
+              <p class="stat-title">of utility water can be non-revenue</p>
+              <p class="stat-note">Global range: 20–30%, higher in ageing networks.<sup>1</sup></p>
+            </article>
+            <article class="stat-card card reveal">
+              <div class="stat-big"><span data-count="59">0</span><small>%</small></div>
+              <p class="stat-title">of confirmed leaks never surface</p>
+              <p class="stat-note">Reported in commercial L-band screening.<sup>2</sup></p>
+            </article>
+            <article class="stat-card card reveal">
+              <div class="stat-big"><span data-count="1691">0</span></div>
+              <p class="stat-title">repairs in one Texas district</p>
+              <p class="stat-note">Coryell City WSD, logged 2019–2026.</p>
+            </article>
+          </div>
+
+          <figure class="cross-section card reveal">
+            <svg viewBox="0 0 720 520" role="img" aria-label="A satellite radar beam reaching the ground above a buried leaking pipe, with a wet plume spreading through the soil.">
+              <defs>
+                <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#0a1420"/><stop offset="1" stop-color="#0d1a26"/>
+                </linearGradient>
+                <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#3b2d22"/><stop offset="1" stop-color="#1a1410"/>
+                </linearGradient>
+                <linearGradient id="beam" x1="0" y1="0" x2="0.3" y2="1">
+                  <stop offset="0" stop-color="#4cc9f0" stop-opacity=".55"/>
+                  <stop offset="1" stop-color="#4cc9f0" stop-opacity=".02"/>
+                </linearGradient>
+                <radialGradient id="plume" cx="50%" cy="50%" r="50%">
+                  <stop offset="0" stop-color="#4cc9f0" stop-opacity=".85"/>
+                  <stop offset=".55" stop-color="#2a8ad8" stop-opacity=".35"/>
+                  <stop offset="1" stop-color="#2a8ad8" stop-opacity="0"/>
+                </radialGradient>
+                <filter id="soft"><feGaussianBlur stdDeviation="5"/></filter>
+              </defs>
+              <rect x="0" y="0" width="720" height="520" fill="url(#sky)"/>
+              <g opacity=".35" stroke="#4cc9f0" stroke-width=".6">
+                <path d="M0 80h720M0 130h720M0 180h720"/>
+                <path d="M120 0v300M240 0v300M360 0v300M480 0v300M600 0v300"/>
+              </g>
+              <g class="satellite">
+                <rect x="300" y="38" width="118" height="30" rx="6" fill="#0d1a26" stroke="#4cc9f0" stroke-opacity=".55"/>
+                <rect x="318" y="47" width="82" height="12" rx="2" fill="#4cc9f0" fill-opacity=".18" stroke="#4cc9f0" stroke-opacity=".4" stroke-width=".8"/>
+                <circle cx="359" cy="30" r="3" fill="#ff9f1c"/>
+                <path d="M305 68l-18 20M413 68l18 20" stroke="#4cc9f0" stroke-opacity=".5" stroke-width="1.2"/>
+              </g>
+              <path class="beam" d="M330 70 L100 318 L620 318 L390 70 Z" fill="url(#beam)"/>
+              <g stroke="#4cc9f0" stroke-opacity=".22" stroke-width="1" class="beam-lines">
+                <path d="M338 76 160 314M350 72 280 316M368 72 400 316M382 76 560 314"/>
+              </g>
+              <path d="M0 318h720v202H0z" fill="url(#soil)"/>
+              <g opacity=".5" stroke="#7a5a40" stroke-width=".8">
+                <path d="M0 360q90-12 180 0t180 0 180 0 180 0"/>
+                <path d="M0 408q90 10 180 0t180 0 180 0 180 0"/>
+                <path d="M0 456q90-9 180 0t180 0 180 0 180 0"/>
+              </g>
+              <path d="M0 318h720" stroke="#7ec8e3" stroke-opacity=".5" stroke-width="2"/>
+              <g class="pipe">
+                <circle cx="360" cy="430" r="86" fill="url(#plume)" opacity=".9"/>
+                <ellipse cx="360" cy="418" rx="90" ry="34" fill="#2a8ad8" opacity=".16" filter="url(#soft)"/>
+                <path d="M120 430h170" stroke="#9aa7b4" stroke-width="18" stroke-linecap="round"/>
+                <path d="M470 430h130" stroke="#9aa7b4" stroke-width="18" stroke-linecap="round"/>
+                <path d="M290 430h180" stroke="#4cc9f0" stroke-width="18" stroke-linecap="round" opacity=".7"/>
+                <path d="M352 421l14 10-8 14" fill="none" stroke="#ff9f1c" stroke-width="3" stroke-linecap="round"/>
+                <g class="drops" fill="#7ee0ff">
+                  <circle cx="366" cy="404" r="2.4"/><circle cx="380" cy="390" r="2"/><circle cx="352" cy="386" r="1.8"/>
+                  <circle cx="394" cy="370" r="1.6"/><circle cx="342" cy="370" r="1.4"/>
+                </g>
+              </g>
+              <g class="mono" fill="#8b98a8" font-size="11">
+                <text x="136" y="300" fill="#4cc9f0" fill-opacity=".9">RADAR BEAM · L-BAND</text>
+                <text x="136" y="456" fill="#aeb9c6">BURIED WATER MAIN · 1–1.5 m</text>
+                <text x="470" y="392" fill="#7ee0ff">WET SOIL PLUME</text>
+                <text x="470" y="408" fill="#5d6a7a">seen as a moisture anomaly</text>
+              </g>
+              <g class="mono" fill="#ff9f1c" font-size="10.5">
+                <text x="386" y="452">LEAK</text>
+                <path d="M389 445l-6 8" stroke="#ff9f1c" stroke-width="1"/>
+              </g>
+            </svg>
+            <figcaption class="mono">The satellite does not image the pipe. It images the consequence.</figcaption>
+          </figure>
+        </div>
+        <p class="source-note mono"><sup>1</sup> Theocharidis et al. (2025), non-revenue water review · <sup>2</sup> ASTERRA / SUEZ / Affinity Water (2025), vendor-reported screening · Coryell City WSD repair log</p>
+      </div>
+    </section>
+
+    <!-- =========================================================== 2 · SIGNAL -->
+    <section class="slide" data-chapter="The signal" data-title="Ask a better question" data-notes="The key idea is subtraction. We do not train on leaks. We train on ordinary conditions: what does a 20 metre pixel look like given rainfall, temperature, evapotranspiration, soil and vegetation? The residual is observed minus expected. After rain everything is wet, so the diagnostic signal is not wetness — it is persistence through a dry-down. That is the anomaly we map.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">02&nbsp;·&nbsp;The signal</div>
+            <h2 class="reveal">Don't look for leaks.<br><span class="accent">Look for anomalies.</span></h2>
+          </div>
+          <p class="slide-lede reveal">Leaks are rare and unlabelled. Ordinary ground is abundant. So we model ordinary ground, then subtract.</p>
+        </div>
+
+        <div class="equation-grid">
+          <div class="eq-steps">
+            <article class="eq-card reveal">
+              <span class="eq-num mono">01</span>
+              <div><h3>Expect</h3><p>Predict the surface from weather, soil, land cover, season and vegetation.</p></div>
+              <div class="formula mono">y&#770; = f(rain, T, ET&#8320;, soil, NDVI, …)</div>
+            </article>
+            <article class="eq-card reveal">
+              <span class="eq-num mono">02</span>
+              <div><h3>Subtract</h3><p>Observed minus expected gives a two-sided residual — wetter or drier than it should be.</p></div>
+              <div class="formula mono">z = (y − y&#770;) / σ</div>
+            </article>
+            <article class="eq-card reveal">
+              <span class="eq-num mono">03</span>
+              <div><h3>Persist</h3><p>Keep only patches that stay wet through the dry season, on or near a mapped pipe.</p></div>
+              <div class="formula mono">score = 0.55·wet + 0.25·persistence + 0.20·cool</div>
+            </article>
+          </div>
+
+          <figure class="chart-card card reveal">
+            <div class="chart-head">
+              <div><span class="mono">SOIL MOISTURE · ONE PIXEL</span><b>Expected vs observed</b></div>
+              <div class="legend-inline"><span class="key exp"></span>expected <span class="key obs"></span>observed</div>
+            </div>
+            <svg viewBox="0 0 620 320" class="resid-chart" role="img" aria-label="Line chart: observed moisture tracks the expected seasonal curve, with an unexplained wet anomaly during the dry season.">
+              <defs>
+                <linearGradient id="anomFill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#ff9f1c" stop-opacity=".55"/>
+                  <stop offset="1" stop-color="#ff9f1c" stop-opacity=".03"/>
+                </linearGradient>
+              </defs>
+              <g class="grid-lines">
+                <path d="M56 40h530M56 100h530M56 160h530M56 220h530M56 280h530"/>
+                <path d="M56 40v240M190 40v240M324 40v240M458 40v240M586 40v240"/>
+              </g>
+              <g class="mono axis" fill="#5d6a7a" font-size="10">
+                <text x="10" y="44">wet</text><text x="10" y="284">dry</text>
+                <text x="54" y="310">2022</text><text x="188" y="310">2023</text><text x="322" y="310">2024</text><text x="456" y="310">2025</text><text x="566" y="310">2026</text>
+              </g>
+              <path class="obs-line" d="M56 210 C90 190 110 120 140 112 S190 168 220 160 S270 84 300 88 S350 170 380 150 S450 88 470 74 S520 132 550 118 S578 78 586 70" fill="none" stroke="#8b98a8" stroke-width="2" stroke-dasharray="4 4"/>
+              <path class="exp-line" d="M56 206 C90 188 112 126 140 120 S190 158 220 152 S270 96 300 100 S350 158 380 144 S450 96 470 86 S520 126 550 114 S578 84 586 80" fill="none" stroke="#4cc9f0" stroke-width="2.4"/>
+              <path class="anom-band" d="M270 96 C290 92 310 96 322 110 C335 126 345 140 360 146 C380 152 392 150 402 142 C412 134 418 118 430 110 L430 96 C412 100 400 100 380 96 C350 90 300 90 270 96 Z" fill="url(#anomFill)" opacity=".9"/>
+              <line class="scan" x1="356" y1="46" x2="356" y2="292" stroke="#ff9f1c" stroke-opacity=".45" stroke-width="1"/>
+              <circle class="anom-dot" cx="360" cy="122" r="5" fill="#ff9f1c"/>
+              <g class="mono" fill="#ff9f1c" font-size="11" paint-order="stroke" stroke="#0b1016" stroke-width="3" stroke-linejoin="round">
+                <text x="370" y="112">unexplained wetness</text>
+                <text x="370" y="126" fill="#8b98a8">persists through the dry-down</text>
+              </g>
+            </svg>
+            <p class="chart-note">Schematic. The signal is not a wet day — it is a patch that stays wet while its surroundings dry down.</p>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== 3 · PIPELINE -->
+    <section class="slide" data-chapter="Method" data-title="One pipeline" data-notes="Everything runs as one code path. Case configuration changes the AOI, grid, date range, orbit, network and labels. The five stages are ingest, expectation, residual, fusion and triage. The same code produced the Bulgarian demo and the three labelled cities.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">03&nbsp;·&nbsp;Method</div>
+            <h2 class="reveal">One pipeline.<br><span class="accent">Four places.</span></h2>
+          </div>
+          <p class="slide-lede reveal">Every study area runs the same code. Only the configuration changes: AOI, grid, orbit, network and labels.</p>
+        </div>
+
+        <div class="pipeline">
+          <div class="flow-line" aria-hidden="true"></div>
+          <article class="flow-step reveal">
+            <span class="flow-index mono">01</span>
+            <div class="flow-icon">
+              <svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true"><circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="1.4" opacity=".35"/><path d="M20 8l4 8-4 16-4-16z" fill="currentColor" opacity=".85"/><circle cx="20" cy="20" r="2.4" fill="#ff9f1c"/></svg>
+            </div>
+            <h3>Ingest</h3>
+            <p>Sentinel-1 RTC, Sentinel-2, Landsat, ERA5, soil, land cover, DEM and the pipe network.</p>
+            <span class="flow-tag mono">5 sensors · one grid</span>
+          </article>
+          <article class="flow-step reveal">
+            <span class="flow-index mono">02</span>
+            <div class="flow-icon">
+              <svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true"><path d="M6 28l7-9 6 5 5-11 10 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 33h28" stroke="currentColor" stroke-opacity=".3" stroke-width="1.2"/></svg>
+            </div>
+            <h3>Expectation</h3>
+            <p>LightGBM learns what each 20 m pixel should look like under those conditions.</p>
+            <span class="flow-tag mono">VV · NDMI regressors</span>
+          </article>
+          <article class="flow-step reveal">
+            <span class="flow-index mono">03</span>
+            <div class="flow-icon">
+              <svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true"><rect x="7" y="8" width="26" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="7" y="22" width="26" height="10" rx="2" fill="currentColor" fill-opacity=".14" stroke="currentColor" stroke-width="1.4"/><path d="M12 13h8M12 27h14" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Residual</h3>
+            <p>Observed minus expected. Robust z-scores, dry-season mean and persistence.</p>
+            <span class="flow-tag mono">two-sided anomaly</span>
+          </article>
+          <article class="flow-step reveal">
+            <span class="flow-index mono">04</span>
+            <div class="flow-icon">
+              <svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true"><circle cx="20" cy="20" r="5" fill="currentColor"/><circle cx="20" cy="20" r="10" fill="none" stroke="currentColor" stroke-width="1.1" opacity=".5"/><circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" stroke-width="1" opacity=".25"/><path d="M20 2v6M20 32v6M2 20h6M32 20h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <h3>Fusion</h3>
+            <p>Moisture, persistence and thermal cooling, weighted by distance to the pipe.</p>
+            <span class="flow-tag mono">60 m plume scale</span>
+          </article>
+          <article class="flow-step reveal">
+            <span class="flow-index mono">05</span>
+            <div class="flow-icon">
+              <svg viewBox="0 0 40 40" width="28" height="28" aria-hidden="true"><path d="M9 31V18M18 31V12M27 31V22M33 31V8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M5 34h30" stroke="currentColor" stroke-opacity=".35" stroke-width="1.2"/></svg>
+            </div>
+            <h3>Triage</h3>
+            <p>Ranked inspection candidates with evidence cards, maps and honest validation.</p>
+            <span class="flow-tag mono">not a detector</span>
+          </article>
+        </div>
+
+        <div class="pipeline-foot reveal">
+          <span class="mono">SAME CODE PATH</span>
+          <span>Only <code>case.json</code> changes: AOI · grid · date range · orbit · network · labels · train/test split.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================== 4 · DATA -->
+    <section class="slide" data-chapter="Method" data-title="The data stack" data-notes="The quantitative backbone is Sentinel-1 C-band: 194 dates from 2022 to 2026 in Bulgaria, 434 in the archive, one orbit, full AOI coverage. Sentinel-2 gives optical moisture, Landsat gives thermal context, ERA5 gives the weather that drives the expectation. NISAR L-band is the future upgrade: its browse imagery is shown, but the calibrated HDF5 path is not yet part of the score.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">04&nbsp;·&nbsp;Data</div>
+            <h2 class="reveal">Five sensors.<br><span class="accent">One 20 m grid.</span></h2>
+          </div>
+          <p class="slide-lede reveal">Each sensor answers a different question. The model learns their joint behaviour, not a hand-tuned index.</p>
+        </div>
+
+        <div class="data-grid">
+          <article class="data-card card reveal">
+            <div class="data-top"><span class="data-dot s1"></span><span class="mono">SENTINEL-1</span><span class="data-role">backbone</span></div>
+            <h3>C-band radar</h3>
+            <p>All-weather surface roughness and dielectric change. The multi-year record that makes a residual possible.</p>
+            <div class="data-meta mono">10 m · 6–12 d · 194 dates</div>
+            <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+          <article class="data-card card reveal">
+            <div class="data-top"><span class="data-dot s2"></span><span class="mono">SENTINEL-2</span><span class="data-role">moisture</span></div>
+            <h3>Optical moisture</h3>
+            <p>NDMI and NDVI show canopy water content and greenness, with cloud masking and per-date matching.</p>
+            <div class="data-meta mono">10 m · 5 d · 195 dates</div>
+            <div class="wave alt" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+          <article class="data-card card reveal">
+            <div class="data-top"><span class="data-dot lst"></span><span class="mono">LANDSAT</span><span class="data-role">thermal</span></div>
+            <h3>Surface temperature</h3>
+            <p>Evaporative cooling and thermal inertia. Used as a low-weight confirmation, not a primary detector.</p>
+            <div class="data-meta mono">100 m · 8 d · 75 dates</div>
+            <div class="wave warm" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+          <article class="data-card card reveal">
+            <div class="data-top"><span class="data-dot era"></span><span class="mono">ERA5</span><span class="data-role">context</span></div>
+            <h3>Weather history</h3>
+            <p>Rainfall lags, temperature, ET₀, VPD, soil moisture and dry-spell length — the “should” in the model.</p>
+            <div class="data-meta mono">1,779 days · daily</div>
+            <div class="rain" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </article>
+          <article class="data-card card reveal">
+            <div class="data-top"><span class="data-dot soil"></span><span class="mono">STATIC</span><span class="data-role">ground</span></div>
+            <h3>Soil &amp; land cover</h3>
+            <p>SoilGrids texture, WorldCover class, Copernicus DEM and slope anchor the expectation to the place.</p>
+            <div class="data-meta mono">20 m · EPSG:32634</div>
+            <div class="strat" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          </article>
+          <article class="data-card card reveal">
+            <div class="data-top"><span class="data-dot net"></span><span class="mono">NETWORK</span><span class="data-role">prior</span></div>
+            <h3>Pipes &amp; repairs</h3>
+            <p>Utility GIS or OSM geometry constrains the search; repair records provide the only labels we have.</p>
+            <div class="data-meta mono">918 segments · 1,691 repairs</div>
+            <div class="pipe-glyph" aria-hidden="true"><span></span><b></b><span></span></div>
+          </article>
+        </div>
+
+        <div class="data-foot reveal">
+          <div><span class="mono">3.1M</span><small>training rows</small></div>
+          <div><span class="mono">69</span><small>dry-season scenes</small></div>
+          <div><span class="mono">4</span><small>independent study areas</small></div>
+          <p>NISAR L-band is shown as context in this build; calibrated GCOV is the next scientific step.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================= 5 · MAP -->
+    <section class="slide map-slide" data-chapter="Dashboard" data-title="Live repair map" data-notes="This is the live dashboard, built from the district's 1,691 repair records. Press play to animate the record accumulating from 2019 to 2026. Colour by pipe size, water loss, cause or year. The map is the exploration layer; the model's ranked candidates sit on top of a network like this. Note what this map shows — logged repairs, not confirmed leak detections.">
+      <div class="slide-inner map-inner">
+        <div class="map-stage card reveal">
+          <div id="map" role="application" aria-label="Interactive map of water leak repairs in Coryell County, Texas"></div>
+          <div class="map-loading" id="map-loading"><span class="spinner"></span> Loading district layers…</div>
+          <div class="map-panel">
+            <div class="eyebrow">Live dashboard&nbsp;·&nbsp;Coryell, Texas</div>
+            <h2>1,691 repairs.<br><span class="accent">2019 → 2026.</span></h2>
+            <p>Every logged repair in the district. Play the record forward, then colour it by what failed.</p>
+
+            <div class="map-stats">
+              <div><b id="map-count">–</b><span>shown</span></div>
+              <div><b id="map-median">–</b><span>median gpm</span></div>
+              <div><b id="map-big">–</b><span>on ≥ 4″</span></div>
+            </div>
+
+            <div class="map-time">
+              <div class="map-time-head"><span id="map-date" class="mono">2019</span><span id="map-window" class="mono">ALL TIME</span></div>
+              <input id="map-range" type="range" min="0" max="1000" value="1000" aria-label="Repair date filter">
+              <div class="map-ticks mono"><span>2019</span><span>2021</span><span>2023</span><span>2026</span></div>
+            </div>
+
+            <div class="map-controls">
+              <button id="map-play" class="play-btn" type="button" aria-label="Play repairs over time">
+                <svg class="icon-play" viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M6 4.5v11l9-5.5z" fill="currentColor"/></svg>
+                <svg class="icon-pause" viewBox="0 0 20 20" width="15" height="15" aria-hidden="true"><path d="M6 4h3v12H6zM11 4h3v12h-3z" fill="currentColor"/></svg>
+                <span>Play</span>
+              </button>
+              <button id="map-all" class="mini-btn" type="button">Show all</button>
+            </div>
+
+            <div class="map-field">
+              <label>Colour by
+                <select id="map-color">
+                  <option value="size">Pipe size</option>
+                  <option value="loss">Water loss</option>
+                  <option value="cause">Cause</option>
+                  <option value="year">Year</option>
+                </select>
+              </label>
+              <label>Base
+                <select id="map-base">
+                  <option value="dark">Dark canvas</option>
+                  <option value="imagery">Aerial imagery</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="map-legend" class="map-legend"></div>
+            <p class="map-hint">Hover a repair for details. Drag to pan, scroll to zoom. Repairs are logged events, not confirmed leaks.</p>
+          </div>
+
+          <div class="map-corner">
+            <span class="live-dot"></span>
+            <span class="mono">CCWSD · REPAIR RECORDS</span>
+          </div>
+          <div id="map-fallback" class="map-fallback" hidden>
+            <b>Map data not found.</b>
+            <p>Build the local Coryell layers once, then reload:</p>
+            <code>python scripts/fetch_coryell_data.py --steps vectors,footprints</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 6 · CASES -->
+    <section class="slide" data-chapter="Evidence" data-title="Four study areas" data-notes="Four networks, one method. Bulgaria is the unlabelled demonstration on a 3.3 kilometre rural main. Aguascalientes, Calgary and Coryell are labelled tests with 50, 48 and 72 repair or break records. Selecting a card shows what each case taught us. The labelled cities are the scientific test; Bulgaria is the story.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">05&nbsp;·&nbsp;Evidence</div>
+            <h2 class="reveal">Four networks.<br><span class="accent">One method.</span></h2>
+          </div>
+          <p class="slide-lede reveal">A rural main, a dense urban grid, a trunk network and a Texas district. The code path is identical.</p>
+        </div>
+
+        <div class="case-grid" id="case-grid">
+          <button class="case-card reveal" type="button" data-case="bulgaria" style="--c:#4cc9f0">
+            <div class="case-head"><span class="case-swatch" style="--c:#4cc9f0"></span><span class="mono">BULGARIA</span><span class="case-pill none">unlabelled</span></div>
+            <h3>Elin Pelin</h3>
+            <p>3.3 km buried water main through farmland. The demonstration AOI.</p>
+            <div class="case-metrics">
+              <div><b>194</b><span>S1 dates</span></div>
+              <div><b>0.61</b><span>VV R²</span></div>
+              <div><b>0.89</b><span>p95</span></div>
+            </div>
+            <span class="case-more" aria-hidden="true">→</span>
+          </button>
+          <button class="case-card reveal" type="button" data-case="aguascalientes" style="--c:#7ee0b0">
+            <div class="case-head"><span class="case-swatch" style="--c:#7ee0b0"></span><span class="mono">MEXICO</span><span class="case-pill weak">50 labels</span></div>
+            <h3>Aguascalientes</h3>
+            <p>A 5 × 5 km utility grid with dense urban land cover and repair labels.</p>
+            <div class="case-metrics">
+              <div><b>28</b><span>S1 dates</span></div>
+              <div><b>0.44</b><span>VV R²</span></div>
+              <div><b>0.53</b><span>AUC</span></div>
+            </div>
+            <span class="case-more" aria-hidden="true">→</span>
+          </button>
+          <button class="case-card reveal" type="button" data-case="calgary" style="--c:#ff9f1c">
+            <div class="case-head"><span class="case-swatch" style="--c:#ff9f1c"></span><span class="mono">CANADA</span><span class="case-pill weak">48 labels</span></div>
+            <h3>Calgary</h3>
+            <p>A 10 × 10 km trunk network. The strongest expected-condition model.</p>
+            <div class="case-metrics">
+              <div><b>50</b><span>S1 dates</span></div>
+              <div><b>0.65</b><span>VV R²</span></div>
+              <div><b>0.52</b><span>AUC</span></div>
+            </div>
+            <span class="case-more" aria-hidden="true">→</span>
+          </button>
+          <button class="case-card reveal" type="button" data-case="coryell" style="--c:#f15bb5">
+            <div class="case-head"><span class="case-swatch" style="--c:#f15bb5"></span><span class="mono">TEXAS</span><span class="case-pill weak">72 labels</span></div>
+            <h3>Coryell</h3>
+            <p>A rural district with the longest local repair record and the live map.</p>
+            <div class="case-metrics">
+              <div><b>55</b><span>S1 dates</span></div>
+              <div><b>0.43</b><span>VV R²</span></div>
+              <div><b>0.55</b><span>AUC</span></div>
+            </div>
+            <span class="case-more" aria-hidden="true">→</span>
+          </button>
+        </div>
+
+        <div class="case-detail card reveal" id="case-detail">
+          <div class="case-detail-kicker mono" id="case-kicker">BULGARIA · DEMONSTRATION</div>
+          <div class="case-detail-main">
+            <div>
+              <h3 id="case-title">Elin Pelin, Sofia Province</h3>
+              <p id="case-body">A 5.5 × 6.3 km farmland AOI crossed by a 3.3 km transmission main. No confirmed leak. The corridor is not statistically enriched in dry-season moisture anomalies, so the output is a ranked inspection list, not a detection.</p>
+            </div>
+            <div class="case-detail-stats" id="case-detail-stats">
+              <div><b>0.611</b><span>VV R²</span></div>
+              <div><b>0.471</b><span>NDMI R²</span></div>
+              <div><b>0.89</b><span>p95 placebo</span></div>
+            </div>
+          </div>
+          <div class="case-evidence" id="case-evidence"></div>
+          <div class="case-links">
+            <a id="case-link" href="../outputs/aquaguard_map.html" target="_blank" rel="noopener">Open case map ↗</a>
+            <span class="mono">SAME PIPELINE · DIFFERENT CONFIG</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================== 7 · RESULTS -->
+    <section class="slide" data-chapter="Evidence" data-title="Skill vs detection" data-notes="This is the uncomfortable slide, and the most important one. The expected-condition models are genuinely skilful: VV R-squared 0.43 to 0.65, NDMI 0.25 to 0.51 on held-out dates. But the final leak score ranks historical repairs at an AUC of 0.52 to 0.55. AUC 0.5 is random. So the model works; the detector does not. We report that rather than hide it.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">06&nbsp;·&nbsp;Results</div>
+            <h2 class="reveal">The model works.<br><span class="accent">The detector doesn't.</span></h2>
+          </div>
+          <p class="slide-lede reveal">Skilful surface prediction does not automatically become a leak detector. These are held-out test scores, not training fit.</p>
+        </div>
+
+        <div class="results-grid">
+          <figure class="bars-card card reveal">
+            <div class="bars-head">
+              <span class="mono">HELD-OUT TEST</span>
+              <div class="legend-inline"><span class="key vv"></span>VV R² <span class="key ndmi"></span>NDMI R² <span class="key auc"></span>AUC</div>
+            </div>
+            <div class="bar-rows">
+              <div class="bar-row" data-series>
+                <div class="bar-label"><b>Bulgaria</b><span class="mono">194 dates · no labels</span></div>
+                <div class="bar-group">
+                  <div class="bar"><i class="vv" style="--v:61.1"></i><span>0.611</span></div>
+                  <div class="bar"><i class="ndmi" style="--v:47.1"></i><span>0.471</span></div>
+                  <div class="bar auc"><i style="--v:0"></i><span class="na">—</span></div>
+                </div>
+              </div>
+              <div class="bar-row" data-series>
+                <div class="bar-label"><b>Aguascalientes</b><span class="mono">50 labels</span></div>
+                <div class="bar-group">
+                  <div class="bar"><i class="vv" style="--v:43.6"></i><span>0.436</span></div>
+                  <div class="bar"><i class="ndmi" style="--v:29.4"></i><span>0.294</span></div>
+                  <div class="bar auc"><i class="auc-fill" style="--v:52.6"></i><span>0.526</span><em class="baseline" style="--x:50"></em></div>
+                </div>
+              </div>
+              <div class="bar-row" data-series>
+                <div class="bar-label"><b>Calgary</b><span class="mono">48 labels</span></div>
+                <div class="bar-group">
+                  <div class="bar"><i class="vv" style="--v:65.0"></i><span>0.650</span></div>
+                  <div class="bar"><i class="ndmi" style="--v:24.9"></i><span>0.249</span></div>
+                  <div class="bar auc"><i class="auc-fill" style="--v:52.4"></i><span>0.524</span><em class="baseline" style="--x:50"></em></div>
+                </div>
+              </div>
+              <div class="bar-row" data-series>
+                <div class="bar-label"><b>Coryell</b><span class="mono">72 labels</span></div>
+                <div class="bar-group">
+                  <div class="bar"><i class="vv" style="--v:42.6"></i><span>0.426</span></div>
+                  <div class="bar"><i class="ndmi" style="--v:50.5"></i><span>0.505</span></div>
+                  <div class="bar auc"><i class="auc-fill" style="--v:54.8"></i><span>0.548</span><em class="baseline" style="--x:50"></em></div>
+                </div>
+              </div>
+            </div>
+            <p class="chart-note">AUC bars run 0–100 with the random baseline marked at 50. Every labelled case sits just above it.</p>
+          </figure>
+
+          <div class="result-aside">
+            <article class="big-number card reveal">
+              <span class="mono">LABEL RANKING</span>
+              <div class="big-num">0.52<span>–</span>0.55</div>
+              <p>area under the ROC curve across the three labelled cities</p>
+              <div class="gauge">
+                <span class="g-rand mono">RANDOM 0.50</span>
+                <span class="g-dot" style="--x:54"></span>
+                <span class="g-line"></span>
+              </div>
+            </article>
+            <article class="callout card reveal">
+              <h3>Why the gap?</h3>
+              <ul>
+                <li>A repair point marks where a pipe failed — not where a persistent moisture plume survived.</li>
+                <li>A 20 m pixel is 400 m²; a 0.1–0.6 m pipe is a sliver of it.</li>
+                <li>Irrigation, crops, roads and snow produce the same surface signature.</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================= 8 · VALIDATION -->
+    <section class="slide" data-chapter="Evidence" data-title="The negative result" data-notes="We tested the pipeline against translated placebo corridors. In Bulgaria the actual corridor is not enriched: p 0.57 for the mean and 0.89 for the 95th percentile. Aguascalientes and Calgary are also not significant. Coryell has a nominally small mean p of 0.024, but its p95 test is 0.24, so we do not call it detection. The honest conclusion is that this is a triage tool, and we say so.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">07&nbsp;·&nbsp;Validation</div>
+            <h2 class="reveal">We tested<br><span class="accent">the negative.</span></h2>
+          </div>
+          <p class="slide-lede reveal">Up to 200 translated placebo corridors, same length and buffer. If the pipe mattered, the real corridor should stand out.</p>
+        </div>
+
+        <div class="validation-wrap">
+        <div class="validation-grid">
+          <div class="scorecard card reveal">
+            <div class="scorecard-head"><span class="mono">PLACEBO CORRIDOR TEST</span><span class="mono">30 m buffer · 40–200 draws</span></div>
+            <table>
+              <thead><tr><th>Case</th><th>Labels</th><th>AUC</th><th>mean p</th><th>p95 p</th><th>Verdict</th></tr></thead>
+              <tbody>
+                <tr><td>Bulgaria</td><td>—</td><td class="dim">—</td><td>0.57</td><td>0.89</td><td><span class="tag none">not significant</span></td></tr>
+                <tr><td>Aguascalientes</td><td>50</td><td>0.526</td><td>1.00</td><td>1.00</td><td><span class="tag none">not significant</span></td></tr>
+                <tr><td>Calgary</td><td>48</td><td>0.524</td><td>0.95</td><td>0.95</td><td><span class="tag none">not significant</span></td></tr>
+                <tr class="hl"><td>Coryell</td><td>72</td><td>0.548</td><td>0.024</td><td>0.24</td><td><span class="tag weak">nominally weak</span></td></tr>
+              </tbody>
+            </table>
+            <p class="table-note">A small mean p alone is not confirmation. The p95 result, which asks whether the corridor's strongest anomalies stand out, stays at 0.24.</p>
+          </div>
+
+          <div class="validation-aside">
+            <article class="verdict-card card reveal">
+              <span class="mono">CORYELL · 72 LABELS</span>
+              <div class="verdict-num">p<span>=</span>0.24</div>
+              <p>p95 placebo test. Not significant.</p>
+              <div class="p-scale" aria-hidden="true">
+                <div class="p-track"><span class="p-zone"></span><span class="p-marker" style="--x:76"></span></div>
+                <div class="p-labels mono"><span>0.01</span><span>0.05</span><span>0.50</span><span>1.00</span></div>
+              </div>
+            </article>
+            <article class="quote-card card reveal">
+              <blockquote>A weak positive is not a detection.</blockquote>
+              <p>The result is consistent with the literature and with the unlabelled Bulgarian case. We ship it as evidence, not as a claim.</p>
+            </article>
+          </div>
+        </div>
+
+        <div class="validation-foot reveal">
+          <div><b>What would change our mind?</b></div>
+          <ul>
+            <li>A confirmed leak with before/after acquisitions</li>
+            <li>Calibrated NISAR L-band HH/HV and closure phase</li>
+            <li>Hydraulic data and metre-scale field validation</li>
+            <li>More labels that separate repair events from persistent wet patches</li>
+          </ul>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 9 · NISAR -->
+    <section class="slide" data-chapter="Outlook" data-title="Why L-band" data-notes="NISAR is the reason this challenge exists. Its L-band wavelength is about 24 centimetres, roughly four times Sentinel-1's C-band, so it penetrates deeper into soil and vegetation and is more sensitive to moisture and biomass. Our current score is C-band and optical. We show NISAR browse imagery as context; the calibrated GCOV extraction path is implemented but the Bulgaria HDF5s need Earthdata authentication. That is the next upgrade, not a claim of this build.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">08&nbsp;·&nbsp;Outlook</div>
+            <h2 class="reveal">C-band finds the pattern.<br><span class="accent">L-band finds the water.</span></h2>
+          </div>
+          <p class="slide-lede reveal">NISAR's longer wavelength reaches deeper into soil and vegetation — the physical upgrade this method needs.</p>
+        </div>
+
+        <div class="band-grid">
+          <article class="band-card card reveal">
+            <div class="band-head"><span class="mono">SENTINEL-1</span><span class="band-tag">operational record</span></div>
+            <div class="band-wave c" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <h3>C-band</h3>
+            <dl>
+              <div><dt>Wavelength</dt><dd>≈ 5.6 cm</dd></div>
+              <div><dt>Sensing depth</dt><dd>2–5 cm</dd></div>
+              <div><dt>Revisit</dt><dd>6–12 days</dd></div>
+              <div><dt>Role here</dt><dd>194-date backbone</dd></div>
+            </dl>
+            <div class="depth"><span class="depth-label mono">SOIL DEPTH</span><span class="depth-bar c" style="--w:26%"></span></div>
+          </article>
+
+          <div class="band-bridge reveal" aria-hidden="true">
+            <span class="mono">LONGER WAVELENGTH</span>
+            <svg viewBox="0 0 120 40" width="120" height="40"><path d="M4 20h112M96 10l20 10-20 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+
+          <article class="band-card card nisar reveal">
+            <div class="band-head"><span class="mono">NISAR</span><span class="band-tag hot">the upgrade</span></div>
+            <div class="band-wave l" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <h3>L-band</h3>
+            <dl>
+              <div><dt>Wavelength</dt><dd>≈ 24 cm</dd></div>
+              <div><dt>Sensing depth</dt><dd>5–20 cm</dd></div>
+              <div><dt>Revisit</dt><dd>12 days</dd></div>
+              <div><dt>Role next</dt><dd>calibrated moisture</dd></div>
+            </dl>
+            <div class="depth"><span class="depth-label mono">SOIL DEPTH</span><span class="depth-bar l" style="--w:74%"></span></div>
+          </article>
+        </div>
+
+        <div class="nisar-strip reveal">
+          <div class="nisar-item"><span class="nisar-year" aria-hidden="true">2025</span><span class="mono">2025-10-17</span><b>NISAR science data begins</b><small>First calibrated L-band science acquisitions become available.</small></div>
+          <div class="nisar-item"><span class="nisar-year" aria-hidden="true">2026</span><span class="mono">2026-06-20</span><b>Public browse layer, track 094</b><small>The first L-band context layer over our Bulgarian AOI.</small></div>
+          <div class="nisar-item"><span class="nisar-year" aria-hidden="true">2026</span><span class="mono">2026-10-06</span><b>Second browse date, change context</b><small>Two dates show surface change between June and October.</small></div>
+          <div class="nisar-item accent"><span class="nisar-year" aria-hidden="true">+</span><span class="mono">NEXT</span><b>Calibrated GCOV HH/HV + closure phase</b><small>The next scientific upgrade — not part of this build.</small></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================== 10 · ROADMAP -->
+    <section class="slide" data-chapter="Outlook" data-title="What comes next" data-notes="What ships now is real: an open pipeline, a live map, four cases, validation and a usable screening product. Next is scientific hardening: calibrated NISAR, known-leak campaigns, a proper temporal test and field validation. Later is operational integration with utility work orders and hydraulic models. We are explicit about the limits because that is what makes the tool trustworthy.">
+      <div class="slide-inner">
+        <div class="slide-head">
+          <div>
+            <div class="eyebrow reveal">09&nbsp;·&nbsp;Roadmap</div>
+            <h2 class="reveal">What ships now.<br><span class="accent">What comes next.</span></h2>
+          </div>
+          <p class="slide-lede reveal">A working screening product now; a scientifically hardened detector only when the data earns it.</p>
+        </div>
+
+        <div class="roadmap">
+          <article class="road-card now reveal">
+            <span class="road-big" aria-hidden="true">01</span>
+            <div class="road-kicker mono">NOW&nbsp;·&nbsp;SHIPPED</div>
+            <h3>The screening dashboard</h3>
+            <p class="road-goal">A working prototype that runs end to end on open data.</p>
+            <ul>
+              <li>Open-source pipeline, four study areas, one grid</li>
+              <li>Expected-condition models and residual maps</li>
+              <li>Live repair map and ranked inspection candidates</li>
+              <li>Placebo validation and explicit limits</li>
+            </ul>
+            <span class="road-mark">available today</span>
+          </article>
+          <article class="road-card next reveal">
+            <span class="road-big" aria-hidden="true">02</span>
+            <div class="road-kicker mono">NEXT&nbsp;·&nbsp;SCIENTIFIC</div>
+            <h3>Calibrated NISAR</h3>
+            <p class="road-goal">The science upgrade: deeper sensing and real leak campaigns.</p>
+            <ul>
+              <li>Authenticated GCOV HDF5; calibrated HH/HV</li>
+              <li>Closure phase and polarimetric decomposition</li>
+              <li>Known-leak campaigns with before/after passes</li>
+              <li>Temporal holdout on repair cohorts, not points</li>
+            </ul>
+            <span class="road-mark">needs Earthdata + field data</span>
+          </article>
+          <article class="road-card later reveal">
+            <span class="road-big" aria-hidden="true">03</span>
+            <div class="road-kicker mono">LATER&nbsp;·&nbsp;OPERATIONS</div>
+            <h3>Utility integration</h3>
+            <p class="road-goal">An operations product a utility can put in front of a crew.</p>
+            <ul>
+              <li>Work-order prioritisation and crew routing</li>
+              <li>Hydraulic and pressure-zone context</li>
+              <li>Continuous monitoring as NISAR revisits</li>
+              <li>Public, open evidence cards for every flag</li>
+            </ul>
+            <span class="road-mark">industry collaboration</span>
+          </article>
+        </div>
+
+        <div class="limits reveal">
+          <span class="mono">HARD LIMITS WE DO NOT PAPER OVER</span>
+          <p>20 m pixels cannot localise a metre-scale leak. Thermal data cannot resolve a pipe-scale halo. A weak label ranking is not a detection. The right output is a ranked inspection list — and a clear statement of uncertainty.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================ 11 · CLOSE -->
+    <section class="slide close" data-chapter="Close" data-title="The hypothesis" data-notes="To close: the map is a hypothesis, not a verdict. It tells a crew where to look first, and it tells us honestly when the evidence is thin. Everything is open: the pipeline, the cases, the validation and the live maps. Thank you.">
+      <div class="slide-inner close-grid">
+        <div class="close-copy">
+          <div class="eyebrow reveal">10&nbsp;·&nbsp;Close</div>
+          <h2 class="reveal">The map is a hypothesis,<br><span class="accent">not a verdict.</span></h2>
+          <p class="lede reveal">Radar can't see the pipe. It can see the wet ground — and that is enough to tell a crew where to look first.</p>
+          <div class="close-actions reveal">
+            <a class="btn primary" href="../viz/" target="_blank" rel="noopener">Open the live map <span aria-hidden="true">↗</span></a>
+            <a class="btn ghost" href="../chris-results/app/" target="_blank" rel="noopener">Evidence explorer <span aria-hidden="true">↗</span></a>
+            <button class="btn ghost" type="button" data-restart>Replay deck ↺</button>
+          </div>
+          <div class="credits reveal">
+            <p><b>NASA Space Apps Challenge 2026</b> · “Dancing with the SARs”</p>
+            <p>Sentinel-1/2 · Landsat · ERA5 · SoilGrids · WorldCover · Copernicus DEM · NISAR browse · OpenStreetMap · Coryell City WSD</p>
+            <p class="mono">OPEN SOURCE · OPEN DATA · HONEST LIMITS</p>
+          </div>
+        </div>
+        <div class="close-visual reveal" aria-hidden="true">
+          <div class="signal-rings">
+            <span class="ring r1"></span><span class="ring r2"></span><span class="ring r3"></span><span class="ring r4"></span>
+            <span class="ring-core"></span>
+            <div class="close-stat s1"><b>4</b><span>sites</span></div>
+            <div class="close-stat s2"><b>1,691</b><span>repairs</span></div>
+            <div class="close-stat s3"><b>0.55</b><span>best AUC</span></div>
+            <div class="close-stat s4"><b>20 m</b><span>pixels</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="deckbar">
+    <div class="deck-left">
+      <button class="nav-btn" id="prev-btn" type="button" aria-label="Previous slide">
+        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="nav-btn" id="next-btn" type="button" aria-label="Next slide">
+        <svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><path d="M7.5 4.5 13 10l-5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="play-deck" id="deck-play" type="button" aria-label="Autoplay slides" title="Autoplay (P)">
+        <svg class="icon-play" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M6 4.5v11l9-5.5z" fill="currentColor"/></svg>
+        <svg class="icon-pause" viewBox="0 0 20 20" width="14" height="14" aria-hidden="true"><path d="M6 4h3v12H6zM11 4h3v12h-3z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="deck-progress">
+      <div class="deck-progress-head"><span id="slide-title" class="mono">AquaGuard</span><span class="mono" id="slide-count">01 / 12</span></div>
+      <div class="progress-track"><span id="progress-fill"></span><span id="progress-knob"></span></div>
+    </div>
+    <div class="deck-right">
+      <button class="icon-label" id="help-btn" type="button" title="Keyboard shortcuts">?</button>
+      <button class="icon-label" id="notes-btn-2" type="button" title="Speaker notes (N)">Notes</button>
+    </div>
+  </footer>
+
+  <aside id="notes" class="notes" hidden aria-label="Speaker notes">
+    <div class="notes-head">
+      <span class="mono">SPEAKER NOTES</span>
+      <div><span id="notes-slide" class="mono">01 / 12</span><button class="notes-close" id="notes-close" type="button" aria-label="Close notes">×</button></div>
+    </div>
+    <div class="notes-body" id="notes-body"></div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>
